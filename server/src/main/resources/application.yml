@@ -1,0 +1,10 @@
+aircloud:
+  cors:
+    origin: "*"
+
+spring:
+  application:
+    name: AirCloud
+
+server:
+  port: 8080
