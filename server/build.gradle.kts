@@ -26,7 +26,7 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-websocket")
     implementation("com.fasterxml.jackson.core:jackson-databind")
-    implementation("net.datafaker:datafaker")
+    implementation("net.datafaker:datafaker:2.4.4")
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
