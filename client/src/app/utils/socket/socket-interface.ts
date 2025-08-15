@@ -5,9 +5,11 @@ export enum RequestType {
 }
 
 export enum ResponseType {
+    PEER_CONNECTED = "PEER_CONNECTED",
     PEER_OFFER = "PEER_OFFER",
     PEER_ANSWER = "PEER_ANSWER",
-    APPROVE_PEER_ANSWER = "APPROVE_PEER_ANSWER"
+    APPROVE_PEER_ANSWER = "APPROVE_PEER_ANSWER",
+    PEER_LEFT = "PEER_LEFT",
 }
 
 export enum Discoverability {

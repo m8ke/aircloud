@@ -1,0 +1,77 @@
+<nav
+    class="flex items-center max-md:w-full max-md:justify-between px-6 py-4 text-white text-sm backdrop-blur">
+    <div class="flex flex-row items-center">
+        <div routerLink="/" class="cursor-pointer">
+            <img ngSrc="/aircloud-white.svg" alt="AirCloud" [width]="100" [height]="30">
+        </div>
+
+        <div class="bg-white border text-black rounded-2xl px-2 py-1 ms-2 text-xs">
+            <p>Beta</p>
+        </div>
+    </div>
+
+    <div class="flex justify-end items-center w-full grow-1">
+        <div class="hidden md:flex items-center gap-6">
+            <a href="#" class="relative overflow-hidden group">
+                <span class="block group-hover:-translate-y-full transition-transform duration-300">Products</span>
+                <span
+                    class="block absolute top-full left-0 group-hover:translate-y-[-100%] transition-transform duration-300">Features</span>
+            </a>
+            <a href="#" class="relative overflow-hidden group">
+                <span class="block group-hover:-translate-y-full transition-transform duration-300">Use cases</span>
+                <span
+                    class="block absolute top-full left-0 group-hover:translate-y-[-100%] transition-transform duration-300">Use cases</span>
+            </a>
+            <a href="#" class="relative overflow-hidden group">
+                <span class="block group-hover:-translate-y-full transition-transform duration-300">Resources</span>
+                <span
+                    class="block absolute top-full left-0 group-hover:translate-y-[-100%] transition-transform duration-300">Resources</span>
+            </a>
+            <a href="#" class="relative overflow-hidden group">
+                <span class="block group-hover:-translate-y-full transition-transform duration-300">Roadmap</span>
+                <span
+                    class="block absolute top-full left-0 group-hover:translate-y-[-100%] transition-transform duration-300">Roadmap</span>
+            </a>
+        </div>
+
+        <div class="hidden ms-4 md:flex items-center gap-2">
+            <button
+                class="border border-slate-600 hover:bg-slate-500/30 px-4 py-2 rounded-full text-sm font-medium transition">
+                Contact
+            </button>
+            <button
+                class="bg-white hover:shadow-[0px_0px_30px_6px] shadow-[0px_0px_20px_3px] hover:shadow-white/50 shadow-white/50 text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-100 transition duration-300">
+                Support us
+            </button>
+        </div>
+    </div>
+
+    <button id="menuToggle" class="md:hidden text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+    </button>
+    <div id="mobileMenu" class="absolute hidden top-48 text-base left-0 bg-black w-full flex-col items-center gap-4">
+        <a class="hover:text-indigo-600" href="#">
+            Features
+        </a>
+        <a class="hover:text-indigo-600" href="#">
+            Use cases
+        </a>
+        <a class="hover:text-indigo-600" href="#">
+            Resources
+        </a>
+        <a class="hover:text-indigo-600" href="#">
+            Docs
+        </a>
+        <button
+            class="border border-slate-600 hover:bg-slate-800 px-4 py-2 rounded-full text-sm font-medium transition">
+            Contact
+        </button>
+        <button
+            class="bg-white hover:shadow-[0px_0px_30px_14px] shadow-[0px_0px_30px_7px] hover:shadow-white/50 shadow-white/50 text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-100 transition duration-300">
+            Get Started
+        </button>
+    </div>
+</nav>

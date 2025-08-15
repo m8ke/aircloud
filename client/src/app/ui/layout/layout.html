@@ -1,3 +1,27 @@
-<main>
-    <ng-content/>
+<main
+    class="flex flex-col min-h-screen"
+    cdkDropList
+    (dragover)="onDragOver($event)"
+    (drop)="onFileDrop($event)"
+    (dragleave)="onDragLeave($event)">
+
+    <app-navbar [class.pointer-events-none]="isFileDropping()"/>
+
+    <div class="relative flex grow-1 border border-slate-500/30 rounded-2xl mx-4 mb-4">
+        <div class="container mx-auto px-4">
+            <ng-content/>
+        </div>
+
+        <section
+            [class.opacity-0]="!isFileDropping()"
+            [class.opacity-100]="isFileDropping()"
+            [class.pointer-events-none]="!isFileDropping()"
+            [class.duration-500]="isFileDropping()"
+            class="absolute opacity-0 top-0 left-0 z-50 bg-indigo-500 overflow-hidden w-full h-full ease-in-out rounded-xl">
+            <div class="container mx-auto h-full px-4 flex flex-col justify-center items-center text-center">
+                <h1 class="text-3xl font-extrabold mb-3 font-serif">Drop your files here</h1>
+                <p class="text-lg">Your files never be uploaded to any server</p>
+            </div>
+        </section>
+    </div>
 </main>

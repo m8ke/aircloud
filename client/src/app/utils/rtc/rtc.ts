@@ -1,14 +1,16 @@
 import { inject, Injectable } from "@angular/core";
 import { Compression } from "@/utils/compression/compression";
+import { ToastService } from "@/ui/toast/toast.service";
 
 @Injectable({
     providedIn: "root",
 })
 export class RTC {
+    private readonly toast: ToastService = inject(ToastService);
     private readonly compression: Compression = inject(Compression);
 
+    public readonly pcs: Map<string, RTCPeerConnection> = new Map<string, RTCPeerConnection>();
     private readonly dcs: Map<string, RTCDataChannel> = new Map<string, RTCDataChannel>();
-    private readonly pcs: Map<string, RTCPeerConnection> = new Map<string, RTCPeerConnection>();
     private readonly iceCandidates: Map<string, RTCIceCandidateInit[]> = new Map<string, RTCIceCandidateInit[]>();
 
     private receiveBuffer: Uint8Array[] = [];
@@ -132,8 +134,8 @@ export class RTC {
      * @private
      */
     private setupDataChannel(connectionId: string, dc: RTCDataChannel) {
-        dc.onopen = (e) => console.log(`[WebRTC] DC open on connection ID ${connectionId}`);
-        dc.onclose = (e) => console.log(`[WebRTC] DC closed on connection ID ${connectionId}`);
+        dc.onopen = (e) => this.handleDataChannelOpen(connectionId);
+        dc.onclose = (e) => this.handleDataChannelClose(connectionId);
         dc.onmessage = async (e: MessageEvent<any>) => await this.handleDataChannelMessage(e);
         this.dcs.set(connectionId, dc);
     }
@@ -225,6 +227,10 @@ export class RTC {
         this.pcs.delete(connectionId);
     }
 
+    public clearConnectionByPeerId(peerId: string): void {
+        // TODO: Implement
+    }
+
     /**
      * Send file to the peer through unique data channel.
      *
@@ -290,4 +296,12 @@ export class RTC {
         throw new Error("Not implemented");
     }
 
+    private handleDataChannelOpen(connectionId: string): void {
+        console.log(`[WebRTC] DC open on connection ID ${connectionId}`);
+        this.toast.show("Established connection between iOS");
+    }
+
+    private handleDataChannelClose(connectionId: string): void {
+        console.log(`[WebRTC] DC closed on connection ID ${connectionId}`);
+    }
 }

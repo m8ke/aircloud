@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { Drop } from "@/pages/coms/drop";
+import { Drop } from "@/pages/drop/drop";
 
 describe("Drop", () => {
     let component: Drop;

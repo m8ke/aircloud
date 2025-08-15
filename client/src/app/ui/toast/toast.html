@@ -1,0 +1,10 @@
+<div class="toast-container">
+    @for (toast of toasts$ | async; track toast.id) {
+        <div
+            id="toast-bottom-right"
+            class="toast flex items-center w-full max-w-xs px-5 py-4 space-x-4 text-black text-sm bg-white divide-x rtl:divide-x-reverse rounded-full shadow-lg right-5 bottom-5"
+            role="alert">
+            {{ toast.message }}
+        </div>
+    }
+</div>
