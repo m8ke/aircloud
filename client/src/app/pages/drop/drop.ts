@@ -1,9 +1,11 @@
-import { Component, inject, OnInit } from "@angular/core";
+import { Component, inject, OnInit, viewChild } from "@angular/core";
 import { RTC } from "@/utils/rtc/rtc";
 import { ReactiveFormsModule } from "@angular/forms";
 import { Layout } from "@/ui/layout/layout";
 import { Socket } from "@/utils/socket/socket";
 import { RouterLink } from "@angular/router";
+import { Uploader } from "@/utils/uploader/uploader";
+import { Modal } from "@/ui/modal/modal";
 
 @Component({
     selector: "app-drop",
@@ -11,20 +13,27 @@ import { RouterLink } from "@angular/router";
         ReactiveFormsModule,
         Layout,
         RouterLink,
+        Modal,
     ],
     templateUrl: "./drop.html",
     styleUrl: "./drop.scss",
 })
 export class Drop implements OnInit {
-    protected readonly rtc: RTC = inject(RTC);
     private readonly socket: Socket = inject(Socket);
+    protected readonly rtc: RTC = inject(RTC);
+    protected readonly uploader: Uploader = inject(Uploader);
+    protected readonly modalRemoveFile = viewChild<Modal>("modalRemoveFileRef");
+    protected readonly modalRemoveFiles = viewChild<Modal>("modalRemoveFilesRef");
 
-    public async ngOnInit(): Promise<void> {
+    public ngOnInit(): void {
         this.socket.init();
     }
 
-    public getBorderColor(n: number): string {
-        const opacity = Math.min(((100 / n * 0.25) / 100));
-        return `rgba(255,255,255,${opacity})`;
+    public onClearFiles(): void {
+        this.uploader.clearFiles();
+    }
+
+    public onRemoveFile(index: number): void {
+        this.uploader.removeFile(index);
     }
 }

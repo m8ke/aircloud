@@ -1,6 +1,8 @@
-import { Component, signal } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { Navbar } from "@/ui/navbar/navbar";
 import { CdkDropList } from "@angular/cdk/drag-drop";
+import { Uploader } from "@/utils/uploader/uploader";
+import { ToastService } from "@/ui/toast/toast.service";
 
 @Component({
     selector: "app-layout",
@@ -12,6 +14,8 @@ import { CdkDropList } from "@angular/cdk/drag-drop";
     styleUrl: "./layout.scss",
 })
 export class Layout {
+    private readonly toast = inject(ToastService);
+    private readonly uploader = inject(Uploader);
     protected readonly isFileDropping = signal<boolean>(false);
 
     protected onDragOver(event: DragEvent): void {
@@ -26,8 +30,17 @@ export class Layout {
         this.isFileDropping.set(false);
 
         if (event.dataTransfer?.files.length) {
-            const file = event.dataTransfer.files[0];
-            this.uploadFile(file);
+
+            for (const file of event.dataTransfer.files) {
+                // TODO: Check replicates
+                if (this.uploader.files.includes(file)) {
+                    this.toast.show(`File ${file.name} already exist`, "error");
+                    continue;
+                }
+                this.uploader.uploadFile(file);
+            }
+        } else {
+            this.toast.show("Could not upload file", "error");
         }
     }
 
@@ -35,9 +48,5 @@ export class Layout {
         event.preventDefault();
         event.stopPropagation();
         this.isFileDropping.set(false);
-    }
-
-    private uploadFile(file: File): void {
-        console.log("Uploading:", file.name, file.size);
     }
 }

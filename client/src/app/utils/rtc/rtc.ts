@@ -2,6 +2,13 @@ import { inject, Injectable } from "@angular/core";
 import { Compression } from "@/utils/compression/compression";
 import { ToastService } from "@/ui/toast/toast.service";
 
+// TODO
+export interface Peer {
+    id: number;
+    deviceName: string;
+    rtcPeerConnection: RTCPeerConnection;
+}
+
 @Injectable({
     providedIn: "root",
 })
@@ -298,7 +305,7 @@ export class RTC {
 
     private handleDataChannelOpen(connectionId: string): void {
         console.log(`[WebRTC] DC open on connection ID ${connectionId}`);
-        this.toast.show("Established connection between iOS");
+        this.toast.show("Established connection between iOS"); // TODO: Add a variable for device name
     }
 
     private handleDataChannelClose(connectionId: string): void {
