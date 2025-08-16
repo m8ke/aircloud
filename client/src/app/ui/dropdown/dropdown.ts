@@ -4,8 +4,7 @@ import { DropdownItem } from "@/ui/dropdown-item/dropdown-item";
 
 @Component({
     selector: "app-dropdown",
-    imports: [
-    ],
+    imports: [],
     templateUrl: "./dropdown.html",
     styleUrl: "./dropdown.scss",
     providers: [{
@@ -22,20 +21,18 @@ export class Dropdown {
     public isOpen: boolean = false;
     public selectedValue!: string | undefined;
 
-    private onChange = (_: any) => {
-    };
-    private onTouched = () => {
-    };
+    private onChange = (_: any) => null;
+    private onTouched = () => null;
 
-    writeValue(value: string): void {
+    public writeValue(value: string): void {
         this.selectedValue = value;
     }
 
-    registerOnChange(fn: any): void {
+    public registerOnChange(fn: any): void {
         this.onChange = fn;
     }
 
-    registerOnTouched(fn: any): void {
+    public registerOnTouched(fn: any): void {
         this.onTouched = fn;
     }
 

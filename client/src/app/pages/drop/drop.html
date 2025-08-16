@@ -1,5 +1,5 @@
 <app-layout>
-    <section class="my-10 text-center w-full align-items flex justify-center flex-col">
+    <section class="py-10 text-center w-full align-items flex justify-center flex-col h-full">
         <div class="flex justify-center items-center flex-col">
             <h1 class="text-3xl font-extrabold mb-2 font-serif sm:w-[40%]">
                 Drop your files or click here
@@ -23,7 +23,7 @@
         </div>
     </section>
 
-    <div class="flex fixed left-0 bottom-0 m-4 z-100">
+    <div class="flex fixed left-0 bottom-0 m-6 z-100">
         <div class="flex items-center gap-2 rounded-full p-3 pr-5 text-sm text-black bg-white">
             <div class="pl-2 font-medium pr-1">
                 {{ rtc.pcs.size || 0 }} peers connected

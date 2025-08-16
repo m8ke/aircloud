@@ -27,5 +27,4 @@ export class Drop implements OnInit {
         const opacity = Math.min(((100 / n * 0.25) / 100));
         return `rgba(255,255,255,${opacity})`;
     }
-
 }
