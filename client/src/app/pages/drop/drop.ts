@@ -44,4 +44,8 @@ export class Drop implements OnInit {
     protected addFile(event: any): void {
         this.uploader.uploadFiles(event.currentTarget?.files);
     }
+
+    changeOnboardingScreen() {
+
+    }
 }

@@ -1,10 +1,10 @@
 @if (state()) {
-    <div class="relative z-10" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
-        <div class="fixed inset-0 bg-black/90 transition-opacity" aria-hidden="true" (click)="close()"></div>
+    <div class="relative z-10" role="dialog" aria-modal="true">
+        <div class="modal-backdrop fixed inset-0 bg-black/90 transition-opacity" aria-hidden="true" (click)="close()"></div>
 
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="modal fixed inset-0 z-10 w-screen overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg ring-4 ring-white/20">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg ring-4 ring-white/30">
                     <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                         <ng-content/>
                     </div>

@@ -30,7 +30,6 @@ export class Layout {
         this.isFileDropping.set(false);
 
         if (event.dataTransfer?.files.length) {
-
             for (const file of event.dataTransfer.files) {
                 // TODO: Check replicates
                 if (this.uploader.files.includes(file)) {

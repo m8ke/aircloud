@@ -1,10 +1,12 @@
-import { Injectable, signal } from "@angular/core";
+import { inject, Injectable, PLATFORM_ID, signal } from "@angular/core";
+import { isPlatformBrowser } from "@angular/common";
 
 @Injectable({
     providedIn: "root",
 })
 export class Uploader {
     private readonly _files = signal<File[]>([]);
+    private readonly isBrowser = inject(PLATFORM_ID);
 
     public uploadFile(file: File): void {
         this.files.push(file);
@@ -15,6 +17,14 @@ export class Uploader {
         for (const file of files) {
             this.files.push(file);
             console.log("Added file to buffer:", file.name, file.size);
+        }
+    }
+
+    private addFileToSessionStorage(file: File): void {
+        // TODO: Store files in session storage
+        if (isPlatformBrowser(this.isBrowser)) {
+            this.files.push(file);
+            sessionStorage.setItem("files", JSON.stringify(this.isBrowser));
         }
     }
 

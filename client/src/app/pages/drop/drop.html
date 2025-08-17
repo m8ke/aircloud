@@ -1,5 +1,5 @@
 <app-layout>
-    <section class="py-10 h-full">
+    <section class="py-3 h-full">
         @if (uploader.files.length > 0) {
             <div class="flex flex-col w-full grid gap-y-3">
                 <div class="flex justify-between items-center">
@@ -40,16 +40,34 @@
             </div>
         } @else {
             <div class="flex justify-center items-center flex-col h-full text-center xl:w-[40%] lg:w-[60%] mx-auto inset-shadow-sm">
-                <div class="px-10 w-full">
-                    <div class="flex flex-row rounded-t-xl font-semibold w-full overflow-hidden">
-                        <div class="ps-4 py-2 -mb-1 grow-1 cursor-pointer bg-zinc-100 text-black hover:bg-indigo-500 hover:text-white hover:mb-0 transition-all">
-                            Join room
+                <div class="flex flex-row items-center mb-4 gap-x-4">
+                    <div class="flex flex-col text-center items-center">
+                        <img
+                            src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt=""
+                            class="inline-block size-10 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10 hover:scale-110 transition duration-300 active:scale-100"
+                        />
+                        <div class="text-xs mt-1">
+                            Joe<br><span class="text-white/50">iOS</span>
                         </div>
+                    </div>
 
-                        <div class="w-px bg-zinc-200"></div>
+                    <div class="flex flex-col text-center items-center">
+                        <img
+                            src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                            alt=""
+                            class="inline-block size-10 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10 hover:scale-110 transition duration-300 active:scale-100"
+                        />
+                        <div class="text-xs mt-1">
+                            Jack<br><span class="text-white/50">Android</span>
+                        </div>
+                    </div>
+                </div>
 
-                        <div class="pe-4 py-2 -mb-1 grow-1 cursor-pointer bg-zinc-100 text-black hover:bg-indigo-500 hover:text-white hover:mb-0 transition-all">
-                            Share room
+                <div class="px-10 w-full">
+                    <div class="flex flex-row rounded-t-xl font-semibold text-xs w-full overflow-hidden">
+                        <div (click)="changeOnboardingScreen()" class="ps-4 py-2 -mb-1 grow-1 cursor-pointer bg-zinc-100 text-black hover:bg-indigo-500 hover:text-white hover:mb-0 transition-all">
+                            Connect with peer
                         </div>
                     </div>
                 </div>
@@ -80,11 +98,15 @@
                     </div>
                 </div>
 
-                <p class="mt-2 text-white/50 text-xs">
-                    Your files are shared directly peer-to-peer — we <strong>never</strong> upload, store, or track your files.
+                <p class="mt-2 text-white/50 text-xs w-[80%]">
+                    Your files are shared directly peer-to-peer — we <strong>never</strong> upload, store, or track your files. We respect your privacy and GDPR.
                 </p>
             </div>
         }
+    </section>
+
+    <section class="absolute bottom-0 left-0 m-6 bg-white rounded-full text-black py-3 px-4 shadow">
+        button
     </section>
 
     <app-modal #modalRemoveFilesRef (onSubmit)="onRemoveFiles()">
