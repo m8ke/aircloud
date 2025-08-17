@@ -36,7 +36,7 @@ export class Layout {
                     this.toast.show(`File ${file.name} already exist`, "error");
                     continue;
                 }
-                this.uploader.uploadFile(file);
+                this.uploader.addFile(file);
             }
         } else {
             this.toast.show("Could not upload file", "error");

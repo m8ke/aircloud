@@ -2,19 +2,38 @@
     <section class="py-3 h-full">
         @if (uploader.files.length > 0) {
             <div class="flex flex-col w-full grid gap-y-3">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-xl font-serif">
-                        Added {{ uploader.files.length || 0 }} {{ uploader.files.length > 1 ? 'files' : 'file' }}
-                    </h1>
-
-                    <span class="text-xs cursor-pointer" (click)="modalRemoveFiles()?.open()">
-                        Clear all
-                    </span>
+                <div class="flex flex-row items-center gap-x-4">
+                    @for (_ of [1, 2, 3, 4]; track $index) {
+                        <app-peer
+                            name="Jane"
+                            device="iOS"
+                        />
+                    }
                 </div>
+
+                <div class="flex justify-between items-center">
+                    <div class="flex flex-row items-center">
+                        <h1 class="text-xl font-serif me-2">
+                            Added {{ uploader.files.length || 0 }} {{ uploader.files.length > 1 ? 'files' : 'file' }}
+                        </h1>
+
+                        <span class="text-xs cursor-pointer" (click)="modalRemoveFiles()?.open()">
+                            Clear all
+                        </span>
+                    </div>
+
+                    <button
+                        (click)="openFileExplorer()"
+                        class="rounded-xl bg-indigo-500 px-2.5 py-1.5 text-sm text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                        Add files
+                    </button>
+                </div>
+
                 @for (file of uploader.files; track $index) {
                     <div
                         class="w-full bg-white text-black py-4 px-5 rounded-xl flex flex-row justify-between items-center">
-                        <div (click)="removeFile($index)" class="me-3 bg-rose-100 hover:bg-rose-200 transition rounded-full p-2 cursor-pointer">
+                        <div (click)="removeFile($index)"
+                             class="me-3 bg-rose-100 hover:bg-rose-200 transition rounded-full p-2 cursor-pointer">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                  stroke="currentColor" class="size-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
@@ -39,34 +58,24 @@
                 }
             </div>
         } @else {
-            <div class="flex justify-center items-center flex-col h-full text-center xl:w-[40%] lg:w-[60%] mx-auto inset-shadow-sm">
+            <div
+                class="flex justify-center items-center flex-col h-full text-center xl:w-[40%] lg:w-[60%] mx-auto inset-shadow-sm">
                 <div class="flex flex-row items-center mb-4 gap-x-4">
-                    <div class="flex flex-col text-center items-center">
-                        <img
-                            src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                            alt=""
-                            class="inline-block size-10 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10 hover:scale-110 transition duration-300 active:scale-100"
-                        />
-                        <div class="text-xs mt-1">
-                            Joe<br><span class="text-white/50">iOS</span>
-                        </div>
-                    </div>
+                    <app-peer
+                        name="Joe"
+                        device="iOS"
+                    />
 
-                    <div class="flex flex-col text-center items-center">
-                        <img
-                            src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                            alt=""
-                            class="inline-block size-10 rounded-full ring-2 ring-gray-900 outline -outline-offset-1 outline-white/10 hover:scale-110 transition duration-300 active:scale-100"
-                        />
-                        <div class="text-xs mt-1">
-                            Jack<br><span class="text-white/50">Android</span>
-                        </div>
-                    </div>
+                    <app-peer
+                        name="Jane"
+                        device="Android"
+                    />
                 </div>
 
                 <div class="px-10 w-full">
                     <div class="flex flex-row rounded-t-xl font-semibold text-xs w-full overflow-hidden">
-                        <div (click)="changeOnboardingScreen()" class="ps-4 py-2 -mb-1 grow-1 cursor-pointer bg-zinc-100 text-black hover:bg-indigo-500 hover:text-white hover:mb-0 transition-all">
+                        <div
+                            class="ps-4 py-2 -mb-1 grow-1 cursor-pointer bg-zinc-100 text-black hover:bg-indigo-500 hover:text-white hover:mb-0 transition-all">
                             Connect with peer
                         </div>
                     </div>
@@ -81,14 +90,6 @@
                         You can send multiple files securely through peer-to-peer connection
                     </p>
 
-                    <input
-                        #addFileRef
-                        type="file"
-                        [hidden]="true"
-                        [multiple]="true"
-                        (change)="addFile($event)"
-                    >
-
                     <div class="flex items-center justify-center gap-x-6">
                         <button
                             (click)="openFileExplorer()"
@@ -99,14 +100,19 @@
                 </div>
 
                 <p class="mt-2 text-white/50 text-xs w-[80%]">
-                    Your files are shared directly peer-to-peer — we <strong>never</strong> upload, store, or track your files. We respect your privacy and GDPR.
+                    Your files are shared directly peer-to-peer — we <strong>never</strong> upload, store, or track your
+                    files. We respect your privacy and GDPR.
                 </p>
             </div>
         }
-    </section>
 
-    <section class="absolute bottom-0 left-0 m-6 bg-white rounded-full text-black py-3 px-4 shadow">
-        button
+        <input
+            #addFileRef
+            type="file"
+            [hidden]="true"
+            [multiple]="true"
+            (change)="addFiles($event)"
+        >
     </section>
 
     <app-modal #modalRemoveFilesRef (onSubmit)="onRemoveFiles()">
@@ -115,7 +121,7 @@
         </h3>
         <div class="mt-3">
             <p class="text-sm text-zinc-600">
-                Are you sure you want to remove all files. Don't worry it wasn't uploaded to any server!
+                Are you sure you want to remove all files. Don't worry files wasn't uploaded to server!
             </p>
         </div>
     </app-modal>

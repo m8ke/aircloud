@@ -6,6 +6,7 @@ import { Socket } from "@/utils/socket/socket";
 import { RouterLink } from "@angular/router";
 import { Uploader } from "@/utils/uploader/uploader";
 import { Modal } from "@/ui/modal/modal";
+import { Peer } from "@/ui/peer/peer";
 
 @Component({
     selector: "app-drop",
@@ -14,6 +15,7 @@ import { Modal } from "@/ui/modal/modal";
         Layout,
         RouterLink,
         Modal,
+        Peer,
     ],
     templateUrl: "./drop.html",
     styleUrl: "./drop.scss",
@@ -29,11 +31,11 @@ export class Drop implements OnInit {
         this.socket.init();
     }
 
-    public onRemoveFiles(): void {
+    protected onRemoveFiles(): void {
         this.uploader.removeFiles();
     }
 
-    public openFileExplorer(): void {
+    protected openFileExplorer(): void {
         this.addFileElement()?.nativeElement.click();
     }
 
@@ -41,11 +43,7 @@ export class Drop implements OnInit {
         this.uploader.removeFile(index);
     }
 
-    protected addFile(event: any): void {
-        this.uploader.uploadFiles(event.currentTarget?.files);
-    }
-
-    changeOnboardingScreen() {
-
+    protected addFiles(event: any): void {
+        this.uploader.addFiles(event.currentTarget?.files);
     }
 }

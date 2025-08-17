@@ -8,12 +8,12 @@ export class Uploader {
     private readonly _files = signal<File[]>([]);
     private readonly isBrowser = inject(PLATFORM_ID);
 
-    public uploadFile(file: File): void {
+    public addFile(file: File): void {
         this.files.push(file);
         console.log("Added file to buffer:", file.name, file.size);
     }
 
-    public uploadFiles(files: File[]): void {
+    public addFiles(files: File[]): void {
         for (const file of files) {
             this.files.push(file);
             console.log("Added file to buffer:", file.name, file.size);
