@@ -1,7 +1,8 @@
 import { inject, Injectable, signal } from "@angular/core";
 import { Compression } from "@/utils/compression/compression";
-import { PeerFile, PeerFileMetadata } from "@/utils/rtc/peer-file";
+import { PeerFile, PeerFileMetadata, PeerProgress } from "@/utils/rtc/peer-file";
 import { Peer } from "@/utils/rtc/peer";
+import { ToastService } from "@/ui/toast/toast.service";
 
 enum RTCType {
     EOF = "EOF",
@@ -16,10 +17,12 @@ enum RTCType {
 })
 export class RTC {
     public myPeerId!: string;
+    private readonly toast: ToastService = inject(ToastService);
     private readonly compression: Compression = inject(Compression);
 
     private readonly pendingFiles: Map<string, File[]> = new Map<string, File[]>();
     private readonly receivingFiles: Map<string, PeerFile[]> = new Map<string, PeerFile[]>();
+    public readonly sendingProgress = signal<Map<string, PeerProgress>>(new Map<string, PeerProgress>);
 
     public readonly pcs = signal<Map<string, Peer>>(new Map<string, Peer>());
     private readonly dcs: Map<string, RTCDataChannel> = new Map<string, RTCDataChannel>();
@@ -89,7 +92,7 @@ export class RTC {
     public async createOffer(peerId: string, name: string, device: string): Promise<string> {
         const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device);
 
-        const dc: RTCDataChannel = pc.createDataChannel(`dc-${peerId}`);
+        const dc: RTCDataChannel = pc.createDataChannel(peerId);
         dc.bufferedAmountLowThreshold = RTC.CHUNK_SIZE;
         this.setupDataChannel(peerId, dc);
 
@@ -155,8 +158,8 @@ export class RTC {
      * @private
      */
     private setupDataChannel(peerId: string, dc: RTCDataChannel): void {
-        dc.onopen = (event) => this.handleDataChannelOpen(peerId);
-        dc.onclose = (event) => this.handleDataChannelClose(peerId);
+        dc.onopen = (event) => this.handleDataChannelOpen(dc.label);
+        dc.onclose = (event) => this.handleDataChannelClose(dc.label);
         dc.onmessage = async (event: MessageEvent<any>): Promise<void> => await this.handleDataChannelMessage(event, dc);
         this.dcs.set(peerId, dc);
     }
@@ -223,11 +226,8 @@ export class RTC {
                 console.log(`[WebRTC] ${dc.label} wants to send files:`, metadata);
 
                 // Ask user for confirmation
-                if (confirm(`Accept ${metadata.length} file(s)?`)) {
-                    this.acceptedFileSharing(dc, peerFiles);
-                } else {
-                    dc.send(JSON.stringify({type: RTCType.DENIED_FILE_SHARE}));
-                }
+                this.acceptedFileSharing(dc, peerFiles);
+                // dc.send(JSON.stringify({type: RTCType.DENIED_FILE_SHARE}));
                 break;
             case RTCType.ACCEPTED_FILE_SHARE:
                 const files: File[] | undefined = this.pendingFiles.get(dc.label);
@@ -325,6 +325,11 @@ export class RTC {
             throw new Error(`[WebRTC] DataChannel ${dc?.label ?? "unknown"} is not open`);
         }
 
+        const totalSize: number = files.reduce((sum, file) => sum + file.size, 0);
+
+        this.sendingProgress().set(dc.label, new PeerProgress(totalSize, 0));
+        const peerProgress = this.sendingProgress().get(dc.label)!;
+
         const waitForBuffer = (): Promise<void> => {
             if (dc.bufferedAmount <= RTC.CHUNK_SIZE) {
                 return Promise.resolve();
@@ -352,6 +357,15 @@ export class RTC {
             while (offset < file.size) {
                 const slice = file.slice(offset, offset + RTC.CHUNK_SIZE);
                 const chunk = new Uint8Array(await slice.arrayBuffer());
+
+                peerProgress.sentSize = peerProgress.sentSize + chunk.byteLength;
+
+                this.sendingProgress.update(map => {
+                    const newMap = new Map(map);
+                    const prev = newMap.get(dc.label) ?? { totalSize: totalSize, sentSize: 0 };
+                    newMap.set(dc.label, { ...prev, sentSize: prev.sentSize + chunk.byteLength });
+                    return newMap;
+                });
 
                 dc.send(chunk);
                 await waitForBuffer();
@@ -387,19 +401,19 @@ export class RTC {
      * Send text message to the peer.
      * TODO: Implement this.
      *
-     * @param peerId
+     * @param dcLabel
      * @param message
      */
-    public sendMessage(peerId: string, message: string): void {
+    public sendMessage(dcLabel: string, message: string): void {
         throw new Error("Not implemented");
     }
 
-    private handleDataChannelOpen(peerId: string): void {
-        console.log(`[WebRTC] DC open on connection ID ${peerId}`);
+    private handleDataChannelOpen(dcLabel: string): void {
+        console.log(`[WebRTC] DC open on connection ID ${dcLabel}`);
     }
 
-    private handleDataChannelClose(peerId: string): void {
-        console.log(`[WebRTC] DC closed on connection ID ${peerId}`);
+    private handleDataChannelClose(dcLabel: string): void {
+        console.log(`[WebRTC] DC closed on connection ID ${dcLabel}`);
     }
 
     /**

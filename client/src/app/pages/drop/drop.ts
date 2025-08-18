@@ -56,4 +56,16 @@ export class Drop implements OnInit {
     protected async sendFilesToPeer(peerId: string): Promise<void> {
         this.rtc.requestFileSending(peerId, this.uploader.files());
     }
+
+    public isLoading(peerId: string): boolean {
+        if (this.getProgress(peerId) >= 100) {
+            return false;
+        }
+
+        return !!this.rtc.sendingProgress().get(peerId);
+    }
+
+    public getProgress(peerId: string): number {
+        return Number((((this.rtc.sendingProgress().get(peerId)?.sentSize ?? 0) / (this.rtc.sendingProgress().get(peerId)?.totalSize ?? 0)) * 100).toFixed(0));
+    }
 }

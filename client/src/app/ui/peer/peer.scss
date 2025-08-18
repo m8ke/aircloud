@@ -1,0 +1,8 @@
+.progress-bar {
+    width: auto;
+    height: auto;
+    border-radius: 50%;
+    background:
+        radial-gradient(closest-side, white 79%, transparent 80%),
+        conic-gradient(cyan var(--progress), darkcyan 0);
+}
