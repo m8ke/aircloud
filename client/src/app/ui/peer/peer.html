@@ -3,11 +3,9 @@
         [class.p-1]="isLoading()"
         [ngStyle]="{'--progress': `${progress()}%`}"
         class="progress-bar">
-        <img
-            src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-            [alt]="name()"
-            class="inline-block shadow size-10 rounded-full ring-2 ring-black outline -outline-offset-1 outline-white/10 hover:scale-110 transition duration-300 active:scale-100"
-        />
+        <div class="relative w-10 h-10 overflow-hidden bg-gray-100 rounded-full dark:bg-gray-600 shadow ring-2 ring-black outline -outline-offset-1 outline-white/10 hover:scale-105 transition duration-300 active:scale-100">
+            <svg class="absolute w-12 h-12 text-gray-400 -left-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+        </div>
     </div>
     <div class="text-xs mt-1">
         {{ name() }}<br><span class="text-white/50">{{ device() }}</span>

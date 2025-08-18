@@ -5,6 +5,8 @@ import { Modal } from "@/ui/modal/modal";
 import { Dropdown } from "@/ui/dropdown/dropdown";
 import { DropdownItem } from "@/ui/dropdown-item/dropdown-item";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import { LocalStorage } from "@/utils/storage/local-storage";
+import { SessionStorage } from "@/utils/storage/session-storage";
 
 @Component({
     selector: "app-navbar",
@@ -21,18 +23,28 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angula
 })
 export class Navbar implements OnInit {
     protected form!: FormGroup;
-    private readonly formBuilder = inject<FormBuilder>(FormBuilder);
+    private readonly formBuilder: FormBuilder = inject<FormBuilder>(FormBuilder);
+    private readonly localStorage: LocalStorage = inject<LocalStorage>(LocalStorage);
+    private readonly sessionStorage: SessionStorage = inject<LocalStorage>(SessionStorage);
     protected readonly modalChangeSettings = viewChild<Modal>("modalChangeSettingsRef");
 
     public ngOnInit(): void {
         this.form = this.formBuilder.group({
             name: [null, Validators.required],
             discoverable: ["network", Validators.required],
-            saveToBrowser: [true, Validators.required],
+            saveToBrowser: [false, Validators.required],
         });
     }
 
     protected saveSettings(): void {
-        // TODO
+        if (Boolean(this.form.get("saveToBrowser")?.value)) {
+            this.localStorage.setItem("name", this.form.get("name")?.value);
+        } else {
+            this.sessionStorage.setItem("name", this.form.get("name")?.value);
+        }
+    }
+
+    public get name(): string {
+        return this.sessionStorage.getItem("name") || "-";
     }
 }

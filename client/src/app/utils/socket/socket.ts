@@ -2,14 +2,18 @@ import { inject, Injectable } from "@angular/core";
 import { RTC } from "@/utils/rtc/rtc";
 import { ToastService } from "@/ui/toast/toast.service";
 import { ConnectRequest, Discoverability, RequestType, ResponseType } from "@/utils/socket/socket-interface";
+import { SessionStorage } from "@/utils/storage/session-storage";
+import { LocalStorage } from "@/utils/storage/local-storage";
+import { uniqueNamesGenerator, Config, adjectives, colors, animals } from "unique-names-generator";
 
 @Injectable({
     providedIn: "root",
 })
 export class Socket {
     private readonly ws: WebSocket = new WebSocket("ws://localhost:8080/ws");
-    private readonly rtc: RTC = inject(RTC);
-    private readonly toast: ToastService = inject(ToastService);
+    private readonly rtc: RTC = inject<RTC>(RTC);
+    private readonly toast: ToastService = inject<ToastService>(ToastService);
+    private readonly sessionStorage: SessionStorage = inject<LocalStorage>(SessionStorage);
 
     public constructor() {
         this.ws.onopen = (): void => {
@@ -83,7 +87,7 @@ export class Socket {
         this.sendMessage<ConnectRequest>({
             type: RequestType.CONNECT,
             data: {
-                name: "John",
+                name: this.sessionStorage.getItem("name") || "-",
                 discoverability: Discoverability.NETWORK,
             },
         });

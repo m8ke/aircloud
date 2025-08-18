@@ -22,9 +22,9 @@ import { KeyValuePipe } from "@angular/common";
     styleUrl: "./drop.scss",
 })
 export class Drop implements OnInit {
-    private readonly socket: Socket = inject(Socket);
-    protected readonly rtc: RTC = inject(RTC);
-    protected readonly uploader: Uploader = inject(Uploader);
+    private readonly socket: Socket = inject<Socket>(Socket);
+    protected readonly rtc: RTC = inject<RTC>(RTC);
+    protected readonly uploader: Uploader = inject<Uploader>(Uploader);
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
     protected readonly modalRemoveFiles = viewChild<Modal>("modalRemoveFilesRef");

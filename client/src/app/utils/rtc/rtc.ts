@@ -1,8 +1,8 @@
 import { inject, Injectable, signal } from "@angular/core";
-import { Compression } from "@/utils/compression/compression";
-import { PeerFile, PeerFileMetadata, PeerProgress } from "@/utils/rtc/peer-file";
 import { Peer } from "@/utils/rtc/peer";
 import { ToastService } from "@/ui/toast/toast.service";
+import { Compression } from "@/utils/compression/compression";
+import { PeerFile, PeerFileMetadata, PeerProgress } from "@/utils/rtc/peer-file";
 
 enum RTCType {
     EOF = "EOF",
@@ -86,8 +86,8 @@ export class RTC {
      * Create an offer and compress it.
      *
      * @param peerId peer ID to establish a peer-to-peer connection
-     * @param name
-     * @param device
+     * @param name peer's name
+     * @param device peer's device OS family
      */
     public async createOffer(peerId: string, name: string, device: string): Promise<string> {
         const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device);
@@ -153,7 +153,7 @@ export class RTC {
     /**
      * Setup data channels to listen to events (open, close, message).
      *
-     * @param peerId connection ID to establish a peer-to-peer connection
+     * @param peerId peer ID to establish a peer-to-peer connection
      * @param dc data channel
      * @private
      */
@@ -167,7 +167,7 @@ export class RTC {
     /**
      * Wait for ICE gathering.
      *
-     * @param peerId connection ID to establish a peer-to-peer connection
+     * @param peerId peer ID to establish a peer-to-peer connection
      * @private
      */
     private async waitForICEGathering(peerId: string): Promise<void> {
@@ -196,7 +196,7 @@ export class RTC {
      * Handle data channel message.
      *
      * @param event message event
-     * @param dc
+     * @param dc data channel
      * @private
      */
     private async handleDataChannelMessage(event: MessageEvent<any>, dc: RTCDataChannel): Promise<void> {
@@ -219,13 +219,11 @@ export class RTC {
                 // TODO: Show modal/toast to accept or deny the request
                 const metadata: PeerFileMetadata[] = data.metadata;
 
-                // Save metadata so we know what to expect if user accepts
-                const peerFiles = metadata.map(meta => new PeerFile(meta));
+                const peerFiles: PeerFile[] = metadata.map(meta => new PeerFile(meta));
                 this.receivingFiles.set(dc.label, peerFiles);
 
                 console.log(`[WebRTC] ${dc.label} wants to send files:`, metadata);
 
-                // Ask user for confirmation
                 this.acceptedFileSharing(dc, peerFiles);
                 // dc.send(JSON.stringify({type: RTCType.DENIED_FILE_SHARE}));
                 break;
@@ -248,8 +246,8 @@ export class RTC {
 
                 if (current) {
                     current.complete = true;
-                    const blob = new Blob(current.buffer);
-                    this.saveReceivedFile(blob, current.metadata.name);
+                    const blob: Blob = new Blob(current.buffer);
+                    this.downloadReceivedFile(blob, current.metadata.name);
                     console.log(`[WebRTC] File complete: ${current.metadata.name}`);
                 }
                 break;
@@ -301,7 +299,7 @@ export class RTC {
         }));
     }
 
-    public acceptedFileSharing(dc: RTCDataChannel, files: PeerFile[]): void {
+    private acceptedFileSharing(dc: RTCDataChannel, files: PeerFile[]): void {
         if (!dc || dc.readyState !== "open") {
             throw new Error(`[WebRTC] DataChannel ID ${dc.label} is not open`);
         }
@@ -320,7 +318,7 @@ export class RTC {
      * @param dc RTC data channel
      * @param files file blobs
      */
-    public async sendFiles(dc: RTCDataChannel, files: File[]): Promise<void> {
+    private async sendFiles(dc: RTCDataChannel, files: File[]): Promise<void> {
         if (!dc || dc.readyState !== "open") {
             throw new Error(`[WebRTC] DataChannel ${dc?.label ?? "unknown"} is not open`);
         }
@@ -355,15 +353,15 @@ export class RTC {
             let offset: number = 0;
 
             while (offset < file.size) {
-                const slice = file.slice(offset, offset + RTC.CHUNK_SIZE);
-                const chunk = new Uint8Array(await slice.arrayBuffer());
+                const slice: Blob = file.slice(offset, offset + RTC.CHUNK_SIZE);
+                const chunk: Uint8Array = new Uint8Array(await slice.arrayBuffer());
 
                 peerProgress.sentSize = peerProgress.sentSize + chunk.byteLength;
 
                 this.sendingProgress.update(map => {
                     const newMap = new Map(map);
-                    const prev = newMap.get(dc.label) ?? { totalSize: totalSize, sentSize: 0 };
-                    newMap.set(dc.label, { ...prev, sentSize: prev.sentSize + chunk.byteLength });
+                    const prev = newMap.get(dc.label) ?? {totalSize: totalSize, sentSize: 0};
+                    newMap.set(dc.label, {...prev, sentSize: prev.sentSize + chunk.byteLength});
                     return newMap;
                 });
 
@@ -381,14 +379,13 @@ export class RTC {
     }
 
     /**
-     * Save received files automatically.
-     * TODO: Use "Accept" or "Decline" instead of this.
+     * Download received files.
      *
      * @param blob
      * @param filename
      * @private
      */
-    private saveReceivedFile(blob: Blob, filename: string): void {
+    private downloadReceivedFile(blob: Blob, filename: string): void {
         const url: string = URL.createObjectURL(blob);
         const a: HTMLAnchorElement = document.createElement("a");
         a.href = url;
@@ -414,6 +411,7 @@ export class RTC {
 
     private handleDataChannelClose(dcLabel: string): void {
         console.log(`[WebRTC] DC closed on connection ID ${dcLabel}`);
+        this.clearConnection(dcLabel);
     }
 
     /**
@@ -424,18 +422,16 @@ export class RTC {
      * @private
      */
     private async receiveFiles(dcLabel: string, data: any): Promise<void> {
-        const files = this.receivingFiles.get(dcLabel) ?? [];
-        const current = files.find(f => !f.complete);
+        const files: PeerFile[] = this.receivingFiles.get(dcLabel) ?? [];
+        const current: PeerFile | undefined = files.find(f => !f.complete);
 
         if (!current) return;
 
-        const chunk = data instanceof ArrayBuffer
+        const chunk: Uint8Array = data instanceof ArrayBuffer
             ? new Uint8Array(data)
             : new Uint8Array(await data.arrayBuffer());
 
         current.buffer.push(chunk);
         current.receivedSize += chunk.length;
-
-        console.log(`[WebRTC] Chunk received (${current.receivedSize}/${current.metadata.size})`);
     }
 }

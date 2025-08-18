@@ -4,5 +4,5 @@
     border-radius: 50%;
     background:
         radial-gradient(closest-side, white 79%, transparent 80%),
-        conic-gradient(cyan var(--progress), darkcyan 0);
+        conic-gradient(oklch(51.1% 0.262 276.966) var(--progress), oklch(68.5% 0.233 277.117) 0);
 }
