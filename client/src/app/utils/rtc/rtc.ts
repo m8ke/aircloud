@@ -90,6 +90,7 @@ export class RTC {
         const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device);
 
         const dc: RTCDataChannel = pc.createDataChannel(`dc-${peerId}`);
+        dc.bufferedAmountLowThreshold = RTC.CHUNK_SIZE;
         this.setupDataChannel(peerId, dc);
 
         const offer: RTCSessionDescriptionInit = await pc.createOffer();
@@ -251,7 +252,6 @@ export class RTC {
                     this.saveReceivedFile(blob, current.metadata.name);
                     console.log(`[WebRTC] File complete: ${current.metadata.name}`);
                 }
-
                 break;
             }
         }
@@ -325,17 +325,26 @@ export class RTC {
             throw new Error(`[WebRTC] DataChannel ${dc?.label ?? "unknown"} is not open`);
         }
 
-        const waitForBuffer = async () => {
-            while (dc.bufferedAmount > RTC.CHUNK_SIZE) {
-                await new Promise(r => setTimeout(r, 1));
+        const waitForBuffer = (): Promise<void> => {
+            if (dc.bufferedAmount <= RTC.CHUNK_SIZE) {
+                return Promise.resolve();
             }
+
+            return new Promise(resolve => {
+                const handler = () => {
+                    dc.removeEventListener("bufferedamountlow", handler);
+                    resolve();
+                };
+
+                dc.addEventListener("bufferedamountlow", handler, {once: true});
+            });
         };
 
         for (const file of files) {
             // Send metadata once
             dc.send(JSON.stringify({
                 type: RTCType.SEND_FILE_METADATA,
-                metadata: { name: file.name, size: file.size, type: file.type }
+                metadata: {name: file.name, size: file.size, type: file.type},
             }));
 
             let offset: number = 0;
@@ -350,7 +359,7 @@ export class RTC {
                 offset += RTC.CHUNK_SIZE;
             }
 
-            dc.send(JSON.stringify({ type: RTCType.EOF, name: file.name }));
+            dc.send(JSON.stringify({type: RTCType.EOF, name: file.name}));
             console.log(`[WebRTC] File "${file.name}" sent on DC ${dc.label}`);
         }
 
