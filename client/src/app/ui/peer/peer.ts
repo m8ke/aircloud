@@ -1,4 +1,4 @@
-import { Component, input } from "@angular/core";
+import { Component, Input, input } from "@angular/core";
 
 @Component({
     selector: "app-peer",
@@ -7,6 +7,7 @@ import { Component, input } from "@angular/core";
     styleUrl: "./peer.scss",
 })
 export class Peer {
-    public readonly name = input.required();
-    public readonly device = input.required();
+    public key = input.required();
+    public name = input.required();
+    public device = input.required();
 }

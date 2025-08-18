@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, signal, Signal } from "@angular/core";
+import { Component, EventEmitter, input, Output, signal, Signal } from "@angular/core";
 
 @Component({
     selector: "app-modal",
@@ -7,24 +7,29 @@ import { Component, EventEmitter, Output, signal, Signal } from "@angular/core";
     styleUrl: "./modal.scss",
 })
 export class Modal {
-    private _isOpen = signal<boolean>(false);
+    public disabled = input<boolean>(false);
+    public isWarning = input<boolean>(false);
+
+    private readonly isOpen = signal<boolean>(false);
+
+    // TODO: Use output()
     @Output() public onSubmit = new EventEmitter<unknown>();
     @Output() public onCancel = new EventEmitter<unknown>();
 
-    public get state(): Signal<boolean> {
-        return this._isOpen.asReadonly();
+    protected get state(): Signal<boolean> {
+        return this.isOpen.asReadonly();
     }
 
     public open(): void {
-        this._isOpen.set(true);
+        this.isOpen.set(true);
     }
 
-    public close(): void {
+    protected close(): void {
         this.onCancel.emit();
-        this._isOpen.set(false);
+        this.isOpen.set(false);
     }
 
-    public continue(): void {
+    protected continue(): void {
         this.onSubmit.emit();
         this.close();
     }

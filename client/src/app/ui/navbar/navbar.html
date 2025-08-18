@@ -11,12 +11,12 @@
 
         <div class="flex items-center gap-2 rounded-full py-1.5 px-3 text-white/70 border border-white/25 ms-2 text-xs">
             <div class="font-medium">
-               Panda &bull; MacOS
+                Mike &bull; Network
             </div>
 
             <div class="h-4 w-px bg-white/25"></div>
 
-            <div routerLink="/" class="cursor-pointer">
+            <div (click)="modalChangeSettings()?.open()" class="cursor-pointer">
                 Change settings
             </div>
         </div>
@@ -87,3 +87,84 @@
         </button>
     </div>
 </nav>
+
+<app-modal
+    #modalChangeSettingsRef
+    [disabled]="form.invalid"
+    (onSubmit)="saveSettings()">
+    <h3 class="text-xl font-semibold text-gray-900 font-serif">
+        Change settings
+    </h3>
+    <div class="mt-3">
+        <form [formGroup]="form" class="grid gap-3">
+            <div>
+                <label
+                    for="name"
+                    class="block text-sm/6 font-medium text-black">
+                    Display name
+                </label>
+                <div class="mt-2">
+                    <input
+                        id="name"
+                        type="text"
+                        autocomplete="name"
+                        formControlName="name"
+                        [maxLength]="30"
+                        class="block w-full rounded-xl bg-white/5 px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-black/10 placeholder:text-zinc-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label
+                    for="discoverable"
+                    class="block text-sm/6 font-medium text-black">
+                    Discovery mode
+                </label>
+
+                <app-dropdown
+                    formControlName="discoverable"
+                    placeholder="Expiration time">
+                    <app-dropdown-item value="all">
+                        All
+                    </app-dropdown-item>
+                    <app-dropdown-item value="network">
+                        Network
+                    </app-dropdown-item>
+                    <app-dropdown-item value="direct">
+                        Direct connection
+                    </app-dropdown-item>
+                </app-dropdown>
+            </div>
+
+            <div class="flex gap-3">
+                <div class="flex h-6 shrink-0 items-center">
+                    <div class="group grid size-4 grid-cols-1">
+                        <input
+                            id="saveToBrowser"
+                            type="checkbox"
+                            formControlName="saveToBrowser"
+                            [checked]="true"
+                            class="col-start-1 row-start-1 appearance-none rounded-sm border border-black/10 bg-black/5 checked:border-indigo-500 checked:bg-indigo-500 indeterminate:border-indigo-500 indeterminate:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:border-white/5 disabled:bg-white/10 disabled:checked:bg-white/10 forced-colors:appearance-auto"
+                        />
+                        <svg viewBox="0 0 14 14" fill="none"
+                             class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-disabled:stroke-white/25">
+                            <path d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                  class="opacity-0 group-has-checked:opacity-100"/>
+                            <path d="M3 7H11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                  class="opacity-0 group-has-indeterminate:opacity-100"/>
+                        </svg>
+                    </div>
+                </div>
+                <div>
+                    <label for="saveToBrowser" class="font-medium text-black">
+                        Use for every session
+                    </label>
+                    <p id="comments-description" class="text-zinc-400">
+                        It will be shown to your network only
+                    </p>
+                </div>
+            </div>
+        </form>
+    </div>
+</app-modal>

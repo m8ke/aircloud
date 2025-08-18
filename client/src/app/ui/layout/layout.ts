@@ -32,7 +32,7 @@ export class Layout {
         if (event.dataTransfer?.files.length) {
             for (const file of event.dataTransfer.files) {
                 // TODO: Check replicates
-                if (this.uploader.files.includes(file)) {
+                if (this.uploader.files().includes(file)) {
                     this.toast.show(`File ${file.name} already exist`, "error");
                     continue;
                 }

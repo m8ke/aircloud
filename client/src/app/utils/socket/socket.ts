@@ -1,7 +1,7 @@
 import { inject, Injectable } from "@angular/core";
-import { ConnectRequest, Discoverability, RequestType, ResponseType } from "@/utils/socket/socket-interface";
 import { RTC } from "@/utils/rtc/rtc";
 import { ToastService } from "@/ui/toast/toast.service";
+import { ConnectRequest, Discoverability, RequestType, ResponseType } from "@/utils/socket/socket-interface";
 
 @Injectable({
     providedIn: "root",
@@ -19,43 +19,42 @@ export class Socket {
 
         // TODO: Add interfaces to prevent headache
         // TODO: Share ICE candidates
-        this.ws.onmessage = async (e): Promise<void> => {
-            let data = JSON.parse(e.data);
+        this.ws.onmessage = async (event): Promise<void> => {
+            const data = JSON.parse(event.data);
 
             switch (data.type as ResponseType) {
                 case ResponseType.PEER_CONNECTED:
+                    this.rtc.myPeerId = data.peerId;
                     this.toast.show("Connected to P2P network");
                     break;
                 case ResponseType.PEER_LEFT:
-                    this.rtc.clearConnectionByPeerId(data.peerId);
+                    this.rtc.clearConnection(data.peerId);
                     break;
                 case ResponseType.PEER_OFFER:
                     console.log("[WebSocket] Received offer request from peer", data);
-                    const offer: string = await this.rtc.createOffer(data.connectionId);
+                    const offer: string = await this.rtc.createOffer(data.peerId, data.name, data.device);
                     this.sendMessage({
                         type: RequestType.PEER_OFFER,
                         data: {
                             offer: offer,
                             peerId: data.peerId,
-                            connectionId: data.connectionId,
                         },
                     });
                     break;
                 case ResponseType.PEER_ANSWER:
                     console.log("[WebSocket] Received offer from peer and creating an answer", data);
-                    const answer: string = await this.rtc.createAnswer(data.connectionId, data.offer);
+                    const answer: string = await this.rtc.createAnswer(data.peerId, data.offer, data.name, data.device);
                     this.sendMessage({
                         type: RequestType.PEER_ANSWER,
                         data: {
                             answer: answer,
                             peerId: data.peerId,
-                            connectionId: data.connectionId,
                         },
                     });
                     break;
                 case ResponseType.APPROVE_PEER_ANSWER:
                     console.log("[WebSocket] Received and approving an answer from the peer to establish a connection", data);
-                    await this.rtc.approveAnswer(data.connectionId, data.answer);
+                    await this.rtc.approveAnswer(data.peerId, data.answer);
                     break;
                 default:
                     console.log("[WebSocket] Message received: ", data);

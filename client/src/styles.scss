@@ -2,10 +2,10 @@
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Text:ital@0;1&display=swap');
 
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
 body {
     font-size: 14px;
-    color: #fff;
-    background-color: #000;
 }
 
 .font-serif {

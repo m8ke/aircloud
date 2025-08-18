@@ -1,22 +1,23 @@
-import { Component, ElementRef, inject, OnInit, viewChild } from "@angular/core";
+import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, viewChild } from "@angular/core";
 import { RTC } from "@/utils/rtc/rtc";
 import { ReactiveFormsModule } from "@angular/forms";
 import { Layout } from "@/ui/layout/layout";
 import { Socket } from "@/utils/socket/socket";
-import { RouterLink } from "@angular/router";
 import { Uploader } from "@/utils/uploader/uploader";
 import { Modal } from "@/ui/modal/modal";
 import { Peer } from "@/ui/peer/peer";
+import { KeyValuePipe } from "@angular/common";
 
 @Component({
     selector: "app-drop",
     imports: [
         ReactiveFormsModule,
         Layout,
-        RouterLink,
         Modal,
         Peer,
+        KeyValuePipe,
     ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: "./drop.html",
     styleUrl: "./drop.scss",
 })
@@ -24,7 +25,8 @@ export class Drop implements OnInit {
     private readonly socket: Socket = inject(Socket);
     protected readonly rtc: RTC = inject(RTC);
     protected readonly uploader: Uploader = inject(Uploader);
-    private readonly addFileElement = viewChild<ElementRef>("addFileRef");
+
+    protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
     protected readonly modalRemoveFiles = viewChild<Modal>("modalRemoveFilesRef");
 
     public ngOnInit(): void {
@@ -45,5 +47,13 @@ export class Drop implements OnInit {
 
     protected addFiles(event: any): void {
         this.uploader.addFiles(event.currentTarget?.files);
+    }
+
+    protected selectFile(): void {
+        // TODO: Select file to send only selected files (not all together)
+    }
+
+    protected async sendFilesToPeer(peerId: string): Promise<void> {
+        this.rtc.requestFileSending(peerId, this.uploader.files());
     }
 }
