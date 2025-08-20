@@ -75,10 +75,10 @@ export class RTC {
             }
         };
 
-        this.pcs.update(p => {
-            const pcs = new Map(p);
-            pcs.set(peerId, new Peer(name, device, pc));
-            return pcs;
+        this.pcs.update(prevp => {
+            const next = new Map(prevp);
+            next.set(peerId, new Peer(name, device, pc));
+            return next;
         });
 
         return pc;
@@ -226,10 +226,10 @@ export class RTC {
 
                 const peerFiles: PeerFile[] = metadata.map(meta => new PeerFile(meta));
 
-                this.receivingFiles.update(filesMap => {
-                    const files = new Map(filesMap);
-                    files.set(dc.label, peerFiles);
-                    return files;
+                this.receivingFiles.update(prev => {
+                    const next = new Map(prev);
+                    next.set(dc.label, peerFiles);
+                    return next;
                 });
 
                 console.log(`[WebRTC] ${dc.label} wants to send files:`, metadata);
@@ -262,10 +262,10 @@ export class RTC {
 
                     console.log(`[WebRTC] File complete: ${current.metadata.name}`);
 
-                    this.receivingFiles.update(filesMap => {
-                        const files = new Map(filesMap);
-                        files.delete(dc.label);
-                        return files;
+                    this.receivingFiles.update(prev => {
+                        const next = new Map(prev);
+                        next.delete(dc.label);
+                        return next;
                     });
                 }
                 break;
@@ -341,10 +341,10 @@ export class RTC {
             throw new Error(`[WebRTC] DataChannel ID ${dc.label} is not open`);
         }
 
-        this.receivingFiles.update(filesMap => {
-            const newMap = new Map(filesMap);
-            newMap.set(dc.label, files);
-            return newMap;
+        this.receivingFiles.update(prev => {
+            const next = new Map(prev);
+            next.set(dc.label, files);
+            return next;
         });
 
         // TODO: Add interface
@@ -400,11 +400,11 @@ export class RTC {
 
                 peerProgress.sentSize = peerProgress.sentSize + chunk.byteLength;
 
-                this.sendingProgress.update(p => {
-                    const process = new Map(p);
-                    const prev = process.get(peerId) ?? {totalSize: totalSize, sentSize: 0};
-                    process.set(peerId, {...prev, sentSize: prev.sentSize + chunk.byteLength});
-                    return process;
+                this.sendingProgress.update(prev => {
+                    const next = new Map(prev);
+                    const curr = next.get(peerId) ?? {totalSize: totalSize, sentSize: 0};
+                    next.set(peerId, {...curr, sentSize: curr.sentSize + chunk.byteLength});
+                    return next;
                 });
 
                 dc.send(chunk);
