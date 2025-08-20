@@ -15,6 +15,6 @@ public class RTCAnswerRequest {
 
     private String peerId;
 
-    private UUID connectionId;
+    private UUID dataChannelId;
 
 }

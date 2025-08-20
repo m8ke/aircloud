@@ -1,3 +1,5 @@
+import { UUID } from "node:crypto";
+
 export class Peer {
     public name: string;
     public device: string;

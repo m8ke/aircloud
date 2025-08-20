@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, viewChild } from "@angular/core";
+import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from "@angular/core";
 import { RTC } from "@/utils/rtc/rtc";
 import { ReactiveFormsModule } from "@angular/forms";
 import { Layout } from "@/ui/layout/layout";
-import { Socket } from "@/utils/socket/socket";
 import { Uploader } from "@/utils/uploader/uploader";
 import { Modal } from "@/ui/modal/modal";
 import { Peer } from "@/ui/peer/peer";
@@ -21,17 +20,12 @@ import { KeyValuePipe } from "@angular/common";
     templateUrl: "./drop.html",
     styleUrl: "./drop.scss",
 })
-export class Drop implements OnInit {
-    private readonly socket: Socket = inject<Socket>(Socket);
+export class Drop {
     protected readonly rtc: RTC = inject<RTC>(RTC);
     protected readonly uploader: Uploader = inject<Uploader>(Uploader);
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
     protected readonly modalRemoveFiles = viewChild<Modal>("modalRemoveFilesRef");
-
-    public ngOnInit(): void {
-        this.socket.init();
-    }
 
     protected onRemoveFiles(): void {
         this.uploader.removeFiles();
@@ -58,6 +52,8 @@ export class Drop implements OnInit {
     }
 
     public isLoading(peerId: string): boolean {
+        console.log(this.rtc.sendingProgress().get(peerId))
+
         if (this.getProgress(peerId) >= 100) {
             return false;
         }

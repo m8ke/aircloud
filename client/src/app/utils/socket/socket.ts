@@ -4,19 +4,30 @@ import { ToastService } from "@/ui/toast/toast.service";
 import { ConnectRequest, Discoverability, RequestType, ResponseType } from "@/utils/socket/socket-interface";
 import { SessionStorage } from "@/utils/storage/session-storage";
 import { LocalStorage } from "@/utils/storage/local-storage";
-import { uniqueNamesGenerator, Config, adjectives, colors, animals } from "unique-names-generator";
 
 @Injectable({
     providedIn: "root",
 })
 export class Socket {
-    private readonly ws: WebSocket = new WebSocket("ws://localhost:8080/ws");
+    private static readonly RECONNECT_DELAY = 2000; // ms
+    private static readonly CONNECT_TIMEOUT = 5000; // ms
+
+    private ws!: WebSocket;
     private readonly rtc: RTC = inject<RTC>(RTC);
     private readonly toast: ToastService = inject<ToastService>(ToastService);
     private readonly sessionStorage: SessionStorage = inject<LocalStorage>(SessionStorage);
 
-    public constructor() {
+    public init(): void {
+        this.ws = new WebSocket("ws://localhost:8080/ws");
+        console.log("[WebSocket] Initialize connection");
+
+        const connectTimeout = setTimeout(() => {
+            console.warn("[WebSocket] Connection timeout, closing...");
+            this.ws?.close();
+        }, Socket.CONNECT_TIMEOUT);
+
         this.ws.onopen = (): void => {
+            clearTimeout(connectTimeout);
             console.log("[WebSocket] Connection opened");
             this.connectWebSocket();
         };
@@ -32,16 +43,16 @@ export class Socket {
                     this.toast.show("Connected to P2P network");
                     break;
                 case ResponseType.PEER_LEFT:
-                    this.rtc.clearConnection(data.peerId);
+                    this.rtc.closeConnection(data.peerId);
                     break;
                 case ResponseType.PEER_OFFER:
                     console.log("[WebSocket] Received offer request from peer", data);
-                    const offer: string = await this.rtc.createOffer(data.peerId, data.name, data.device);
+                    const offer = await this.rtc.createOffer(data.peerId, data.name, data.device);
                     this.sendMessage({
                         type: RequestType.PEER_OFFER,
                         data: {
-                            offer: offer,
                             peerId: data.peerId,
+                            offer: offer.localDescription,
                         },
                     });
                     break;
@@ -67,20 +78,21 @@ export class Socket {
         };
 
         this.ws.onclose = (e): void => {
-            console.log("[WebSocket] Connection closed", e);
+            clearTimeout(connectTimeout);
+            console.warn("[WebSocket] Connection closed, retrying in", Socket.RECONNECT_DELAY, "ms");
+            setTimeout(this.init, Socket.RECONNECT_DELAY);
         };
 
         this.ws.onerror = (e): void => {
             console.log("[WebSocket] Connection error", e);
+            this.ws.close();
         };
     }
 
-    public init(): void {
-        console.log("[WebSocket] Initialize connection");
-    }
-
     public sendMessage<T>(message: T): void {
-        this.ws.send(JSON.stringify(message));
+        if (this.ws?.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify(message));
+        }
     }
 
     private connectWebSocket(): void {

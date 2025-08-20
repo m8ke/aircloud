@@ -4,6 +4,7 @@ import { Toast } from "@/ui/toast/toast";
 import { animals, uniqueNamesGenerator } from "unique-names-generator";
 import { SessionStorage } from "@/utils/storage/session-storage";
 import { LocalStorage } from "@/utils/storage/local-storage";
+import { Socket } from "@/utils/socket/socket";
 
 @Component({
     selector: "app-root",
@@ -12,7 +13,12 @@ import { LocalStorage } from "@/utils/storage/local-storage";
     styleUrl: "./app.scss",
 })
 export class App implements OnInit {
+    private readonly socket: Socket = inject<Socket>(Socket);
     private readonly sessionStorage: SessionStorage = inject<LocalStorage>(SessionStorage);
+
+    public constructor() {
+        this.socket.init();
+    }
 
     public ngOnInit(): void {
         if (!this.sessionStorage.getItem("name")) {
