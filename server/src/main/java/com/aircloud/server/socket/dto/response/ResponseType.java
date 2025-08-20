@@ -5,11 +5,10 @@ package com.aircloud.server.socket.dto.response;
  */
 public enum ResponseType {
 
-    PEER_CONNECTED,
-    PEER_JOINED,
-    PEER_LEFT,
-    PEER_OFFER,
-    PEER_ANSWER,
-    APPROVE_PEER_ANSWER
+    CONNECT,
+    DISCONNECT,
+    OFFER,
+    ANSWER,
+    APPROVE_ANSWER
 
 }

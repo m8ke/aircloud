@@ -8,7 +8,7 @@ public enum RequestType {
     CONNECT,
     DISCONNECT,
     CHANGE_SETTINGS,
-    PEER_OFFER,
-    PEER_ANSWER
+    OFFER,
+    ANSWER
 
 }

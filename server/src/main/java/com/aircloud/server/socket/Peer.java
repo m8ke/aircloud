@@ -3,8 +3,9 @@ package com.aircloud.server.socket;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
-import net.datafaker.Faker;
 import org.springframework.web.socket.WebSocketSession;
+import ua_parser.Client;
+import ua_parser.Parser;
 
 import java.util.Objects;
 
@@ -24,9 +25,11 @@ public class Peer {
     @JsonIgnore
     private int heartBeat;
 
+    private String connectionId = randomizeConnectionId();
+
     private String device;
 
-    private String name = randomizeName();
+    private String name;
 
     public Peer(WebSocketSession session) {
         this.session = session;
@@ -34,17 +37,17 @@ public class Peer {
         this.device = parseDeviceName();
     }
 
-    private String randomizeName() {
-        final Faker faker = new Faker();
-        return faker.animal().name();
-    }
-
     private String parseIpAddress() {
         return Objects.requireNonNull(session.getRemoteAddress()).getAddress().getHostAddress();
     }
 
     private String parseDeviceName() {
-        return Objects.requireNonNull(session.getHandshakeHeaders().get("user-agent")).getFirst();
+        String uaString = Objects.requireNonNull(session.getHandshakeHeaders().get("user-agent")).getFirst();
+
+        final Parser uaParser = new Parser();
+        final Client client = uaParser.parse(uaString);
+
+        return client.os.family;
     }
 
     public void updatePeerSession(WebSocketSession session) {
@@ -56,9 +59,14 @@ public class Peer {
         return session.getId();
     }
 
+    // TODO
+    private String randomizeConnectionId() {
+        return "123GDA";
+    }
+
     @JsonIgnore
     public boolean isActive() {
-        return discoverability != null;
+        return session.isOpen() && name != null && device != null;
     }
 
 }

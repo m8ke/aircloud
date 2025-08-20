@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PeerChangeDataRequest {
+public class PeerChangeSettingsRequest {
 
     private String name;
 

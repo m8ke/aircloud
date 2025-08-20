@@ -7,12 +7,10 @@ import lombok.Setter;
 @Setter
 public class RTCOfferRequest {
 
-    private final RequestType type = RequestType.PEER_OFFER;
+    private final RequestType type = RequestType.OFFER;
 
     private String offer;
 
     private String peerId;
-
-    private String dataChannelId;
 
 }
