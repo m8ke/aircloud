@@ -371,21 +371,6 @@ export class RTC {
         this.sendingProgress().set(peerId, new PeerProgress(totalSize, 0));
         const peerProgress: PeerProgress = this.sendingProgress().get(peerId)!;
 
-        const waitForBuffer = (): Promise<void> => {
-            if (dc.bufferedAmount <= RTC.CHUNK_SIZE) {
-                return Promise.resolve();
-            }
-
-            return new Promise(resolve => {
-                const handler = () => {
-                    dc.removeEventListener("bufferedamountlow", handler);
-                    resolve();
-                };
-
-                dc.addEventListener("bufferedamountlow", handler, {once: true});
-            });
-        };
-
         for (const file of files) {
             dc.send(JSON.stringify({
                 type: RTCType.SEND_FILE_METADATA,
@@ -408,16 +393,42 @@ export class RTC {
                 });
 
                 dc.send(chunk);
-                await waitForBuffer();
+                await this.waitForBuffer(dc);
 
                 offset += RTC.CHUNK_SIZE;
             }
 
-            dc.send(JSON.stringify({type: RTCType.EOF, name: file.name}));
+            // TODO: Add an interface
+            dc.send(JSON.stringify({
+                type: RTCType.EOF,
+                name: file.name,
+            }));
+
             console.log(`[WebRTC] File "${file.name}" sent on DC ${dc.label}`);
         }
 
         console.log(`[WebRTC] Finished sending ${files.length} file(s) on DC ${dc.label}`);
+    }
+
+    /**
+     * Wait for buffer.
+     *
+     * @param dc data channel
+     * @private
+     */
+    private async waitForBuffer(dc: RTCDataChannel): Promise<void> {
+        if (dc.bufferedAmount <= RTC.CHUNK_SIZE) {
+            return Promise.resolve();
+        }
+
+        return new Promise(resolve => {
+            const handler = () => {
+                dc.removeEventListener("bufferedamountlow", handler);
+                resolve();
+            };
+
+            dc.addEventListener("bufferedamountlow", handler, {once: true});
+        });
     }
 
     /**
