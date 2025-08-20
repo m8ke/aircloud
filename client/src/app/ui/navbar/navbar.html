@@ -14,12 +14,24 @@
                 {{ name }} &bull; Network
             </div>
 
-<!--            <div class="h-4 w-px bg-white/25"></div>-->
+            <!--            <div class="h-4 w-px bg-white/25"></div>-->
 
-<!--            <div (click)="modalChangeSettings()?.open()" class="cursor-pointer">-->
-<!--                Change settings-->
-<!--            </div>-->
+            <!--            <div (click)="modalChangeSettings()?.open()" class="cursor-pointer">-->
+            <!--                Change settings-->
+            <!--            </div>-->
         </div>
+
+        @if (isReceiving()) {
+            <div
+                [ngStyle]="{'--progress': `${progress()}%`}"
+                class="progress-bar p-2 mx-2">
+                <div
+                    class="relative w-3 h-3 overflow-hidden bg-black rounded-full ring-6 ring-black">
+                </div>
+            </div>
+
+            Receiving files {{ progress() }}%
+        }
     </div>
 
     <div class="flex justify-end items-center grow-1">

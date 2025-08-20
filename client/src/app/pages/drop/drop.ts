@@ -52,8 +52,6 @@ export class Drop {
     }
 
     public isLoading(peerId: string): boolean {
-        console.log(this.rtc.sendingProgress().get(peerId))
-
         if (this.getProgress(peerId) >= 100) {
             return false;
         }

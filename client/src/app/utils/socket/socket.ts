@@ -9,8 +9,8 @@ import { LocalStorage } from "@/utils/storage/local-storage";
     providedIn: "root",
 })
 export class Socket {
-    private static readonly RECONNECT_DELAY = 2000; // ms
-    private static readonly CONNECT_TIMEOUT = 5000; // ms
+    private static readonly RECONNECT_DELAY = 2000;
+    private static readonly CONNECT_TIMEOUT = 5000;
 
     private ws!: WebSocket;
     private readonly rtc: RTC = inject<RTC>(RTC);
@@ -38,36 +38,38 @@ export class Socket {
             const data = JSON.parse(event.data);
 
             switch (data.type as ResponseType) {
-                case ResponseType.PEER_CONNECTED:
+                case ResponseType.CONNECT:
                     this.rtc.myPeerId = data.peerId;
                     this.toast.show("Connected to P2P network");
                     break;
-                case ResponseType.PEER_LEFT:
+                case ResponseType.DISCONNECT:
                     this.rtc.closeConnection(data.peerId);
                     break;
-                case ResponseType.PEER_OFFER:
+                case ResponseType.OFFER:
                     console.log("[WebSocket] Received offer request from peer", data);
-                    const offer = await this.rtc.createOffer(data.peerId, data.name, data.device);
+                    const offer: string = await this.rtc.createOffer(data.peerId, data.name, data.device);
+
                     this.sendMessage({
-                        type: RequestType.PEER_OFFER,
+                        type: RequestType.OFFER,
                         data: {
                             peerId: data.peerId,
-                            offer: offer.localDescription,
+                            offer: offer,
                         },
                     });
                     break;
-                case ResponseType.PEER_ANSWER:
+                case ResponseType.ANSWER:
                     console.log("[WebSocket] Received offer from peer and creating an answer", data);
                     const answer: string = await this.rtc.createAnswer(data.peerId, data.offer, data.name, data.device);
+
                     this.sendMessage({
-                        type: RequestType.PEER_ANSWER,
+                        type: RequestType.ANSWER,
                         data: {
                             answer: answer,
                             peerId: data.peerId,
                         },
                     });
                     break;
-                case ResponseType.APPROVE_PEER_ANSWER:
+                case ResponseType.APPROVE_ANSWER:
                     console.log("[WebSocket] Received and approving an answer from the peer to establish a connection", data);
                     await this.rtc.approveAnswer(data.peerId, data.answer);
                     break;
@@ -77,13 +79,13 @@ export class Socket {
             }
         };
 
-        this.ws.onclose = (e): void => {
+        this.ws.onclose = (e: CloseEvent): void => {
             clearTimeout(connectTimeout);
             console.warn("[WebSocket] Connection closed, retrying in", Socket.RECONNECT_DELAY, "ms");
             setTimeout(this.init, Socket.RECONNECT_DELAY);
         };
 
-        this.ws.onerror = (e): void => {
+        this.ws.onerror = (e: Event): void => {
             console.log("[WebSocket] Connection error", e);
             this.ws.close();
         };
@@ -96,11 +98,18 @@ export class Socket {
     }
 
     private connectWebSocket(): void {
+        const name: string | null = this.sessionStorage.getItem("name");
+        const discoverability: Discoverability = this.sessionStorage.getItem("discoverability") as Discoverability || Discoverability.NETWORK;
+
+        if (!name) {
+            throw new Error("Name is not provided");
+        }
+
         this.sendMessage<ConnectRequest>({
             type: RequestType.CONNECT,
             data: {
-                name: this.sessionStorage.getItem("name") || "-",
-                discoverability: Discoverability.NETWORK,
+                name,
+                discoverability,
             },
         });
     }

@@ -5,6 +5,7 @@ import { animals, uniqueNamesGenerator } from "unique-names-generator";
 import { SessionStorage } from "@/utils/storage/session-storage";
 import { LocalStorage } from "@/utils/storage/local-storage";
 import { Socket } from "@/utils/socket/socket";
+import { Discoverability } from "@/utils/socket/socket-interface";
 
 @Component({
     selector: "app-root",
@@ -24,13 +25,17 @@ export class App implements OnInit {
         if (!this.sessionStorage.getItem("name")) {
             this.sessionStorage.setItem("name", this.generateName());
         }
+
+        if (!this.sessionStorage.getItem("discoverability")) {
+            this.sessionStorage.setItem("discoverability", Discoverability.NETWORK);
+        }
     }
 
     private generateName(): string {
-        const randomName: string = uniqueNamesGenerator({
+        // TODO: It can be replaced with an array of animal names and get one randomized value from there.
+        return uniqueNamesGenerator({
             dictionaries: [animals],
+            style: "capital"
         });
-
-        return randomName.charAt(0).toUpperCase() + randomName.slice(1);
     }
 }
