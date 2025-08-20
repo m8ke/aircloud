@@ -1,0 +1,182 @@
+<nav
+    class="flex items-center max-md:w-full max-md:justify-between px-6 py-4 text-white text-sm backdrop-blur">
+    <div class="flex flex-row items-center">
+        <div routerLink="/" class="cursor-pointer">
+            <img ngSrc="/aircloud-white.svg" alt="AirCloud" [width]="100" [height]="30">
+        </div>
+
+        <div class="bg-white border text-black rounded-2xl px-2 py-1 ms-2 text-xs">
+            <p>Beta</p>
+        </div>
+
+        <div class="flex items-center gap-2 rounded-full py-1.5 px-3 text-white/70 border border-white/25 ms-2 text-xs">
+            <div class="font-medium">
+                {{ name }} &bull; Network
+            </div>
+
+            <!--            <div class="h-4 w-px bg-white/25"></div>-->
+
+            <!--            <div (click)="modalChangeSettings()?.open()" class="cursor-pointer">-->
+            <!--                Change settings-->
+            <!--            </div>-->
+        </div>
+
+        @if (isReceiving()) {
+            <div
+                [ngStyle]="{'--progress': `${progress()}%`}"
+                class="progress-bar p-2 mx-2">
+                <div
+                    class="relative w-3 h-3 overflow-hidden bg-black rounded-full ring-6 ring-black">
+                </div>
+            </div>
+
+            Receiving files {{ progress() }}%
+        }
+    </div>
+
+    <div class="flex justify-end items-center grow-1">
+        <div class="hidden md:flex items-center gap-6">
+            <a href="#" class="relative overflow-hidden group">
+                <span class="block group-hover:-translate-y-full transition-transform duration-300">Features</span>
+                <span
+                    class="block absolute top-full left-0 group-hover:translate-y-[-100%] transition-transform duration-300">Features</span>
+            </a>
+            <a href="#" class="relative overflow-hidden group">
+                <span class="block group-hover:-translate-y-full transition-transform duration-300">Use cases</span>
+                <span
+                    class="block absolute top-full left-0 group-hover:translate-y-[-100%] transition-transform duration-300">Use cases</span>
+            </a>
+            <a href="#" class="relative overflow-hidden group">
+                <span class="block group-hover:-translate-y-full transition-transform duration-300">Resources</span>
+                <span
+                    class="block absolute top-full left-0 group-hover:translate-y-[-100%] transition-transform duration-300">Resources</span>
+            </a>
+            <a href="#" class="relative overflow-hidden group">
+                <span class="block group-hover:-translate-y-full transition-transform duration-300">Roadmap</span>
+                <span
+                    class="block absolute top-full left-0 group-hover:translate-y-[-100%] transition-transform duration-300">Roadmap</span>
+            </a>
+        </div>
+
+        <div class="hidden ms-4 md:flex items-center gap-2">
+            <button
+                class="border border-slate-600 hover:bg-slate-500/30 px-4 py-2 rounded-full text-sm font-medium transition">
+                Contact
+            </button>
+            <button
+                class="bg-white hover:shadow-[0px_0px_30px_6px] shadow-[0px_0px_20px_3px] hover:shadow-white/50 shadow-white/50 text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-100 transition duration-300">
+                Support us
+            </button>
+        </div>
+    </div>
+
+    <button id="menuToggle" class="md:hidden text-gray-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+             stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+    </button>
+    <div id="mobileMenu" class="absolute hidden top-48 text-base left-0 bg-black w-full flex-col items-center gap-4">
+        <a class="hover:text-indigo-600" href="#">
+            Features
+        </a>
+        <a class="hover:text-indigo-600" href="#">
+            Use cases
+        </a>
+        <a class="hover:text-indigo-600" href="#">
+            Resources
+        </a>
+        <a class="hover:text-indigo-600" href="#">
+            Roadmap
+        </a>
+        <button
+            class="border border-slate-600 hover:bg-slate-800 px-4 py-2 rounded-full text-sm font-medium transition">
+            Contact
+        </button>
+        <button
+            class="bg-white hover:shadow-[0px_0px_30px_14px] shadow-[0px_0px_30px_7px] hover:shadow-white/50 shadow-white/50 text-black px-4 py-2 rounded-full text-sm font-medium hover:bg-slate-100 transition duration-300">
+            Support us
+        </button>
+    </div>
+</nav>
+
+<app-modal
+    #modalChangeSettingsRef
+    [disabled]="form.invalid"
+    (onSubmit)="saveSettings()">
+    <h3 class="text-xl font-semibold text-gray-900 font-serif">
+        Change settings
+    </h3>
+    <div class="mt-3">
+        <form [formGroup]="form" class="grid gap-3">
+            <div>
+                <label
+                    for="name"
+                    class="block text-sm/6 font-medium text-black">
+                    Display name
+                </label>
+                <div class="mt-2">
+                    <input
+                        id="name"
+                        type="text"
+                        autocomplete="name"
+                        formControlName="name"
+                        [maxLength]="30"
+                        class="block w-full rounded-xl bg-white/5 px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-black/10 placeholder:text-zinc-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label
+                    for="discoverable"
+                    class="block text-sm/6 font-medium text-black">
+                    Discovery mode
+                </label>
+
+                <app-dropdown
+                    formControlName="discoverable"
+                    placeholder="Expiration time">
+                    <app-dropdown-item value="all">
+                        All
+                    </app-dropdown-item>
+                    <app-dropdown-item value="network">
+                        Network
+                    </app-dropdown-item>
+                    <app-dropdown-item value="direct">
+                        Direct connection
+                    </app-dropdown-item>
+                </app-dropdown>
+            </div>
+
+            <div class="flex gap-3">
+                <div class="flex h-6 shrink-0 items-center">
+                    <div class="group grid size-4 grid-cols-1">
+                        <input
+                            id="saveToBrowser"
+                            type="checkbox"
+                            formControlName="saveToBrowser"
+                            [checked]="true"
+                            class="col-start-1 row-start-1 appearance-none rounded-sm border border-black/10 bg-black/5 checked:border-indigo-500 checked:bg-indigo-500 indeterminate:border-indigo-500 indeterminate:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:border-white/5 disabled:bg-white/10 disabled:checked:bg-white/10 forced-colors:appearance-auto"
+                        />
+                        <svg viewBox="0 0 14 14" fill="none"
+                             class="pointer-events-none col-start-1 row-start-1 size-3.5 self-center justify-self-center stroke-white group-has-disabled:stroke-white/25">
+                            <path d="M3 8L6 11L11 3.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                  class="opacity-0 group-has-checked:opacity-100"/>
+                            <path d="M3 7H11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                  class="opacity-0 group-has-indeterminate:opacity-100"/>
+                        </svg>
+                    </div>
+                </div>
+                <div>
+                    <label for="saveToBrowser" class="font-medium text-black">
+                        Use for every session
+                    </label>
+                    <p id="comments-description" class="text-zinc-400">
+                        It will be shown to your network only
+                    </p>
+                </div>
+            </div>
+        </form>
+    </div>
+</app-modal>

@@ -1,13 +1,16 @@
 export enum RequestType {
     CONNECT = "CONNECT",
-    PEER_OFFER = "PEER_OFFER",
-    PEER_ANSWER = "PEER_ANSWER",
+    OFFER = "OFFER",
+    ANSWER = "ANSWER",
+    CHANGE_SETTINGS = "CHANGE_SETTINGS"
 }
 
 export enum ResponseType {
-    PEER_OFFER = "PEER_OFFER",
-    PEER_ANSWER = "PEER_ANSWER",
-    APPROVE_PEER_ANSWER = "APPROVE_PEER_ANSWER"
+    DISCONNECT = "DISCONNECT",
+    CONNECT = "CONNECT",
+    OFFER = "OFFER",
+    ANSWER = "ANSWER",
+    APPROVE_ANSWER = "APPROVE_ANSWER",
 }
 
 export enum Discoverability {
