@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } fro
 import { RTC } from "@/utils/rtc/rtc";
 import { ReactiveFormsModule } from "@angular/forms";
 import { Layout } from "@/ui/layout/layout";
-import { Uploader } from "@/utils/uploader/uploader";
+import { FileManager } from "@/utils/file-manager/file-manager.service";
 import { Modal } from "@/ui/modal/modal";
 import { Peer } from "@/ui/peer/peer";
 import { KeyValuePipe } from "@angular/common";
@@ -22,7 +22,7 @@ import { KeyValuePipe } from "@angular/common";
 })
 export class Drop {
     protected readonly rtc: RTC = inject<RTC>(RTC);
-    protected readonly uploader: Uploader = inject<Uploader>(Uploader);
+    protected readonly uploader: FileManager = inject<FileManager>(FileManager);
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
     protected readonly modalRemoveFiles = viewChild<Modal>("modalRemoveFilesRef");

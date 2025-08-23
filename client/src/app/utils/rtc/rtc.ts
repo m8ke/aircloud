@@ -1,17 +1,17 @@
 import { UUID } from "node:crypto";
 import { inject, Injectable, signal } from "@angular/core";
 import { Peer } from "@/utils/rtc/peer";
-import { ToastService } from "@/ui/toast/toast.service";
 import { Compression } from "@/utils/compression/compression";
 import { PeerFile, PeerFileMetadata } from "@/utils/rtc/peer-file";
 import { PeerProgress } from "@/utils/rtc/peer-progress";
+import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
+import { SessionStorage } from "@/utils/storage/session-storage";
 
 enum RTCType {
     EOF = "EOF",
     REQUESTED_FILE_SHARE = "REQUESTED_FILE_SHARE",
     ACCEPTED_FILE_SHARE = "ACCEPTED_FILE_SHARE",
     DENIED_FILE_SHARE = "DENIED_FILE_SHARE",
-    SEND_FILE_METADATA = "SEND_FILE_METADATA",
 }
 
 @Injectable({
@@ -19,16 +19,17 @@ enum RTCType {
 })
 export class RTC {
     public myPeerId!: string;
-    private readonly toast: ToastService = inject(ToastService);
     private readonly compression: Compression = inject(Compression);
+    private readonly notification: NotificationService = inject(NotificationService);
+    private readonly sessionStorage: SessionStorage = inject(SessionStorage);
 
     public readonly pcs = signal<Map<string, Peer>>(new Map<string, Peer>());
+    public readonly receivingFiles = signal<Map<string, PeerFile[]>>(new Map<string, PeerFile[]>());
     public readonly sendingProgress = signal<Map<string, PeerProgress>>(new Map<string, PeerProgress>);
 
     private readonly dcs: Map<string, RTCDataChannel> = new Map<string, RTCDataChannel>();
     private readonly iceCandidates: Map<string, RTCIceCandidateInit[]> = new Map<string, RTCIceCandidateInit[]>();
     private readonly pendingFiles: Map<string, File[]> = new Map<string, File[]>();
-    public readonly receivingFiles = signal<Map<string, PeerFile[]>>(new Map<string, PeerFile[]>());
 
     private static readonly CHUNK_SIZE: number = 64 * 1024;
 
@@ -221,60 +222,90 @@ export class RTC {
 
         switch (type) {
             case RTCType.REQUESTED_FILE_SHARE:
-                // TODO: Show modal/toast to accept or deny the request
-                const metadata: PeerFileMetadata[] = data.metadata;
-
-                const peerFiles: PeerFile[] = metadata.map(meta => new PeerFile(meta));
-
-                this.receivingFiles.update(prev => {
-                    const next = new Map(prev);
-                    next.set(dc.label, peerFiles);
-                    return next;
-                });
-
-                console.log(`[WebRTC] ${dc.label} wants to send files:`, metadata);
-
-                this.acceptedFileSharing(dc, peerFiles);
-                // dc.send(JSON.stringify({type: RTCType.DENIED_FILE_SHARE}));
-                break;
+                return this.handleRequestedFileShare(dc, data);
             case RTCType.ACCEPTED_FILE_SHARE:
-                const files: File[] | undefined = this.pendingFiles.get(data.peerId);
-
-                if (files && files.length > 0) {
-                    await this.sendFiles(data.peerId, dc, files);
-                }
-                break;
+                return this.handleAcceptedFileShare(dc, data);
             case RTCType.DENIED_FILE_SHARE:
-                // TODO: Show notification about denied request
-                //       Remove pending files
-                //       Remove pending files when peerId is disconnected as well
-                console.log("DENIED FILE SHARE");
-                break;
-            case RTCType.EOF: {
-                const files: PeerFile[] = this.receivingFiles().get(dc.label) ?? [];
+                return this.handleDeniedFileShare(dc, data);
+            case RTCType.EOF:
+                return this.handleEndOfFile(dc, data);
+        }
+    }
 
-                // TODO: Add unique ID for file and replace this condition
-                const current: PeerFile | undefined = files.find(f => f.receivedSize === f.metadata.size);
+    // TODO: Add interface
+    private handleRequestedFileShare(dc: RTCDataChannel, data: any): void {
+        const name: string = data.name;
+        const metadata: PeerFileMetadata[] = data.metadata;
+        const peerFiles: PeerFile[] = metadata.map(meta => new PeerFile(meta));
 
-                if (current) {
-                    const blob: Blob = new Blob(current.buffer);
-                    this.downloadReceivedFile(blob, current.metadata.name);
+        console.log(`[WebRTC] ${dc.label} requested to send files:`, metadata);
 
-                    console.log(`[WebRTC] File complete: ${current.metadata.name}`);
-
+        this.notification.show({name, metadata}, NotificationType.FILE_REQUEST).subscribe({
+            next: (result) => {
+                if (result == "accept") {
                     this.receivingFiles.update(prev => {
                         const next = new Map(prev);
-                        next.delete(dc.label);
+                        next.set(dc.label, peerFiles);
                         return next;
                     });
+
+                    this.acceptedFileSharing(dc, peerFiles);
+                } else {
+                    dc.send(JSON.stringify({type: RTCType.DENIED_FILE_SHARE}));
                 }
-                break;
-            }
+            },
+        });
+    }
+
+    // TODO: Add interface
+    private async handleAcceptedFileShare(dc: RTCDataChannel, data: any): Promise<void> {
+        const files: File[] | undefined = this.pendingFiles.get(data.peerId);
+
+        if (files && files.length > 0) {
+            await this.sendFiles(data.peerId, dc, files);
+        }
+    }
+
+    // TODO: Add interface
+    private handleDeniedFileShare(dc: RTCDataChannel, data: any): void {
+        // TODO: Show notification about denied request
+        //       Remove pending files
+        //       Remove pending files when peerId is disconnected as well
+        console.log("DENIED FILE SHARE");
+    }
+
+    // TODO: Add interface
+    private handleEndOfFile(dc: RTCDataChannel, data: any): void {
+        const files: PeerFile[] = this.receivingFiles().get(dc.label) ?? [];
+
+        // TODO: Add unique ID for file and replace this condition
+        const current: PeerFile | undefined = files.find(f => f.receivedSize === f.metadata.size);
+
+        if (current) {
+            const blob: Blob = new Blob(current.buffer);
+            this.downloadReceivedFile(blob, current.metadata.name);
+
+            console.log(`[WebRTC] File complete: ${current.metadata.name}`);
+
+            // TODO: Refactor needed. It's a workaround for now. Should use unique ID.
+            this.receivingFiles.update(prev => {
+                const next = new Map(prev);
+                const channelFiles = next.get(dc.label) ?? [];
+                const remainingFiles = channelFiles.filter(f => f !== current);
+
+                if (remainingFiles.length > 0) {
+                    next.set(dc.label, remainingFiles);
+                } else {
+                    next.delete(dc.label);
+                }
+
+                return next;
+            });
         }
     }
 
     /**
-     * Clear connection to optimize the memory.
+     * Clear connection.
      *
      * @param peerId peer ID with which the connection has been established
      */
@@ -332,6 +363,7 @@ export class RTC {
         // TODO: Add interface
         dc.send(JSON.stringify({
             type: RTCType.REQUESTED_FILE_SHARE,
+            name: this.name,
             metadata: metadata,
         }));
     }
@@ -372,11 +404,6 @@ export class RTC {
         const peerProgress: PeerProgress = this.sendingProgress().get(peerId)!;
 
         for (const file of files) {
-            dc.send(JSON.stringify({
-                type: RTCType.SEND_FILE_METADATA,
-                metadata: {name: file.name, size: file.size, type: file.type},
-            }));
-
             let offset: number = 0;
 
             while (offset < file.size) {
@@ -401,7 +428,6 @@ export class RTC {
             // TODO: Add an interface
             dc.send(JSON.stringify({
                 type: RTCType.EOF,
-                name: file.name,
             }));
 
             console.log(`[WebRTC] File "${file.name}" sent on DC ${dc.label}`);
@@ -475,22 +501,29 @@ export class RTC {
      * @private
      */
     private async receiveFiles(dcLabel: string, data: any): Promise<void> {
-        const files: PeerFile[] = this.receivingFiles().get(dcLabel) ?? [];
-        const current: PeerFile | undefined = files.find(f => !f.complete);
+        const files: PeerFile[] | undefined = this.receivingFiles().get(dcLabel);
 
-        if (!current) return;
+        if (files) {
+            const current: PeerFile | undefined = files.find(f => !f.complete);
 
-        const chunk: Uint8Array = data instanceof ArrayBuffer
-            ? new Uint8Array(data)
-            : new Uint8Array(await data.arrayBuffer());
+            if (current) {
+                const chunk: Uint8Array = data instanceof ArrayBuffer
+                    ? new Uint8Array(data)
+                    : new Uint8Array(await data.arrayBuffer());
 
-        current.buffer.push(chunk);
-        current.receivedSize += chunk.length;
+                current.buffer.push(chunk);
+                current.receivedSize += chunk.length;
 
-        this.receivingFiles.update((prev) => {
-            const next = new Map(prev);
-            next.set(dcLabel, [...files]);
-            return next;
-        });
+                this.receivingFiles.update((prev) => {
+                    const next = new Map(prev);
+                    next.set(dcLabel, [...files]);
+                    return next;
+                });
+            }
+        }
+    }
+
+    private get name(): string {
+        return this.sessionStorage.getItem("name") || "-";
     }
 }

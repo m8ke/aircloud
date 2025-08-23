@@ -1,6 +1,5 @@
 import { Component, inject, OnInit } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
-import { Toast } from "@/ui/toast/toast";
 import { animals, uniqueNamesGenerator } from "unique-names-generator";
 import { SessionStorage } from "@/utils/storage/session-storage";
 import { LocalStorage } from "@/utils/storage/local-storage";
@@ -9,7 +8,7 @@ import { Discoverability } from "@/utils/socket/socket-interface";
 
 @Component({
     selector: "app-root",
-    imports: [RouterOutlet, Toast],
+    imports: [RouterOutlet],
     templateUrl: "./app.html",
     styleUrl: "./app.scss",
 })

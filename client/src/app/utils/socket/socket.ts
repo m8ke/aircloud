@@ -1,9 +1,9 @@
 import { inject, Injectable } from "@angular/core";
 import { RTC } from "@/utils/rtc/rtc";
-import { ToastService } from "@/ui/toast/toast.service";
 import { ConnectRequest, Discoverability, RequestType, ResponseType } from "@/utils/socket/socket-interface";
 import { SessionStorage } from "@/utils/storage/session-storage";
 import { LocalStorage } from "@/utils/storage/local-storage";
+import { NotificationService } from "@/ui/notification/notification.service";
 
 @Injectable({
     providedIn: "root",
@@ -14,7 +14,7 @@ export class Socket {
 
     private ws!: WebSocket;
     private readonly rtc: RTC = inject<RTC>(RTC);
-    private readonly toast: ToastService = inject<ToastService>(ToastService);
+    private readonly notification: NotificationService = inject<NotificationService>(NotificationService);
     private readonly sessionStorage: SessionStorage = inject<LocalStorage>(SessionStorage);
 
     public init(): void {
@@ -40,7 +40,7 @@ export class Socket {
             switch (data.type as ResponseType) {
                 case ResponseType.CONNECT:
                     this.rtc.myPeerId = data.peerId;
-                    this.toast.show("Connected to P2P network");
+                    this.notification.show({ message: "Connected to P2P network" });
                     break;
                 case ResponseType.DISCONNECT:
                     this.rtc.closeConnection(data.peerId);

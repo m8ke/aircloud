@@ -56,9 +56,9 @@ export class Navbar implements OnInit {
         return this.rtc.receivingFiles().size > 0;
     }
 
-    public readonly progress = computed(() => {
-        let totalSize = 0;
-        let receivedSize = 0;
+    protected readonly progress = computed(() => {
+        let totalSize: number = 0;
+        let receivedSize: number = 0;
 
         for (const files of this.rtc.receivingFiles().values()) {
             for (const file of files) {

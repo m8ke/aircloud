@@ -3,7 +3,7 @@ import { Injectable, signal } from "@angular/core";
 @Injectable({
     providedIn: "root",
 })
-export class Uploader {
+export class FileManager {
     readonly files = signal<File[]>([]);
 
     public addFile(file: File): void {
