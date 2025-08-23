@@ -224,11 +224,12 @@ export class RTC {
             case RTCType.DENIED_FILE_SHARE:
                 return this.handleDeniedFileShare(dc, data);
             case RTCType.EOF:
-                return this.handleEndOfFile(dc, data);
+                return this.handleEndOfFile(dc);
         }
     }
 
     // TODO: Add interface
+    //       Add docs
     private handleRequestedFileShare(dc: RTCDataChannel, data: any): void {
         const name: string = data.name;
         const metadata: PeerFileMetadata[] = data.metadata;
@@ -237,7 +238,7 @@ export class RTC {
         console.log(`[WebRTC] ${dc.label} requested to send files:`, metadata);
 
         this.notification.show({name, metadata}, NotificationType.FILE_REQUEST).subscribe({
-            next: (result) => {
+            next: (result): void => {
                 if (result == "accept") {
                     this.receivingFiles.update(prev => {
                         const next = new Map(prev);
@@ -254,6 +255,7 @@ export class RTC {
     }
 
     // TODO: Add interface
+    //       Add docs
     private async handleAcceptedFileShare(dc: RTCDataChannel, data: any): Promise<void> {
         const files: PendingFile[] | undefined = this.pendingFiles().get(data.peerId);
 
@@ -263,6 +265,7 @@ export class RTC {
     }
 
     // TODO: Add interface
+    //       Add docs
     private handleDeniedFileShare(dc: RTCDataChannel, data: any): void {
         // TODO: Show notification about denied request
         //       Remove pending files
@@ -270,8 +273,8 @@ export class RTC {
         console.log("DENIED FILE SHARE");
     }
 
-    // TODO: Add interface
-    private handleEndOfFile(dc: RTCDataChannel, data: any): void {
+    // TODO: Add docs
+    private handleEndOfFile(dc: RTCDataChannel): void {
         const files: ReceivingFile[] | undefined = this.receivingFiles().get(dc.label);
 
         if (files) {
