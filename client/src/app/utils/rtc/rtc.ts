@@ -233,7 +233,7 @@ export class RTC {
     private handleRequestedFileShare(dc: RTCDataChannel, data: any): void {
         const name: string = data.name;
         const metadata: PeerFileMetadata[] = data.metadata;
-        const peerFiles: ReceivingFile[] = metadata.map(meta => new ReceivingFile(meta));
+        const files: ReceivingFile[] = metadata.map(meta => new ReceivingFile(meta));
 
         console.log(`[WebRTC] ${dc.label} requested to send files:`, metadata);
 
@@ -242,13 +242,16 @@ export class RTC {
                 if (result == "accept") {
                     this.receivingFiles.update(prev => {
                         const next = new Map(prev);
-                        next.set(dc.label, peerFiles);
+                        next.set(dc.label, files);
                         return next;
                     });
 
-                    this.acceptedFileSharing(dc, peerFiles);
+                    this.acceptedFileSharing(dc, files);
                 } else {
-                    dc.send(JSON.stringify({type: RTCType.DENIED_FILE_SHARE}));
+                    dc.send(JSON.stringify({
+                        type: RTCType.DENIED_FILE_SHARE,
+                        peerId: data.peerId,
+                    }));
                 }
             },
         });
@@ -267,10 +270,15 @@ export class RTC {
     // TODO: Add interface
     //       Add docs
     private handleDeniedFileShare(dc: RTCDataChannel, data: any): void {
-        // TODO: Show notification about denied request
-        //       Remove pending files
-        //       Remove pending files when peerId is disconnected as well
-        console.log("DENIED FILE SHARE");
+        // TODO: Show notification about denied request (maybe not)
+        //       Remove pending files when peerId is disconnected as well (in another method)
+        console.log("[WebRTC] Denied file share");
+
+        this.pendingFiles.update(prev => {
+            const next = new Map(prev);
+            next.delete(data.peerId);
+            return next;
+        });
     }
 
     // TODO: Add docs
@@ -373,6 +381,7 @@ export class RTC {
         dc.send(JSON.stringify({
             type: RTCType.REQUESTED_FILE_SHARE,
             name: this.name,
+            peerId: peerId,
             metadata: metadata,
         }));
     }

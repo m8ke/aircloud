@@ -29,7 +29,6 @@ export class Navbar implements OnInit {
     private readonly formBuilder: FormBuilder = inject<FormBuilder>(FormBuilder);
     private readonly localStorage: LocalStorage = inject<LocalStorage>(LocalStorage);
     private readonly sessionStorage: SessionStorage = inject<LocalStorage>(SessionStorage);
-
     // protected readonly modalChangeSettings = viewChild<Modal>("modalChangeSettingsRef");
 
     public ngOnInit(): void {
