@@ -2,7 +2,7 @@ import { UUID } from "node:crypto";
 import { inject, Injectable, signal } from "@angular/core";
 import { Peer } from "@/utils/rtc/peer";
 import { Compression } from "@/utils/compression/compression";
-import { PeerFile, PeerFileMetadata } from "@/utils/rtc/peer-file";
+import { ReceivingFile, PeerFileMetadata, PendingFile } from "@/utils/rtc/receiving-file";
 import { PeerProgress } from "@/utils/rtc/peer-progress";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 import { SessionStorage } from "@/utils/storage/session-storage";
@@ -24,12 +24,11 @@ export class RTC {
     private readonly sessionStorage: SessionStorage = inject(SessionStorage);
 
     public readonly pcs = signal<Map<string, Peer>>(new Map<string, Peer>());
-    public readonly receivingFiles = signal<Map<string, PeerFile[]>>(new Map<string, PeerFile[]>());
-    public readonly sendingProgress = signal<Map<string, PeerProgress>>(new Map<string, PeerProgress>);
+    public readonly pendingFiles = signal<Map<string, PendingFile[]>>(new Map<string, PendingFile[]>());
+    public readonly receivingFiles = signal<Map<string, ReceivingFile[]>>(new Map<string, ReceivingFile[]>());
 
     private readonly dcs: Map<string, RTCDataChannel> = new Map<string, RTCDataChannel>();
     private readonly iceCandidates: Map<string, RTCIceCandidateInit[]> = new Map<string, RTCIceCandidateInit[]>();
-    private readonly pendingFiles: Map<string, File[]> = new Map<string, File[]>();
 
     private static readonly CHUNK_SIZE: number = 64 * 1024;
 
@@ -76,8 +75,8 @@ export class RTC {
             }
         };
 
-        this.pcs.update(prevp => {
-            const next = new Map(prevp);
+        this.pcs.update(prev => {
+            const next = new Map(prev);
             next.set(peerId, new Peer(name, device, pc));
             return next;
         });
@@ -102,8 +101,9 @@ export class RTC {
 
         const offer: RTCSessionDescriptionInit = await pc.createOffer();
         await pc.setLocalDescription(offer);
-
         await this.waitForICEGathering(peerId);
+
+        console.log("[WebRTC] Created an offer");
 
         return this.compression.compress(JSON.stringify(pc.localDescription));
     }
@@ -119,7 +119,7 @@ export class RTC {
     public async createAnswer(peerId: string, offer: string, name: string, device: string): Promise<string> {
         const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device);
 
-        pc.ondatachannel = (event): void => {
+        pc.ondatachannel = (event: RTCDataChannelEvent): void => {
             this.setupDataChannel(peerId, event.channel);
         };
 
@@ -129,8 +129,8 @@ export class RTC {
 
         const answer: RTCSessionDescriptionInit = await pc.createAnswer();
         await pc.setLocalDescription(answer);
-
         await this.waitForICEGathering(peerId);
+
         console.log("[WebRTC] Created an answer");
 
         return this.compression.compress(JSON.stringify(pc.localDescription));
@@ -236,7 +236,7 @@ export class RTC {
     private handleRequestedFileShare(dc: RTCDataChannel, data: any): void {
         const name: string = data.name;
         const metadata: PeerFileMetadata[] = data.metadata;
-        const peerFiles: PeerFile[] = metadata.map(meta => new PeerFile(meta));
+        const peerFiles: ReceivingFile[] = metadata.map(meta => new ReceivingFile(meta));
 
         console.log(`[WebRTC] ${dc.label} requested to send files:`, metadata);
 
@@ -259,7 +259,7 @@ export class RTC {
 
     // TODO: Add interface
     private async handleAcceptedFileShare(dc: RTCDataChannel, data: any): Promise<void> {
-        const files: File[] | undefined = this.pendingFiles.get(data.peerId);
+        const files: PendingFile[] | undefined = this.pendingFiles().get(data.peerId);
 
         if (files && files.length > 0) {
             await this.sendFiles(data.peerId, dc, files);
@@ -276,31 +276,33 @@ export class RTC {
 
     // TODO: Add interface
     private handleEndOfFile(dc: RTCDataChannel, data: any): void {
-        const files: PeerFile[] = this.receivingFiles().get(dc.label) ?? [];
+        const files: ReceivingFile[] | undefined = this.receivingFiles().get(dc.label);
 
-        // TODO: Add unique ID for file and replace this condition
-        const current: PeerFile | undefined = files.find(f => f.receivedSize === f.metadata.size);
+        if (files) {
+            // TODO: Add unique ID for file and replace this condition
+            const current: ReceivingFile | undefined = files.find(f => f.receivedSize === f.metadata.size);
 
-        if (current) {
-            const blob: Blob = new Blob(current.buffer);
-            this.downloadReceivedFile(blob, current.metadata.name);
+            if (current) {
+                const blob: Blob = new Blob(current.buffer);
+                this.downloadReceivedFile(blob, current.metadata.name);
 
-            console.log(`[WebRTC] File complete: ${current.metadata.name}`);
+                console.log(`[WebRTC] File complete: ${current.metadata.name}`);
 
-            // TODO: Refactor needed. It's a workaround for now. Should use unique ID.
-            this.receivingFiles.update(prev => {
-                const next = new Map(prev);
-                const channelFiles = next.get(dc.label) ?? [];
-                const remainingFiles = channelFiles.filter(f => f !== current);
+                // TODO: Refactor needed. It's a workaround for now. Should use unique ID.
+                this.receivingFiles.update(prev => {
+                    const next = new Map(prev);
+                    const channelFiles = next.get(dc.label) ?? [];
+                    const remainingFiles = channelFiles.filter(f => f !== current);
 
-                if (remainingFiles.length > 0) {
-                    next.set(dc.label, remainingFiles);
-                } else {
-                    next.delete(dc.label);
-                }
+                    if (remainingFiles.length > 0) {
+                        next.set(dc.label, remainingFiles);
+                    } else {
+                        next.delete(dc.label);
+                    }
 
-                return next;
-            });
+                    return next;
+                });
+            }
         }
     }
 
@@ -354,11 +356,20 @@ export class RTC {
             throw new Error(`[WebRTC] DataChannel to ${peerId} is not open`);
         }
 
-        const metadata: PeerFileMetadata[] = files.map((file: File) => {
-            return {name: file.name, size: file.size, type: file.type};
-        });
+        const metadata: PeerFileMetadata[] = files.map(file => ({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+        }));
 
-        this.pendingFiles.set(peerId, files);
+        const pendingFileList: PendingFile[] = files.map(file => new PendingFile(file));
+
+        // Update the signal state (immutable update)
+        this.pendingFiles.update(prev => {
+            const next = new Map(prev);
+            next.set(peerId, pendingFileList);
+            return next;
+        });
 
         // TODO: Add interface
         dc.send(JSON.stringify({
@@ -368,7 +379,7 @@ export class RTC {
         }));
     }
 
-    private acceptedFileSharing(dc: RTCDataChannel, files: PeerFile[]): void {
+    private acceptedFileSharing(dc: RTCDataChannel, files: ReceivingFile[]): void {
         if (!dc || dc.readyState !== "open") {
             throw new Error(`[WebRTC] DataChannel ID ${dc.label} is not open`);
         }
@@ -393,29 +404,33 @@ export class RTC {
      * @param dc RTC data channel used for P2P connection
      * @param files file blobs that will be sent
      */
-    private async sendFiles(peerId: string, dc: RTCDataChannel, files: File[]): Promise<void> {
+    private async sendFiles(peerId: string, dc: RTCDataChannel, files: PendingFile[]): Promise<void> {
         if (!dc || dc.readyState !== "open") {
             throw new Error(`[WebRTC] DataChannel ${dc?.label ?? "unknown"} is not open`);
         }
 
-        const totalSize: number = files.reduce((sum, file) => sum + file.size, 0);
+        let totalSent: number = 0;
 
-        this.sendingProgress().set(peerId, new PeerProgress(totalSize, 0));
-        const peerProgress: PeerProgress = this.sendingProgress().get(peerId)!;
+        this.pendingFiles.update(prev => {
+            const next = new Map(prev);
+            next.set(peerId, files);
+            return next;
+        });
 
-        for (const file of files) {
+        for (const pending of files) {
+            const file: File = pending.file;
             let offset: number = 0;
 
             while (offset < file.size) {
                 const slice: Blob = file.slice(offset, offset + RTC.CHUNK_SIZE);
-                const chunk: Uint8Array = new Uint8Array(await slice.arrayBuffer());
+                const chunk: Uint8Array<ArrayBuffer> = new Uint8Array(await slice.arrayBuffer());
 
-                peerProgress.sentSize = peerProgress.sentSize + chunk.byteLength;
+                totalSent += chunk.byteLength;
+                pending.receivedSize += chunk.byteLength;
 
-                this.sendingProgress.update(prev => {
+                this.pendingFiles.update(prev => {
                     const next = new Map(prev);
-                    const curr = next.get(peerId) ?? {totalSize: totalSize, sentSize: 0};
-                    next.set(peerId, {...curr, sentSize: curr.sentSize + chunk.byteLength});
+                    next.set(peerId, [...files]);
                     return next;
                 });
 
@@ -424,6 +439,8 @@ export class RTC {
 
                 offset += RTC.CHUNK_SIZE;
             }
+
+            pending.complete = true;
 
             // TODO: Add an interface
             dc.send(JSON.stringify({
@@ -501,10 +518,10 @@ export class RTC {
      * @private
      */
     private async receiveFiles(dcLabel: string, data: any): Promise<void> {
-        const files: PeerFile[] | undefined = this.receivingFiles().get(dcLabel);
+        const files: ReceivingFile[] | undefined = this.receivingFiles().get(dcLabel);
 
         if (files) {
-            const current: PeerFile | undefined = files.find(f => !f.complete);
+            const current: ReceivingFile | undefined = files.find(f => !f.complete);
 
             if (current) {
                 const chunk: Uint8Array = data instanceof ArrayBuffer

@@ -16,8 +16,8 @@ import { NotificationService, NotificationType } from "@/ui/notification/notific
     styleUrl: "./layout.scss",
 })
 export class Layout {
-    private readonly notification = inject(NotificationService);
-    private readonly uploader = inject(FileManager);
+    private readonly fileManager: FileManager = inject(FileManager);
+    private readonly notification: NotificationService = inject(NotificationService);
     protected readonly isFileDropping = signal<boolean>(false);
 
     protected onDragOver(event: DragEvent): void {
@@ -34,14 +34,14 @@ export class Layout {
         if (event.dataTransfer?.files.length) {
             for (const file of event.dataTransfer.files) {
                 // TODO: Check replicates
-                if (this.uploader.files().includes(file)) {
+                if (this.fileManager.files().includes(file)) {
                     this.notification.show<any>({
                         message: `File ${file.name} already exist`,
                         type: "error",
                     }, NotificationType.INFO);
                     continue;
                 }
-                this.uploader.addFile(file);
+                this.fileManager.addFile(file);
             }
         } else {
             this.notification.show<any>({

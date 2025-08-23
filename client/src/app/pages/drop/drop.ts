@@ -22,13 +22,13 @@ import { KeyValuePipe } from "@angular/common";
 })
 export class Drop {
     protected readonly rtc: RTC = inject<RTC>(RTC);
-    protected readonly uploader: FileManager = inject<FileManager>(FileManager);
+    protected readonly fileManager: FileManager = inject<FileManager>(FileManager);
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
     protected readonly modalRemoveFiles = viewChild<Modal>("modalRemoveFilesRef");
 
     protected onRemoveFiles(): void {
-        this.uploader.removeFiles();
+        this.fileManager.removeFiles();
     }
 
     protected openFileExplorer(): void {
@@ -36,11 +36,11 @@ export class Drop {
     }
 
     protected removeFile(index: number): void {
-        this.uploader.removeFile(index);
+        this.fileManager.removeFile(index);
     }
 
     protected addFiles(event: any): void {
-        this.uploader.addFiles(event.currentTarget?.files);
+        this.fileManager.addFiles(event.currentTarget?.files);
     }
 
     protected selectFile(): void {
@@ -48,18 +48,29 @@ export class Drop {
     }
 
     protected async sendFilesToPeer(peerId: string): Promise<void> {
-        this.rtc.requestFileSending(peerId, this.uploader.files());
+        this.rtc.requestFileSending(peerId, this.fileManager.files());
     }
 
     public isLoading(peerId: string): boolean {
-        if (this.getProgress(peerId) >= 100) {
+        const files = this.rtc.pendingFiles().get(peerId);
+
+        if (!files || files.length === 0) {
             return false;
         }
 
-        return !!this.rtc.sendingProgress().get(peerId);
+        return files.some(file => !file.complete);
     }
 
     public getProgress(peerId: string): number {
-        return Number((((this.rtc.sendingProgress().get(peerId)?.sentSize ?? 0) / (this.rtc.sendingProgress().get(peerId)?.totalSize ?? 0)) * 100).toFixed(0));
+        const files = this.rtc.pendingFiles().get(peerId);
+
+        if (!files || files.length === 0) {
+            return 0;
+        }
+
+        const totalSize = files.reduce((sum, f) => sum + f.file.size, 0);
+        const sentSize = files.reduce((sum, f) => sum + f.receivedSize, 0);
+
+        return totalSize > 0 ? Number(((sentSize / totalSize) * 100).toFixed(0)) : 0;
     }
 }
