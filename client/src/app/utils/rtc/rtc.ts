@@ -2,10 +2,10 @@ import { UUID } from "node:crypto";
 import { inject, Injectable, signal } from "@angular/core";
 import { Peer } from "@/utils/rtc/peer";
 import { Compression } from "@/utils/compression/compression";
-import { ReceivingFile, PeerFileMetadata, PendingFile } from "@/utils/rtc/receiving-file";
-import { PeerProgress } from "@/utils/rtc/peer-progress";
+import { ReceivingFile, PeerFileMetadata } from "@/utils/rtc/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 import { SessionStorage } from "@/utils/storage/session-storage";
+import { PendingFile } from "@/utils/rtc/pending-file";
 
 enum RTCType {
     EOF = "EOF",
@@ -179,11 +179,7 @@ export class RTC {
     private async waitForICEGathering(peerId: string): Promise<void> {
         const pc: RTCPeerConnection | undefined = this.pcs().get(peerId)?.pc;
 
-        if (!pc) {
-            return;
-        }
-
-        if (pc.iceGatheringState === "complete") {
+        if (!pc || pc.iceGatheringState === "complete") {
             return;
         }
 
@@ -364,7 +360,6 @@ export class RTC {
 
         const pendingFileList: PendingFile[] = files.map(file => new PendingFile(file));
 
-        // Update the signal state (immutable update)
         this.pendingFiles.update(prev => {
             const next = new Map(prev);
             next.set(peerId, pendingFileList);
@@ -465,7 +460,7 @@ export class RTC {
         }
 
         return new Promise(resolve => {
-            const handler = () => {
+            const handler = (): void => {
                 dc.removeEventListener("bufferedamountlow", handler);
                 resolve();
             };

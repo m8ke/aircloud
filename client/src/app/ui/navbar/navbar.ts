@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, viewChild } from "@angular/core";
+import { Component, computed, inject, OnInit } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { NgOptimizedImage, NgStyle } from "@angular/common";
 import { Modal } from "@/ui/modal/modal";

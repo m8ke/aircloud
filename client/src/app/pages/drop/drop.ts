@@ -6,6 +6,7 @@ import { FileManager } from "@/utils/file-manager/file-manager.service";
 import { Modal } from "@/ui/modal/modal";
 import { Peer } from "@/ui/peer/peer";
 import { KeyValuePipe } from "@angular/common";
+import { PendingFile } from "@/utils/rtc/pending-file";
 
 @Component({
     selector: "app-drop",
@@ -51,8 +52,8 @@ export class Drop {
         this.rtc.requestFileSending(peerId, this.fileManager.files());
     }
 
-    public isLoading(peerId: string): boolean {
-        const files = this.rtc.pendingFiles().get(peerId);
+    protected isLoading(peerId: string): boolean {
+        const files: PendingFile[] | undefined = this.rtc.pendingFiles().get(peerId);
 
         if (!files || files.length === 0) {
             return false;
@@ -61,15 +62,15 @@ export class Drop {
         return files.some(file => !file.complete);
     }
 
-    public getProgress(peerId: string): number {
+    protected getProgress(peerId: string): number {
         const files = this.rtc.pendingFiles().get(peerId);
 
         if (!files || files.length === 0) {
             return 0;
         }
 
-        const totalSize = files.reduce((sum, f) => sum + f.file.size, 0);
-        const sentSize = files.reduce((sum, f) => sum + f.receivedSize, 0);
+        const totalSize: number = files.reduce((sum, f) => sum + f.file.size, 0);
+        const sentSize: number = files.reduce((sum, f) => sum + f.receivedSize, 0);
 
         return totalSize > 0 ? Number(((sentSize / totalSize) * 100).toFixed(0)) : 0;
     }
