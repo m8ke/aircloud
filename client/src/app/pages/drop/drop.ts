@@ -2,10 +2,11 @@ import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } fro
 import { RTC } from "@/utils/rtc/rtc";
 import { ReactiveFormsModule } from "@angular/forms";
 import { Layout } from "@/ui/layout/layout";
-import { Uploader } from "@/utils/uploader/uploader";
+import { FileManager } from "@/utils/file-manager/file-manager.service";
 import { Modal } from "@/ui/modal/modal";
 import { Peer } from "@/ui/peer/peer";
 import { KeyValuePipe } from "@angular/common";
+import { PendingFile } from "@/utils/rtc/pending-file";
 
 @Component({
     selector: "app-drop",
@@ -22,13 +23,13 @@ import { KeyValuePipe } from "@angular/common";
 })
 export class Drop {
     protected readonly rtc: RTC = inject<RTC>(RTC);
-    protected readonly uploader: Uploader = inject<Uploader>(Uploader);
+    protected readonly fileManager: FileManager = inject<FileManager>(FileManager);
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
     protected readonly modalRemoveFiles = viewChild<Modal>("modalRemoveFilesRef");
 
     protected onRemoveFiles(): void {
-        this.uploader.removeFiles();
+        this.fileManager.removeFiles();
     }
 
     protected openFileExplorer(): void {
@@ -36,30 +37,45 @@ export class Drop {
     }
 
     protected removeFile(index: number): void {
-        this.uploader.removeFile(index);
+        this.fileManager.removeFile(index);
     }
 
     protected addFiles(event: any): void {
-        this.uploader.addFiles(event.currentTarget?.files);
+        this.fileManager.addFiles(event.currentTarget?.files);
     }
 
     protected selectFile(): void {
         // TODO: Select file to send only selected files (not all together)
     }
 
-    protected async sendFilesToPeer(peerId: string): Promise<void> {
-        this.rtc.requestFileSending(peerId, this.uploader.files());
+    protected sendFilesToPeer(peerId: string): void {
+        this.rtc.requestFileSending(peerId, this.fileManager.files());
     }
 
-    public isLoading(peerId: string): boolean {
-        if (this.getProgress(peerId) >= 100) {
+    protected cancelFileSending(peerId: string): void {
+        this.rtc.removePendingFilesByPeerId(peerId);
+    }
+
+    protected isLoading(peerId: string): boolean {
+        const files: PendingFile[] | undefined = this.rtc.pendingFiles().get(peerId);
+
+        if (!files || files.length === 0) {
             return false;
         }
 
-        return !!this.rtc.sendingProgress().get(peerId);
+        return files.some(file => !file.complete);
     }
 
-    public getProgress(peerId: string): number {
-        return Number((((this.rtc.sendingProgress().get(peerId)?.sentSize ?? 0) / (this.rtc.sendingProgress().get(peerId)?.totalSize ?? 0)) * 100).toFixed(0));
+    protected getProgress(peerId: string): number {
+        const files: PendingFile[] | undefined = this.rtc.pendingFiles().get(peerId);
+
+        if (!files || files.length === 0) {
+            return 0;
+        }
+
+        const totalSize: number = files.reduce((sum, f) => sum + f.file.size, 0);
+        const sentSize: number = files.reduce((sum, f) => sum + f.receivedSize, 0);
+
+        return totalSize > 0 ? Number(((sentSize / totalSize) * 100).toFixed(0)) : 0;
     }
 }

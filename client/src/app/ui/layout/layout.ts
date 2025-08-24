@@ -1,21 +1,23 @@
 import { Component, inject, signal } from "@angular/core";
 import { Navbar } from "@/ui/navbar/navbar";
 import { CdkDropList } from "@angular/cdk/drag-drop";
-import { Uploader } from "@/utils/uploader/uploader";
-import { ToastService } from "@/ui/toast/toast.service";
+import { FileManager } from "@/utils/file-manager/file-manager.service";
+import { Notification } from "@/ui/notification/notification";
+import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 
 @Component({
     selector: "app-layout",
     imports: [
         Navbar,
         CdkDropList,
+        Notification,
     ],
     templateUrl: "./layout.html",
     styleUrl: "./layout.scss",
 })
 export class Layout {
-    private readonly toast = inject(ToastService);
-    private readonly uploader = inject(Uploader);
+    private readonly fileManager: FileManager = inject(FileManager);
+    private readonly notification: NotificationService = inject(NotificationService);
     protected readonly isFileDropping = signal<boolean>(false);
 
     protected onDragOver(event: DragEvent): void {
@@ -32,14 +34,20 @@ export class Layout {
         if (event.dataTransfer?.files.length) {
             for (const file of event.dataTransfer.files) {
                 // TODO: Check replicates
-                if (this.uploader.files().includes(file)) {
-                    this.toast.show(`File ${file.name} already exist`, "error");
+                if (this.fileManager.files().includes(file)) {
+                    this.notification.show<any>({
+                        message: `File ${file.name} already exist`,
+                        type: "error",
+                    }, NotificationType.INFO);
                     continue;
                 }
-                this.uploader.addFile(file);
+                this.fileManager.addFile(file);
             }
         } else {
-            this.toast.show("Could not upload file", "error");
+            this.notification.show<any>({
+                message: "Could not upload file",
+                type: "error",
+            }, NotificationType.INFO);
         }
     }
 

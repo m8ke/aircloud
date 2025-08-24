@@ -1,9 +1,9 @@
 import { inject, Injectable } from "@angular/core";
+
 import { RTC } from "@/utils/rtc/rtc";
-import { ToastService } from "@/ui/toast/toast.service";
+import { Session } from "@/utils/session/session";
+import { NotificationService } from "@/ui/notification/notification.service";
 import { ConnectRequest, Discoverability, RequestType, ResponseType } from "@/utils/socket/socket-interface";
-import { SessionStorage } from "@/utils/storage/session-storage";
-import { LocalStorage } from "@/utils/storage/local-storage";
 
 @Injectable({
     providedIn: "root",
@@ -14,10 +14,11 @@ export class Socket {
 
     private ws!: WebSocket;
     private readonly rtc: RTC = inject<RTC>(RTC);
-    private readonly toast: ToastService = inject<ToastService>(ToastService);
-    private readonly sessionStorage: SessionStorage = inject<LocalStorage>(SessionStorage);
+    private readonly session: Session = inject(Session);
+    private readonly notification: NotificationService = inject<NotificationService>(NotificationService);
 
     public init(): void {
+        // TODO: Add env variable for WS URL
         this.ws = new WebSocket("ws://localhost:8080/ws");
         console.log("[WebSocket] Initialize connection");
 
@@ -39,8 +40,8 @@ export class Socket {
 
             switch (data.type as ResponseType) {
                 case ResponseType.CONNECT:
-                    this.rtc.myPeerId = data.peerId;
-                    this.toast.show("Connected to P2P network");
+                    this.session.peerId = data.peerId;
+                    this.notification.show({message: "Connected to P2P network"});
                     break;
                 case ResponseType.DISCONNECT:
                     this.rtc.closeConnection(data.peerId);
@@ -98,8 +99,8 @@ export class Socket {
     }
 
     private connectWebSocket(): void {
-        const name: string | null = this.sessionStorage.getItem("name");
-        const discoverability: Discoverability = this.sessionStorage.getItem("discoverability") as Discoverability || Discoverability.NETWORK;
+        const name: string | null = this.session.name;
+        const discoverability: Discoverability = this.session.discoverability;
 
         if (!name) {
             throw new Error("Name is not provided");

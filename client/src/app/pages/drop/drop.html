@@ -1,6 +1,6 @@
 <app-layout>
     <section class="py-3 h-full">
-        @if (uploader.files().length > 0) {
+        @if (fileManager.files().length > 0) {
             <div class="flex flex-col w-full grid gap-y-3">
                 <div class="flex flex-row items-center gap-x-4">
                     @for (peer of rtc.pcs() | keyvalue; track peer.key) {
@@ -10,7 +10,7 @@
                             [device]="peer.value.device"
                             [isLoading]="isLoading(peer.key)"
                             [progress]="getProgress(peer.key)"
-                            (click)="sendFilesToPeer(peer.key)"
+                            (click)="!isLoading(peer.key) ? sendFilesToPeer(peer.key) : cancelFileSending(peer.key)"
                         />
                     }
                 </div>
@@ -18,7 +18,7 @@
                 <div class="flex justify-between items-center">
                     <div class="flex flex-row items-center">
                         <h1 class="text-xl font-serif me-2">
-                            Added {{ uploader.files().length || 0 }} {{ uploader.files().length > 1 ? 'files' : 'file' }}
+                            Added {{ fileManager.files().length || 0 }} {{ fileManager.files().length > 1 ? 'files' : 'file' }}
                         </h1>
 
                         <span class="text-xs cursor-pointer" (click)="modalRemoveFiles()?.open()">
@@ -33,7 +33,7 @@
                     </button>
                 </div>
 
-                @for (file of uploader.files(); track $index) {
+                @for (file of fileManager.files(); track $index) {
                     <div
                         (click)="selectFile()"
                         class="w-full bg-white text-black py-4 px-5 rounded-xl flex flex-row justify-between items-center">
@@ -78,7 +78,7 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col w-full bg-white py-15 px-10 text-black text-center rounded-2xl shadow-xl" (click)="openFileExplorer()">
+                <div class="flex flex-col w-full bg-white py-15 px-10 text-black text-center rounded-2xl shadow-xl cursor-pointer" (click)="openFileExplorer()">
                     <h1 class="text-3xl font-extrabold mb-2 font-serif">
                         Drop your files or click here
                     </h1>
