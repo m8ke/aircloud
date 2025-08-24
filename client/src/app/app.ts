@@ -1,9 +1,9 @@
-import { Component, inject, OnInit } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
+import { Component, inject, OnInit } from "@angular/core";
 import { animals, uniqueNamesGenerator } from "unique-names-generator";
-import { SessionStorage } from "@/utils/storage/session-storage";
-import { LocalStorage } from "@/utils/storage/local-storage";
+
 import { Socket } from "@/utils/socket/socket";
+import { Session } from "@/utils/session/session";
 import { Discoverability } from "@/utils/socket/socket-interface";
 
 @Component({
@@ -14,19 +14,19 @@ import { Discoverability } from "@/utils/socket/socket-interface";
 })
 export class App implements OnInit {
     private readonly socket: Socket = inject<Socket>(Socket);
-    private readonly sessionStorage: SessionStorage = inject<LocalStorage>(SessionStorage);
+    private readonly session: Session = inject<Session>(Session);
 
     public constructor() {
         this.socket.init();
     }
 
     public ngOnInit(): void {
-        if (!this.sessionStorage.getItem("name")) {
-            this.sessionStorage.setItem("name", this.generateName());
+        if (!this.session.name) {
+            this.session.name = this.generateName();
         }
 
-        if (!this.sessionStorage.getItem("discoverability")) {
-            this.sessionStorage.setItem("discoverability", Discoverability.NETWORK);
+        if (!this.session.discoverability) {
+            this.session.discoverability = Discoverability.NETWORK;
         }
     }
 
@@ -34,7 +34,7 @@ export class App implements OnInit {
         // TODO: It can be replaced with an array of animal names and get one randomized value from there.
         return uniqueNamesGenerator({
             dictionaries: [animals],
-            style: "capital"
+            style: "capital",
         });
     }
 }

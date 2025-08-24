@@ -6,6 +6,7 @@ import { ReceivingFile, PeerFileMetadata } from "@/utils/rtc/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 import { SessionStorage } from "@/utils/storage/session-storage";
 import { PendingFile } from "@/utils/rtc/pending-file";
+import { Session } from "@/utils/session/session";
 
 enum RTCType {
     EOF = "EOF",
@@ -18,7 +19,7 @@ enum RTCType {
     providedIn: "root",
 })
 export class RTC {
-    public myPeerId!: string;
+    private readonly session: Session = inject(Session);
     private readonly compression: Compression = inject(Compression);
     private readonly notification: NotificationService = inject(NotificationService);
     private readonly sessionStorage: SessionStorage = inject(SessionStorage);
@@ -380,7 +381,7 @@ export class RTC {
         // TODO: Add interface
         dc.send(JSON.stringify({
             type: RTCType.REQUESTED_FILE_SHARE,
-            name: this.name,
+            name: this.session.name,
             peerId: peerId,
             metadata: metadata,
         }));
@@ -400,7 +401,7 @@ export class RTC {
         // TODO: Add interface
         dc.send(JSON.stringify({
             type: RTCType.ACCEPTED_FILE_SHARE,
-            peerId: this.myPeerId,
+            peerId: this.session.peerId,
         }));
     }
 
@@ -545,9 +546,5 @@ export class RTC {
                 });
             }
         }
-    }
-
-    private get name(): string {
-        return this.sessionStorage.getItem("name") || "-";
     }
 }

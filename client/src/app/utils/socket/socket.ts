@@ -4,6 +4,7 @@ import { ConnectRequest, Discoverability, RequestType, ResponseType } from "@/ut
 import { SessionStorage } from "@/utils/storage/session-storage";
 import { LocalStorage } from "@/utils/storage/local-storage";
 import { NotificationService } from "@/ui/notification/notification.service";
+import { Session } from "@/utils/session/session";
 
 @Injectable({
     providedIn: "root",
@@ -14,8 +15,8 @@ export class Socket {
 
     private ws!: WebSocket;
     private readonly rtc: RTC = inject<RTC>(RTC);
+    private readonly session: Session = inject(Session);
     private readonly notification: NotificationService = inject<NotificationService>(NotificationService);
-    private readonly sessionStorage: SessionStorage = inject<LocalStorage>(SessionStorage);
 
     public init(): void {
         this.ws = new WebSocket("ws://localhost:8080/ws");
@@ -39,7 +40,7 @@ export class Socket {
 
             switch (data.type as ResponseType) {
                 case ResponseType.CONNECT:
-                    this.rtc.myPeerId = data.peerId;
+                    this.session.peerId = data.peerId;
                     this.notification.show({ message: "Connected to P2P network" });
                     break;
                 case ResponseType.DISCONNECT:
@@ -98,8 +99,8 @@ export class Socket {
     }
 
     private connectWebSocket(): void {
-        const name: string | null = this.sessionStorage.getItem("name");
-        const discoverability: Discoverability = this.sessionStorage.getItem("discoverability") as Discoverability || Discoverability.NETWORK;
+        const name: string | null = this.session.name;
+        const discoverability: Discoverability = this.session.discoverability;
 
         if (!name) {
             throw new Error("Name is not provided");
