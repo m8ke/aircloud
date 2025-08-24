@@ -4,11 +4,17 @@ import { SessionStorage } from "@/utils/storage/session-storage";
 import { Discoverability } from "@/utils/socket/socket-interface";
 import { animals, uniqueNamesGenerator } from "unique-names-generator";
 
+enum SessionKey {
+    NAME = "NAME",
+    PEER_ID = "PEER_ID",
+    DISCOVERABILITY = "DISCOVERABILITY",
+}
+
 @Injectable({
     providedIn: "root",
 })
 export class Session {
-    private readonly sessionStorage: SessionStorage = inject(SessionStorage);
+    private readonly sessionStorage: SessionStorage = inject<SessionStorage>(SessionStorage);
 
     public init(): void {
         if (!this.name) {
@@ -21,27 +27,27 @@ export class Session {
     }
 
     public get name(): string | null {
-        return this.sessionStorage.getItem("name");
+        return this.sessionStorage.getItem(SessionKey.NAME);
     }
 
     public set name(name: string) {
-        this.sessionStorage.setItem("name", name);
+        this.sessionStorage.setItem(SessionKey.NAME, name);
     }
 
     public get peerId(): string | null {
-        return this.sessionStorage.getItem("peerId");
+        return this.sessionStorage.getItem(SessionKey.PEER_ID);
     }
 
     public set peerId(peerId: string) {
-        this.sessionStorage.setItem("peerId", peerId);
+        this.sessionStorage.setItem(SessionKey.PEER_ID, peerId);
     }
 
     public get discoverability(): Discoverability {
-        return this.sessionStorage.getItem("discoverability") as Discoverability || Discoverability.NETWORK;
+        return this.sessionStorage.getItem(SessionKey.DISCOVERABILITY) as Discoverability || Discoverability.NETWORK;
     }
 
     public set discoverability(discoverability: Discoverability) {
-        this.sessionStorage.setItem("discoverability", discoverability);
+        this.sessionStorage.setItem(SessionKey.DISCOVERABILITY, discoverability);
     }
 
     private generateName(): string {
