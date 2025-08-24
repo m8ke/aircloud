@@ -22,7 +22,6 @@ export class RTC {
     private readonly session: Session = inject(Session);
     private readonly compression: Compression = inject(Compression);
     private readonly notification: NotificationService = inject(NotificationService);
-    private readonly sessionStorage: SessionStorage = inject(SessionStorage);
 
     public readonly pcs = signal<Map<string, Peer>>(new Map<string, Peer>());
     public readonly pendingFiles = signal<Map<string, PendingFile[]>>(new Map<string, PendingFile[]>());
@@ -168,7 +167,7 @@ export class RTC {
         this.dcs.set(peerId, dc);
         dc.onopen = (event) => this.handleDataChannelOpen(dc.label);
         dc.onclose = (event) => this.handleDataChannelClose(peerId);
-        dc.onmessage = async (event: MessageEvent<any>): Promise<void> => await this.handleDataChannelMessage(event, dc);
+        dc.onmessage = async (event): Promise<void> => await this.handleDataChannelMessage(event, dc);
     }
 
     /**
@@ -528,12 +527,12 @@ export class RTC {
             const current: ReceivingFile | undefined = files.find(f => !f.complete);
 
             if (current) {
-                const chunk: Uint8Array = data instanceof ArrayBuffer
-                    ? new Uint8Array(data)
-                    : new Uint8Array(await data.arrayBuffer());
+                const chunk: ArrayBuffer = data instanceof ArrayBuffer
+                    ? data
+                    : new ArrayBuffer(await data.arrayBuffer());
 
                 current.buffer.push(chunk);
-                current.receivedSize += chunk.length;
+                current.receivedSize += chunk.byteLength;
 
                 this.receivingFiles.update((prev) => {
                     const next = new Map(prev);
