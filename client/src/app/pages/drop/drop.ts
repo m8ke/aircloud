@@ -63,7 +63,7 @@ export class Drop {
     }
 
     protected getProgress(peerId: string): number {
-        const files = this.rtc.pendingFiles().get(peerId);
+        const files: PendingFile[] | undefined = this.rtc.pendingFiles().get(peerId);
 
         if (!files || files.length === 0) {
             return 0;

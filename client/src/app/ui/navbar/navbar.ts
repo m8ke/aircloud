@@ -1,12 +1,13 @@
-import { Component, computed, inject, OnInit } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { NgOptimizedImage, NgStyle } from "@angular/common";
+import { Component, computed, inject, OnInit } from "@angular/core";
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+
+import { RTC } from "@/utils/rtc/rtc";
 import { Modal } from "@/ui/modal/modal";
+import { Session } from "@/utils/session/session";
 import { Dropdown } from "@/ui/dropdown/dropdown";
 import { DropdownItem } from "@/ui/dropdown-item/dropdown-item";
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { RTC } from "@/utils/rtc/rtc";
-import { Session } from "@/utils/session/session";
 
 @Component({
     selector: "app-navbar",
