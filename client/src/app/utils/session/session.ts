@@ -2,7 +2,7 @@ import { inject, Injectable } from "@angular/core";
 
 import { SessionStorage } from "@/utils/storage/session-storage";
 import { Discoverability } from "@/utils/socket/socket-interface";
-import { animals, uniqueNamesGenerator } from "unique-names-generator";
+import animals from "@/utils/session/dict/animals";
 
 enum SessionKey {
     NAME = "NAME",
@@ -51,10 +51,10 @@ export class Session {
     }
 
     private generateName(): string {
-        // TODO: It can be replaced with an array of animal names and get one randomized value from there.
-        return uniqueNamesGenerator({
-            dictionaries: [animals],
-            style: "capital",
-        });
+        return animals[this.randomInt(0, animals.length - 1)];
+    }
+
+    private randomInt(min: number, max: number): number {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 }

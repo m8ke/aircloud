@@ -1,8 +1,11 @@
 import { Component, EventEmitter, input, Output } from "@angular/core";
+import { TitleCasePipe } from "@angular/common";
 
 @Component({
     selector: "app-notification-file-request",
-    imports: [],
+    imports: [
+        TitleCasePipe,
+    ],
     templateUrl: "./notification-file-request.html",
     styleUrl: "./notification-file-request.scss",
 })

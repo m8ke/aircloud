@@ -1,5 +1,5 @@
 import { RouterLink } from "@angular/router";
-import { NgOptimizedImage, NgStyle } from "@angular/common";
+import { NgOptimizedImage, NgStyle, TitleCasePipe } from "@angular/common";
 import { Component, computed, inject, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 
@@ -19,6 +19,7 @@ import { DropdownItem } from "@/ui/dropdown-item/dropdown-item";
         DropdownItem,
         ReactiveFormsModule,
         NgStyle,
+        TitleCasePipe,
     ],
     templateUrl: "./navbar.html",
     styleUrl: "./navbar.scss",

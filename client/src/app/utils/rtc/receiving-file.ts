@@ -6,7 +6,7 @@ export interface PeerFileMetadata {
 
 export class ReceivingFile {
     public metadata: PeerFileMetadata;
-    public buffer: Uint8Array[] = [];
+    public buffer: ArrayBuffer[] = [];
     public complete: boolean = false;
     public receivedSize: number = 0;
 

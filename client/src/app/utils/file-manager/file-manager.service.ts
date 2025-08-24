@@ -4,7 +4,7 @@ import { Injectable, signal } from "@angular/core";
     providedIn: "root",
 })
 export class FileManager {
-    readonly files = signal<File[]>([]);
+    public readonly files = signal<File[]>([]);
 
     public addFile(file: File): void {
         this.files().unshift(file);
