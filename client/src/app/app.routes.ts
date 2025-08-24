@@ -6,4 +6,8 @@ export const routes: Routes = [
         path: "",
         component: Drop,
     },
+    {
+        path: "**",
+        redirectTo: "",
+    },
 ];

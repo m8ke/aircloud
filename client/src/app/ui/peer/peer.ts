@@ -1,10 +1,11 @@
 import { Component, input } from "@angular/core";
-import { NgStyle } from "@angular/common";
+import { NgStyle, TitleCasePipe } from "@angular/common";
 
 @Component({
     selector: "app-peer",
     imports: [
         NgStyle,
+        TitleCasePipe,
     ],
     templateUrl: "./peer.html",
     styleUrl: "./peer.scss",
