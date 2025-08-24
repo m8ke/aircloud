@@ -48,8 +48,12 @@ export class Drop {
         // TODO: Select file to send only selected files (not all together)
     }
 
-    protected async sendFilesToPeer(peerId: string): Promise<void> {
+    protected sendFilesToPeer(peerId: string): void {
         this.rtc.requestFileSending(peerId, this.fileManager.files());
+    }
+
+    protected cancelFileSending(peerId: string): void {
+        this.rtc.removePendingFilesByPeerId(peerId);
     }
 
     protected isLoading(peerId: string): boolean {

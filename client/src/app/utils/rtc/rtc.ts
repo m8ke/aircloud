@@ -274,12 +274,7 @@ export class RTC {
         // TODO: Show notification about denied request (maybe not)
         //       Remove pending files when peerId is disconnected as well (in another method)
         console.log("[WebRTC] Denied file share");
-
-        this.pendingFiles.update(prev => {
-            const next = new Map(prev);
-            next.delete(data.peerId);
-            return next;
-        });
+        this.removePendingFilesByPeerId(data.peerId);
     }
 
     // TODO: Add docs
@@ -458,6 +453,7 @@ export class RTC {
             console.log(`[WebRTC] File "${file.name}" sent on DC ${dc.label}`);
         }
 
+        this.removePendingFilesByPeerId(peerId);
         console.log(`[WebRTC] Finished sending ${files.length} file(s) on DC ${dc.label}`);
     }
 
@@ -546,5 +542,13 @@ export class RTC {
                 });
             }
         }
+    }
+
+    public removePendingFilesByPeerId(peerId: string): void {
+        this.pendingFiles.update(prev => {
+            const next = new Map(prev);
+            next.delete(peerId);
+            return next;
+        });
     }
 }

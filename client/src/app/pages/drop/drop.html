@@ -10,7 +10,7 @@
                             [device]="peer.value.device"
                             [isLoading]="isLoading(peer.key)"
                             [progress]="getProgress(peer.key)"
-                            (click)="sendFilesToPeer(peer.key)"
+                            (click)="!isLoading(peer.key) ? sendFilesToPeer(peer.key) : cancelFileSending(peer.key)"
                         />
                     }
                 </div>
