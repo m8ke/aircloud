@@ -167,7 +167,7 @@ export class RTC {
         this.dcs.set(peerId, dc);
         dc.onopen = (event) => this.handleDataChannelOpen(dc.label);
         dc.onclose = (event) => this.handleDataChannelClose(peerId);
-        dc.onmessage = async (event): Promise<void> => await this.handleDataChannelMessage(event, dc);
+        dc.onmessage = async (event: MessageEvent<any>): Promise<void> => await this.handleDataChannelMessage(event, dc);
     }
 
     /**
