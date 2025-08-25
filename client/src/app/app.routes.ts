@@ -7,10 +7,6 @@ export const routes: Routes = [
         component: Dropzone,
     },
     {
-        path: "pair/:connectionId",
-        component: Dropzone,
-    },
-    {
         path: "**",
         redirectTo: "",
     },
