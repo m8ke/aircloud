@@ -1,32 +1,61 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, viewChild } from "@angular/core";
+
+import { Env } from "@/utils/env/env";
 import { RTC } from "@/utils/rtc/rtc";
-import { ReactiveFormsModule } from "@angular/forms";
-import { Layout } from "@/ui/layout/layout";
-import { FileManager } from "@/utils/file-manager/file-manager.service";
-import { Modal } from "@/ui/modal/modal";
 import { Peer } from "@/ui/peer/peer";
-import { KeyValuePipe } from "@angular/common";
+import { Modal } from "@/ui/modal/modal";
+import { Layout } from "@/ui/layout/layout";
+import { Socket } from "@/utils/socket/socket";
+import { Session } from "@/utils/session/session";
+import { FileManager } from "@/utils/file-manager/file-manager.service";
 import { PendingFile } from "@/utils/rtc/pending-file";
+import { KeyValuePipe } from "@angular/common";
+import { QRCodeComponent } from "angularx-qrcode";
 
 @Component({
-    selector: "app-drop",
+    selector: "app-dropzone",
     imports: [
         ReactiveFormsModule,
         Layout,
         Modal,
         Peer,
         KeyValuePipe,
+        QRCodeComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    templateUrl: "./drop.html",
-    styleUrl: "./drop.scss",
+    templateUrl: "./dropzone.html",
+    styleUrl: "./dropzone.scss",
 })
-export class Drop {
+export class Dropzone implements OnInit {
+    protected formJoinPeer!: FormGroup;
     protected readonly rtc: RTC = inject<RTC>(RTC);
+    protected readonly session: Session = inject<Session>(Session);
     protected readonly fileManager: FileManager = inject<FileManager>(FileManager);
+
+    private readonly env: Env = inject<Env>(Env);
+    private readonly route: ActivatedRoute = inject<ActivatedRoute>(ActivatedRoute);
+    private readonly socket: Socket = inject<Socket>(Socket);
+    private readonly formBuilder: FormBuilder = inject<FormBuilder>(FormBuilder);
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
     protected readonly modalRemoveFiles = viewChild<Modal>("modalRemoveFilesRef");
+    protected readonly modalConnectWithPeer = viewChild<Modal>("modalConnectWithPeerRef");
+
+    public ngOnInit(): void {
+        this.formJoinPeer = this.formBuilder.group({
+            connectionId: [null, [
+                Validators.required,
+                Validators.minLength(6),
+                Validators.maxLength(255),
+            ]],
+        });
+
+        if (this.connectionId) {
+            this.socket.connectPeer(this.connectionId);
+        }
+    }
 
     protected onRemoveFiles(): void {
         this.fileManager.removeFiles();
@@ -77,5 +106,17 @@ export class Drop {
         const sentSize: number = files.reduce((sum, f) => sum + f.receivedSize, 0);
 
         return totalSize > 0 ? Number(((sentSize / totalSize) * 100).toFixed(0)) : 0;
+    }
+
+    protected get directConnectionUrl(): string {
+        return `${this.env.clientUrl}/pair/${this.session.connectionId}`;
+    }
+
+    private get connectionId(): string | null {
+        return this.route.snapshot.params["connectionId"];
+    }
+
+    protected onJoinPeer(): void {
+        this.socket.connectPeer(this.formJoinPeer.get("connectionId")?.value);
     }
 }

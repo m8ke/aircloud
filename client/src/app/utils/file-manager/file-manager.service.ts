@@ -8,7 +8,7 @@ export class FileManager {
 
     public addFile(file: File): void {
         this.files().unshift(file);
-        console.log("Added file to buffer:", file.name, file.size);
+        console.log("[FileManager] Added file to buffer:", file.name, file.size);
     }
 
     public addFiles(files: File[]): void {

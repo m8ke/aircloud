@@ -1,7 +1,7 @@
-import { UUID } from "node:crypto";
+import { v4 as uuidv4 } from "uuid";
 
 export class PeerFile {
-    public id: UUID = crypto.randomUUID();
+    public id: string = uuidv4();
     public file: File;
     public complete: boolean = false;
     public receivedSize: number = 0;
