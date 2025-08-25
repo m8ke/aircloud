@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, Subject } from "rxjs";
-import { UUID } from "node:crypto";
+import { v4 as uuidv4 } from "uuid";
 
 export enum NotificationType {
     INFO = "INFO",
@@ -8,7 +8,7 @@ export enum NotificationType {
 }
 
 export interface INotification<T = any> {
-    id: UUID;
+    id: string;
     type: NotificationType;
     data: T;
     duration: number;
@@ -22,7 +22,7 @@ export class NotificationService {
     public notifications$ = new BehaviorSubject<INotification[]>([]);
 
     public show<T>(data: T, type: NotificationType = NotificationType.INFO, duration: number = 6000): Observable<any> {
-        const id: UUID = crypto.randomUUID();
+        const id: string = uuidv4();
         const subject: Subject<"accept" | "reject"> = new Subject<"accept" | "reject">();
         const notification: INotification = {id, data, subject, type, duration};
         this.notifications$.next([...this.notifications$.value, notification]);
@@ -34,7 +34,7 @@ export class NotificationService {
         return subject.asObservable();
     }
 
-    private resolve(id: UUID, result: "accept" | "reject"): void {
+    private resolve(id: string, result: "accept" | "reject"): void {
         const current = this.notifications$.value;
         const index = current.findIndex(n => n.id === id);
 
@@ -48,11 +48,11 @@ export class NotificationService {
         }
     }
 
-    public accept(id: UUID): void {
+    public accept(id: string): void {
         this.resolve(id, "accept");
     }
 
-    public reject(id: UUID): void {
+    public reject(id: string): void {
         this.resolve(id, "reject");
     }
 }

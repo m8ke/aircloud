@@ -1,12 +1,12 @@
-import { UUID } from "node:crypto";
+import { v4 as uuidv4 } from "uuid";
 import { inject, Injectable, signal } from "@angular/core";
+
 import { Peer } from "@/utils/rtc/peer";
+import { Session } from "@/utils/session/session";
+import { PendingFile } from "@/utils/rtc/pending-file";
 import { Compression } from "@/utils/compression/compression";
 import { ReceivingFile, PeerFileMetadata } from "@/utils/rtc/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
-import { SessionStorage } from "@/utils/storage/session-storage";
-import { PendingFile } from "@/utils/rtc/pending-file";
-import { Session } from "@/utils/session/session";
 
 enum RTCType {
     EOF = "EOF",
@@ -19,9 +19,9 @@ enum RTCType {
     providedIn: "root",
 })
 export class RTC {
-    private readonly session: Session = inject(Session);
-    private readonly compression: Compression = inject(Compression);
-    private readonly notification: NotificationService = inject(NotificationService);
+    private readonly session: Session = inject<Session>(Session);
+    private readonly compression: Compression = inject<Compression>(Compression);
+    private readonly notification: NotificationService = inject<NotificationService>(NotificationService);
 
     public readonly pcs = signal<Map<string, Peer>>(new Map<string, Peer>());
     public readonly pendingFiles = signal<Map<string, PendingFile[]>>(new Map<string, PendingFile[]>());
@@ -92,7 +92,7 @@ export class RTC {
      * @param device peer's device OS family
      */
     public async createOffer(peerId: string, name: string, device: string): Promise<string> {
-        const dataChannelId: UUID = crypto.randomUUID();
+        const dataChannelId: string = uuidv4();
         const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device);
         const dc: RTCDataChannel = pc.createDataChannel(dataChannelId);
 

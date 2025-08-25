@@ -1,12 +1,13 @@
 import { inject, Injectable } from "@angular/core";
 
+import animals from "@/utils/session/dict/animals";
 import { SessionStorage } from "@/utils/storage/session-storage";
 import { Discoverability } from "@/utils/socket/socket-interface";
-import animals from "@/utils/session/dict/animals";
 
 enum SessionKey {
     NAME = "NAME",
     PEER_ID = "PEER_ID",
+    CONNECTION_ID = "CONNECTION_ID",
     DISCOVERABILITY = "DISCOVERABILITY",
 }
 
@@ -23,6 +24,10 @@ export class Session {
 
         if (!this.discoverability) {
             this.discoverability = Discoverability.NETWORK;
+        }
+
+        if (!this.connectionId) {
+            this.connectionId = this.generateConnectionId(6);
         }
     }
 
@@ -42,6 +47,14 @@ export class Session {
         this.sessionStorage.setItem(SessionKey.PEER_ID, peerId);
     }
 
+    public get connectionId(): string | null {
+        return this.sessionStorage.getItem(SessionKey.CONNECTION_ID);
+    }
+
+    public set connectionId(connectionId: string) {
+        this.sessionStorage.setItem(SessionKey.CONNECTION_ID, connectionId);
+    }
+
     public get discoverability(): Discoverability {
         return this.sessionStorage.getItem(SessionKey.DISCOVERABILITY) as Discoverability || Discoverability.NETWORK;
     }
@@ -56,5 +69,11 @@ export class Session {
 
     private randomInt(min: number, max: number): number {
         return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    public generateConnectionId(n: number = 6): string {
+        // min 62^6
+        const c: string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        return [...Array(n)].map(_ => c[~~(Math.random() * c.length)]).join("");
     }
 }

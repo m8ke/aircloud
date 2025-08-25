@@ -1,10 +1,14 @@
 import { Routes } from "@angular/router";
-import { Drop } from "@/pages/drop/drop";
+import { Dropzone } from "@/pages/dropzone/dropzone";
 
 export const routes: Routes = [
     {
         path: "",
-        component: Drop,
+        component: Dropzone,
+    },
+    {
+        path: "pair/:connectionId",
+        component: Dropzone,
     },
     {
         path: "**",

@@ -1,34 +1,29 @@
 import { inject, Injectable } from "@angular/core";
 
+import { Env } from "@/utils/env/env";
 import { RTC } from "@/utils/rtc/rtc";
 import { Session } from "@/utils/session/session";
 import { NotificationService } from "@/ui/notification/notification.service";
-import { ConnectRequest, Discoverability, RequestType, ResponseType } from "@/utils/socket/socket-interface";
+import { ConnectRequest, RequestType, ResponseType } from "@/utils/socket/socket-interface";
 
 @Injectable({
     providedIn: "root",
 })
 export class Socket {
-    private static readonly RECONNECT_DELAY = 2000;
+    private static readonly RECONNECT_DELAY = 3000;
     private static readonly CONNECT_TIMEOUT = 5000;
 
     private ws!: WebSocket;
+    private readonly env: Env = inject<Env>(Env);
     private readonly rtc: RTC = inject<RTC>(RTC);
     private readonly session: Session = inject(Session);
     private readonly notification: NotificationService = inject<NotificationService>(NotificationService);
 
     public init(): void {
-        // TODO: Add env variable for WS URL
-        this.ws = new WebSocket("ws://localhost:8080/ws");
+        this.ws = new WebSocket(this.env.wsUrl);
         console.log("[WebSocket] Initialize connection");
 
-        const connectTimeout = setTimeout(() => {
-            console.warn("[WebSocket] Connection timeout, closing...");
-            this.ws?.close();
-        }, Socket.CONNECT_TIMEOUT);
-
         this.ws.onopen = (): void => {
-            clearTimeout(connectTimeout);
             console.log("[WebSocket] Connection opened");
             this.connectWebSocket();
         };
@@ -75,15 +70,16 @@ export class Socket {
                     await this.rtc.approveAnswer(data.peerId, data.answer);
                     break;
                 default:
-                    console.log("[WebSocket] Message received: ", data);
+                    console.log("[WebSocket] Message received:", data);
                     break;
             }
         };
 
-        this.ws.onclose = (e: CloseEvent): void => {
-            clearTimeout(connectTimeout);
-            console.warn("[WebSocket] Connection closed, retrying in", Socket.RECONNECT_DELAY, "ms");
-            setTimeout(this.init, Socket.RECONNECT_DELAY);
+        this.ws.onclose = async (e: CloseEvent): Promise<void> => {
+            // TODO: Reconnection need improvements to prevent duplications.
+            console.warn(`[WebSocket] Connection closed, retrying in ${Socket.RECONNECT_DELAY} ms`);
+            await this.delay(Socket.RECONNECT_DELAY);
+            this.init();
         };
 
         this.ws.onerror = (e: Event): void => {
@@ -92,15 +88,8 @@ export class Socket {
         };
     }
 
-    public sendMessage<T>(message: T): void {
-        if (this.ws?.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify(message));
-        }
-    }
-
     private connectWebSocket(): void {
         const name: string | null = this.session.name;
-        const discoverability: Discoverability = this.session.discoverability;
 
         if (!name) {
             throw new Error("Name is not provided");
@@ -110,8 +99,31 @@ export class Socket {
             type: RequestType.CONNECT,
             data: {
                 name,
-                discoverability,
+                connectionId: this.session.connectionId,
+                discoverability: this.session.discoverability,
             },
+        });
+    }
+
+    public connectPeer(connectionId: string): void {
+        // TODO: Change <any> to specific type
+        this.sendMessage<any>({
+            type: RequestType.CONNECT_PEER,
+            data: {
+                connectionId,
+            },
+        });
+    }
+
+    private sendMessage<T>(message: T): void {
+        if (this.ws?.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify(message));
+        }
+    }
+
+    private delay(n: number): Promise<void> {
+        return new Promise<void>((resolve): void => {
+            setTimeout(resolve, n);
         });
     }
 }

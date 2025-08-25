@@ -2,7 +2,8 @@ export enum RequestType {
     CONNECT = "CONNECT",
     OFFER = "OFFER",
     ANSWER = "ANSWER",
-    CHANGE_SETTINGS = "CHANGE_SETTINGS"
+    CONNECT_PEER = "CONNECT_PEER",
+    CHANGE_SETTINGS = "CHANGE_SETTINGS",
 }
 
 export enum ResponseType {
@@ -22,6 +23,7 @@ export interface ConnectRequest {
     type: RequestType,
     data: {
         name: string;
+        connectionId: string | null;
         discoverability: Discoverability;
     }
 }

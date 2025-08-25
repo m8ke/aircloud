@@ -4,7 +4,6 @@ import { INotification, NotificationType , NotificationService } from "@/ui/noti
 import { AsyncPipe } from "@angular/common";
 import { NotificationFileRequest } from "@/ui/notification/notification-file-request/notification-file-request";
 import { NotificationInfo } from "@/ui/notification/notification-info/notification-info";
-import { UUID } from "node:crypto";
 
 @Component({
     selector: "app-notification",
@@ -24,11 +23,11 @@ export class Notification {
         return this.notification.notifications$.asObservable();
     }
 
-    protected onAccept(id: UUID): void {
+    protected onAccept(id: string): void {
         this.notification.accept(id);
     }
 
-    protected onReject(id: UUID): void {
+    protected onReject(id: string): void {
         this.notification.reject(id);
     }
 }
