@@ -1,9 +1,13 @@
 import { Component, inject, signal } from "@angular/core";
+
+import { RTC } from "@/utils/rtc/rtc";
 import { Navbar } from "@/ui/navbar/navbar";
+import { Session } from "@/utils/session/session";
 import { CdkDropList } from "@angular/cdk/drag-drop";
 import { FileManager } from "@/utils/file-manager/file-manager.service";
 import { Notification } from "@/ui/notification/notification";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
+import { NgStyle, TitleCasePipe } from "@angular/common";
 
 @Component({
     selector: "app-layout",
@@ -11,11 +15,15 @@ import { NotificationService, NotificationType } from "@/ui/notification/notific
         Navbar,
         CdkDropList,
         Notification,
+        TitleCasePipe,
+        NgStyle,
     ],
     templateUrl: "./layout.html",
     styleUrl: "./layout.scss",
 })
 export class Layout {
+    protected readonly rtc: RTC = inject<RTC>(RTC);
+    protected readonly session: Session = inject<Session>(Session);
     private readonly fileManager: FileManager = inject(FileManager);
     private readonly notification: NotificationService = inject(NotificationService);
     protected readonly isFileDropping = signal<boolean>(false);
