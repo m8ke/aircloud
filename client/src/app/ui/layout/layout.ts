@@ -1,3 +1,4 @@
+import { NgStyle, TitleCasePipe } from "@angular/common";
 import { Component, inject, signal } from "@angular/core";
 
 import { RTC } from "@/utils/rtc/rtc";
@@ -7,7 +8,6 @@ import { CdkDropList } from "@angular/cdk/drag-drop";
 import { FileManager } from "@/utils/file-manager/file-manager.service";
 import { Notification } from "@/ui/notification/notification";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
-import { NgStyle, TitleCasePipe } from "@angular/common";
 
 @Component({
     selector: "app-layout",
