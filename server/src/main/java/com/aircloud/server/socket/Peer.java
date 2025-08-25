@@ -25,7 +25,7 @@ public class Peer {
     @JsonIgnore
     private int heartBeat;
 
-    private String connectionId = randomizeConnectionId();
+    private String connectionId;
 
     private String device;
 
@@ -57,11 +57,6 @@ public class Peer {
 
     public String getSessionId() {
         return session.getId();
-    }
-
-    // TODO
-    private String randomizeConnectionId() {
-        return "123GDA";
     }
 
     @JsonIgnore

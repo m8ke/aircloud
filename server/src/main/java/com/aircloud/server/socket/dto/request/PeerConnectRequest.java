@@ -10,6 +10,8 @@ public class PeerConnectRequest {
 
     private String name;
 
+    private String connectionId;
+
     private Discoverability discoverability;
 
 }
