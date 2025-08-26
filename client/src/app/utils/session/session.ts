@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { inject, Injectable } from "@angular/core";
 
 import animals from "@/utils/session/dict/animals";
@@ -19,6 +20,10 @@ export class Session {
     private readonly sessionStorage: SessionStorage = inject<SessionStorage>(SessionStorage);
 
     public init(): void {
+        if (!this.peerId) {
+            this.peerId = uuidv4();
+        }
+
         if (!this.name) {
             this.name = this.generateName();
         }

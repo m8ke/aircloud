@@ -10,7 +10,6 @@ public enum ResponseType {
     OFFER,
     ANSWER,
     APPROVE_ANSWER,
-    DIRECT_CONNECTION,
     PEER_CONNECT,
 
 }

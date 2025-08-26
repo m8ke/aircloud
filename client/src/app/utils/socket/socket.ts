@@ -44,7 +44,7 @@ export class Socket {
                 case ResponseType.APPROVE_ANSWER:
                     return this.handleApproveAnswer(data);
                 case ResponseType.PEER_CONNECT:
-                    return data.succeed
+                    return data.isConnected
                         ? this.handlePeerConnectSucceed(data)
                         : this.handlePeerConnectFailed(data);
                 default:
@@ -68,26 +68,39 @@ export class Socket {
 
     private connectWebSocket(): void {
         const name: string | null = this.session.name;
+        const peerId: string | null = this.session.peerId;
 
-        if (!name) {
-            throw new Error("Name is not provided");
+        if (!name || !peerId) {
+            throw new Error("Name or peer ID is not provided");
         }
 
         this.sendMessage<ConnectRequest>({
             type: RequestType.CONNECT,
             data: {
                 name,
+                peerId,
                 discoverability: this.session.discoverability,
             },
         });
     }
 
     public connectPeer(connectionId: string): void {
-        // TODO: Change <any> to specific type
+        // TODO: Add an interface
+        // TODO: Exclude IDs that already exists in pcs
         this.sendMessage<any>({
             type: RequestType.PEER_CONNECT,
             data: {
                 connectionId,
+            },
+        });
+    }
+
+    public reestablishConnection(peerId: string): void {
+        // TODO: Add an interface
+        this.sendMessage<any>({
+            type: RequestType.PEER_RECONNECT,
+            data: {
+                peerId,
             },
         });
     }
@@ -106,7 +119,6 @@ export class Socket {
 
     // TODO: Add an interface
     private handleConnect(data: any): void {
-        this.session.peerId = data.peerId;
         this.session.connectionId = data.connectionId;
         this.notification.show({message: "Connected to P2P network"});
     }
@@ -153,18 +165,19 @@ export class Socket {
     // TODO: Add an interface
     private handlePeerConnectSucceed(data: any): void {
         console.log("[WebSocket] Direct connection failed", data);
-        this.session.addConnectedPeerId(data.connectionId);
+        this.session.addConnectedPeerId(data.peerId);
     }
 
     // TODO: Add an interface
     private handlePeerConnectFailed(data: any): void {
         console.log("[WebSocket] Direct connection failed", data);
-        this.session.removeConnectedPeerId(data.connectionId);
+        this.session.removeConnectedPeerId(data.peerId);
     }
 
     private connectPersistedIds(): void {
-        for (const id of this.session.connectedPeerIds) {
-            this.connectPeer(id);
+        // TODO: Exclude IDs that already exists in pcs
+        for (const peerId of this.session.connectedPeerIds) {
+            this.reestablishConnection(peerId);
         }
     }
 }

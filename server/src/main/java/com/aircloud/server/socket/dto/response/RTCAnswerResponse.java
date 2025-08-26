@@ -3,13 +3,15 @@ package com.aircloud.server.socket.dto.response;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class RTCAnswerResponse {
 
     private final ResponseType type = ResponseType.ANSWER;
 
-    private String peerId;
+    private UUID peerId;
 
     private String offer;
 
@@ -18,7 +20,7 @@ public class RTCAnswerResponse {
     private String device;
 
     public RTCAnswerResponse(
-            String peerId,
+            UUID peerId,
             String offer,
             String name,
             String device
