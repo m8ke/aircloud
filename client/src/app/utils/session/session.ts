@@ -25,10 +25,6 @@ export class Session {
         if (!this.discoverability) {
             this.discoverability = Discoverability.NETWORK;
         }
-
-        if (!this.connectionId) {
-            this.connectionId = this.generateConnectionId(6);
-        }
     }
 
     public get name(): string | null {
@@ -69,11 +65,5 @@ export class Session {
 
     private randomInt(min: number, max: number): number {
         return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    public generateConnectionId(n: number = 6): string {
-        // min 62^6
-        const c: string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        return [...Array(n)].map(_ => c[~~(Math.random() * c.length)]).join("");
     }
 }

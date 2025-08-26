@@ -2,7 +2,7 @@
     <section class="py-3 h-full">
         @if (fileManager.files().length > 0) {
             <div class="flex flex-col w-full grid gap-y-3">
-                <div class="horizontal-scroll w-full flex flex-row items-center gap-x-4 py-4">
+                <div class="horizontal-scroll w-full flex flex-row items-center gap-x-4">
                     @for (peer of rtc.pcs() | keyvalue; track peer.key) {
                         <app-peer
                             [key]="peer.key"
@@ -59,7 +59,7 @@
         } @else {
             <div
                 class="flex justify-center items-center flex-col h-full text-center xl:w-[40%] lg:w-[60%] mx-auto inset-shadow-sm">
-                <div class="horizontal-scroll flex flex-row w-full items-center mb-4 gap-x-4">
+                <div class="horizontal-scroll flex flex-row w-full items-center mb-4 gap-x-4 px-14">
                     @for (peer of rtc.pcs() | keyvalue; track peer.key) {
                         <app-peer
                             [key]="peer.key"

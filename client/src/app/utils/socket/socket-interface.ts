@@ -2,7 +2,7 @@ export enum RequestType {
     CONNECT = "CONNECT",
     OFFER = "OFFER",
     ANSWER = "ANSWER",
-    CONNECT_PEER = "CONNECT_PEER",
+    PEER_CONNECT = "PEER_CONNECT",
     CHANGE_SETTINGS = "CHANGE_SETTINGS",
 }
 
@@ -12,6 +12,7 @@ export enum ResponseType {
     OFFER = "OFFER",
     ANSWER = "ANSWER",
     APPROVE_ANSWER = "APPROVE_ANSWER",
+    PEER_CONNECT = "PEER_CONNECT",
 }
 
 export enum Discoverability {
@@ -23,7 +24,6 @@ export interface ConnectRequest {
     type: RequestType,
     data: {
         name: string;
-        connectionId: string | null;
         discoverability: Discoverability;
     }
 }
