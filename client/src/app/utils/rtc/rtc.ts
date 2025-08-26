@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { inject, Injectable, signal } from "@angular/core";
+import { computed, inject, Injectable, signal } from "@angular/core";
 
 import { Peer } from "@/utils/rtc/peer";
 import { Session } from "@/utils/session/session";
@@ -549,5 +549,26 @@ export class RTC {
             next.delete(peerId);
             return next;
         });
+    }
+
+    public readonly progress = computed(() => {
+        let totalSize: number = 0;
+        let receivedSize: number = 0;
+
+        for (const files of this.receivingFiles().values()) {
+            for (const file of files) {
+                totalSize += file.metadata.size;
+                receivedSize += file.receivedSize;
+            }
+        }
+
+        return totalSize > 0
+            ? Math.round((receivedSize / totalSize) * 100)
+            : 0;
+    });
+
+
+    public get isReceiving(): boolean {
+        return this.receivingFiles().size > 0;
     }
 }

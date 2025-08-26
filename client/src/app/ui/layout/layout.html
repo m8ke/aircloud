@@ -9,22 +9,52 @@
         [class.pointer-events-none]="isFileDropping()"
     />
 
-    <div class="relative flex grow-1 border border-slate-500/30 rounded-2xl mx-4 mb-4">
-        <div class="container mx-auto p-5">
-            <app-notification/>
-            <ng-content/>
+    <div class="flex grow-1 flex-col border border-slate-500/10 mx-4 mb-4 rounded-2xl bg-zinc-900">
+        <div class="flex flex-row justify-between gap-2 items-center py-3 px-4 rounded-t-2xl text-white/70 text-xs">
+            <div>
+                Known as <strong class="text-white">{{ session.name | titlecase }}</strong> &bull; Network
+            </div>
+
+            <!--            <div class="h-4 w-px bg-white/25"></div>-->
+
+            <!--            <div (click)="modalChangeSettings()?.open()" class="cursor-pointer">-->
+            <!--                Change settings-->
+            <!--            </div>-->
+
+            <div class="flex items-center">
+                @if (rtc.isReceiving) {
+                    <div>
+                        Receiving files {{ rtc.progress() }}%
+                    </div>
+
+                    <div
+                        [ngStyle]="{'--progress': `${rtc.progress()}%`}"
+                        class="progress-bar p-2 ms-2">
+                        <div
+                            class="relative w-2 h-2 overflow-hidden bg-zinc-900 rounded-full ring-6 ring-zinc-900">
+                        </div>
+                    </div>
+                }
+            </div>
         </div>
 
-        <section
-            [class.opacity-0]="!isFileDropping()"
-            [class.opacity-100]="isFileDropping()"
-            [class.duration-500]="isFileDropping()"
-            [class.pointer-events-none]="!isFileDropping()"
-            class="absolute opacity-0 top-0 left-0 z-50 bg-indigo-500 overflow-hidden w-full h-full ease-in-out rounded-xl">
-            <div class="container mx-auto h-full px-4 flex flex-col justify-center items-center text-center">
-                <h1 class="text-3xl font-extrabold mb-3 font-serif">Drop your files here</h1>
-                <p class="text-lg">Your files are never uploaded to any server</p>
+        <div class="relative flex grow-1 rounded-2xl bg-black border-t border-white/15">
+            <div class="container mx-auto p-5">
+                <app-notification/>
+                <ng-content/>
             </div>
-        </section>
+
+            <section
+                [class.opacity-0]="!isFileDropping()"
+                [class.opacity-100]="isFileDropping()"
+                [class.duration-500]="isFileDropping()"
+                [class.pointer-events-none]="!isFileDropping()"
+                class="absolute opacity-0 top-0 left-0 z-50 bg-indigo-500 overflow-hidden w-full h-full ease-in-out rounded-xl">
+                <div class="container mx-auto h-full px-4 flex flex-col justify-center items-center text-center">
+                    <h1 class="text-3xl font-extrabold mb-3 font-serif">Drop your files here</h1>
+                    <p class="text-lg">Your files are never uploaded to any server</p>
+                </div>
+            </section>
+        </div>
     </div>
 </main>
