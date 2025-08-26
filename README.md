@@ -21,22 +21,22 @@ way to transfer files across devices. We never upload, store, or track files.
 | Feature                  | Description                                                                   |
 |--------------------------|-------------------------------------------------------------------------------|
 | **Metadata removing**    | Read and/or remove metadata from images, videos etc to ensure maximum privacy |
-| **Dark and light theme** | Direct connection between peers without central server                        |
+| **Dark and light theme** | Switch between dark and light theme                                           |
 | **Localization**         | Translated to different languages (community help needed)                     |
 | **Self-hosting**         | Docker image to provide easy self-hosting                                     |
+| **Desktop app**          | Desktop app for MacOS, Windows, Linux                                         |
+| **Mobile app**           | Mobile app for iOS and Android                                                |
+| **TV app**               | TV app for tvOS and Android TV                                                |
 
 ## Platforms
 
-| Platform   | State |
-|------------|-------|
-| Browser    | Beta  |
-| macOS      | Idea  |
-| Windows    | Idea  |
-| Linux      | Idea  |
-| iOS        | Idea  |
-| Android    | Idea  |
-| Apple TV   | Idea  |
-| Android TV | Idea  |
+### Browser (beta)
+
+|               | Brave | Chrome | Firefox | Safari |
+|---------------|-------|--------|---------|--------|
+| **Version**   |       |        |         |        |
+| **Network**   |       |        |         |        |
+| **Bluetooth** |       |        |         |        |
 
 ## Technology stack
 
