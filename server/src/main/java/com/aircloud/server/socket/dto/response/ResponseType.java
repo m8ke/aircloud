@@ -11,5 +11,6 @@ public enum ResponseType {
     ANSWER,
     APPROVE_ANSWER,
     DIRECT_CONNECTION,
+    PEER_CONNECT,
 
 }

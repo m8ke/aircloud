@@ -1,14 +1,11 @@
-package com.aircloud.server;
+package com.aircloud.server.socket;
 
-import com.aircloud.server.socket.Peer;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@SpringBootTest
-class ServerApplicationTests {
+class ConnectionIdGeneratorTest {
 
     private final Set<Peer> peers = ConcurrentHashMap.newKeySet();
 
