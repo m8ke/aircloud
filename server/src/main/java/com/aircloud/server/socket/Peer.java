@@ -31,10 +31,11 @@ public class Peer {
 
     private String name;
 
-    public Peer(WebSocketSession session) {
+    public Peer(WebSocketSession session, String connectionId) {
         this.session = session;
         this.ipAddress = parseIpAddress();
         this.device = parseDeviceName();
+        this.connectionId = connectionId;
     }
 
     private String parseIpAddress() {

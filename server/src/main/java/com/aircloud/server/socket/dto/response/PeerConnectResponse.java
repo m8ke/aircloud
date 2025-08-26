@@ -11,8 +11,11 @@ public class PeerConnectResponse {
 
     private String peerId;
 
-    public PeerConnectResponse(String peerId) {
+    private String connectionId;
+
+    public PeerConnectResponse(String peerId, String connectionId) {
         this.peerId = peerId;
+        this.connectionId = connectionId;
     }
 
 }

@@ -2,6 +2,7 @@ package com.aircloud.server.socket;
 
 import com.aircloud.server.socket.dto.request.*;
 import com.aircloud.server.socket.dto.response.*;
+import com.aircloud.server.utils.ConnectionIdGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
@@ -48,7 +49,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     public void connectPeer(WebSocketSession session) {
-        final Peer peer = new Peer(session);
+        final String connectionId = ConnectionIdGenerator.generateConnectionId(6, peers);
+        final Peer peer = new Peer(session, connectionId);
         peers.add(peer);
         log.info("Peer ID {} established connection", session.getId());
     }
@@ -108,9 +110,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 case RequestType.CONNECT -> {
                     final PeerConnectRequest data = new ObjectMapper().convertValue(payload.getData(), PeerConnectRequest.class);
                     peer.setName(data.getName());
-                    peer.setConnectionId(data.getConnectionId());
                     peer.setDiscoverability(data.getDiscoverability());
-                    sendMessage(session, new PeerConnectResponse(peer.getSessionId()));
+                    sendMessage(session, new PeerConnectResponse(peer.getSessionId(), peer.getConnectionId()));
                     log.info("Peer ID {} connected", peer.getSessionId());
                     handlePeerConnection(peer);
                 }
