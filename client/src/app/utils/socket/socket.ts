@@ -11,12 +11,11 @@ import { ConnectRequest, RequestType, ResponseType } from "@/utils/socket/socket
 })
 export class Socket {
     private static readonly RECONNECT_DELAY = 3000;
-    private static readonly CONNECT_TIMEOUT = 5000;
 
     private ws!: WebSocket;
     private readonly env: Env = inject<Env>(Env);
     private readonly rtc: RTC = inject<RTC>(RTC);
-    private readonly session: Session = inject(Session);
+    private readonly session: Session = inject<Session>(Session);
     private readonly notification: NotificationService = inject<NotificationService>(NotificationService);
 
     public init(): void {
@@ -26,6 +25,7 @@ export class Socket {
         this.ws.onopen = (): void => {
             console.log("[WebSocket] Connection opened");
             this.connectWebSocket();
+            this.connectPersistedIds();
         };
 
         // TODO: Share ICE candidates
@@ -153,12 +153,18 @@ export class Socket {
     // TODO: Add an interface
     private handlePeerConnectSucceed(data: any): void {
         console.log("[WebSocket] Direct connection failed", data);
-        alert("Direct connection succeed");
+        this.session.addConnectedPeerId(data.connectionId);
     }
 
     // TODO: Add an interface
     private handlePeerConnectFailed(data: any): void {
         console.log("[WebSocket] Direct connection failed", data);
-        alert("Direct connection failed");
+        this.session.removeConnectedPeerId(data.connectionId);
+    }
+
+    private connectPersistedIds(): void {
+        for (const id of this.session.connectedPeerIds) {
+            this.connectPeer(id);
+        }
     }
 }

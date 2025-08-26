@@ -9,6 +9,7 @@ enum SessionKey {
     PEER_ID = "PEER_ID",
     CONNECTION_ID = "CONNECTION_ID",
     DISCOVERABILITY = "DISCOVERABILITY",
+    CONNECTED_PEER_IDS = "CONNECTED_PEER_IDS",
 }
 
 @Injectable({
@@ -57,6 +58,28 @@ export class Session {
 
     public set discoverability(discoverability: Discoverability) {
         this.sessionStorage.setItem(SessionKey.DISCOVERABILITY, discoverability);
+    }
+
+    public get connectedPeerIds(): string[] {
+        const ids = sessionStorage.getItem(SessionKey.CONNECTED_PEER_IDS);
+        return ids ? JSON.parse(ids) : [];
+    }
+
+    public set connectedPeerIds(connectedPeerIds: string[]) {
+        sessionStorage.setItem(SessionKey.CONNECTED_PEER_IDS, JSON.stringify(connectedPeerIds));
+    }
+
+    public addConnectedPeerId(connectionId: string): void {
+        const ids: string[] = this.connectedPeerIds;
+
+        if (!ids.includes(connectionId)) {
+            ids.push(connectionId);
+            this.connectedPeerIds = ids;
+        }
+    }
+
+    public removeConnectedPeerId(connectionId: string): void {
+        this.connectedPeerIds = this.connectedPeerIds.filter(id => id !== connectionId);
     }
 
     private generateName(): string {
