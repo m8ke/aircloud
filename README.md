@@ -20,7 +20,7 @@ way to transfer files across devices. We never upload, store, or track files.
 | **Auto-discover peers**   | Detect other peers in the same network (including VPN, LAN, public Wi-Fi)                                      |
 | **Manual connection**     | Connect using a 6-digit code or QR code for peers outside the same network                                     |
 | **No limitations**        | Send as many or large files as you want, everything depends on WebRTC capabilities, and network speed of peers |
-| **No sign-up or ads**     | You don't see annoying ads, or need to sign-up after few transfer                                              |
+| **No sign-up or ads**     | You don't see annoying ads, or need to sign-up after few transfers                                             |
 | **End-to-end encryption** | File transfers are always encrypted                                                                            |
 | **Anonymity**             | Never upload, store, or track files, IPs etc                                                                   |
 | **Open source**           | Review the source code, contribute, or share ideas to improve the project                                      |
