@@ -89,4 +89,8 @@ Feel free to open an issue, submit a pull request, or simply give the project a 
 
 ___
 
-<p align="center">Thank you!</p>
+<p align="center">
+Thank you!
+<br>
+www.aircloud.sh
+</p>
