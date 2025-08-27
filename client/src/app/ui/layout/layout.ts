@@ -5,7 +5,7 @@ import { RTC } from "@/utils/rtc/rtc";
 import { Navbar } from "@/ui/navbar/navbar";
 import { Session } from "@/utils/session/session";
 import { CdkDropList } from "@angular/cdk/drag-drop";
-import { FileManager } from "@/utils/file-manager/file-manager.service";
+import { FileManager } from "@/utils/file-manager/file-manager";
 import { Notification } from "@/ui/notification/notification";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 
