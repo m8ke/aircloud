@@ -108,7 +108,7 @@ export class RTC {
         await pc.setLocalDescription(offer);
         await this.waitForICEGathering(peerId);
 
-        console.log("[WebRTC] Created an offer");
+        console.log(`[WebRTC] Created an offer for peer ID ${peerId}`);
 
         return this.compression.compress(JSON.stringify(pc.localDescription));
     }
@@ -136,7 +136,7 @@ export class RTC {
         await pc.setLocalDescription(answer);
         await this.waitForICEGathering(peerId);
 
-        console.log("[WebRTC] Created an answer");
+        console.log(`[WebRTC] Created an answer for peer ID ${peerId}`);
 
         return this.compression.compress(JSON.stringify(pc.localDescription));
     }
@@ -158,7 +158,7 @@ export class RTC {
             new RTCSessionDescription(JSON.parse(this.compression.decompress(answer))),
         );
 
-        console.log("[WebRTC] Accepted answer");
+        console.log(`[WebRTC] Accepted answer from peer ID ${peerId}`);
     }
 
     /**
@@ -334,6 +334,7 @@ export class RTC {
             pc.close();
 
             this.pcs.update(prev => {
+                console.log(`[WebRTC] Connection ${peerId} deleted`);
                 const next = new Map(prev);
                 next.delete(peerId);
                 return next;

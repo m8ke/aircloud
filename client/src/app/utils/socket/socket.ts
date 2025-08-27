@@ -130,7 +130,7 @@ export class Socket {
 
     // TODO: Add an interface
     private async handleOffer(data: any): Promise<void> {
-        console.log("[WebSocket] Received offer request from peer", data);
+        console.log("[WebSocket] Received offer request from peer");
 
         if (this.isConnectionEstablished(data.peerId)) {
             return;
@@ -150,7 +150,7 @@ export class Socket {
 
     // TODO: Add an interface
     private async handleAnswer(data: any): Promise<void> {
-        console.log("[WebSocket] Received offer from peer and creating an answer", data);
+        console.log("[WebSocket] Received offer from peer and creating an answer");
         const answer: string = await this.rtc.createAnswer(data.peerId, data.offer, data.name, data.device, data.connectionType);
 
         this.sendMessage({
@@ -164,18 +164,18 @@ export class Socket {
 
     // TODO: Add an interface
     private async handleApproveAnswer(data: any): Promise<void> {
-        console.log("[WebSocket] Received and approving an answer from the peer to establish a connection", data);
+        console.log("[WebSocket] Received and approving an answer from the peer to establish a connection");
         await this.rtc.approveAnswer(data.peerId, data.answer);
     }
 
     // TODO: Add an interface
     private handlePeerConnectSucceed(data: any): void {
-        console.log("[WebSocket] Direct connection succeed", data);
+        console.log("[WebSocket] Direct connection succeed");
     }
 
     // TODO: Add an interface
     private handlePeerConnectFailed(data: any): void {
-        console.log("[WebSocket] Direct connection failed", data);
+        console.log("[WebSocket] Direct connection failed");
     }
 
     private connectPersistedIds(): void {
