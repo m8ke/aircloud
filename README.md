@@ -16,11 +16,14 @@
 <a href="https://aircloud.sh" target="_blank">AirCloud</a> is a decentralized web-based application for end-to-end encrypted file sharing built on top of WebRTC. Secure
 way to transfer files across devices. We never upload, store, or track files.
 </p>
+
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/m8ke/aircloud/client-ci.yml?label=Client%20CI&style=flat-square)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/m8ke/aircloud/server-ci.yml?label=Server%20CI&style=flat-square)
 </div>
 
 <br>
 
-![desktop-mobile.png](docs/cover.png)
+![aircloud-cover.png](docs/aircloud-cover.png)
 
 ## Features
 
