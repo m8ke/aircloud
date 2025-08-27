@@ -163,13 +163,21 @@ export class Socket {
     }
 
     // TODO: Add an interface
-    private handlePeerConnectSucceed(data: any): void {
+    private async handlePeerConnectSucceed(data: any): Promise<void> {
         console.log("[WebSocket] Direct connection succeed");
+        this.notification.show({
+            message: "Connected with a peer",
+            type: "success",
+        });
     }
 
     // TODO: Add an interface
     private handlePeerConnectFailed(data: any): void {
         console.log("[WebSocket] Direct connection failed");
+        this.notification.show({
+            message: "Wrong ID or peer is not online",
+            type: "error",
+        });
     }
 
     private connectPersistedIds(): void {

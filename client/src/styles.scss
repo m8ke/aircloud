@@ -13,3 +13,10 @@ body {
     font-weight: 400;
     font-style: normal;
 }
+
+button, input {
+    &:disabled, .disabled {
+        cursor: not-allowed;
+        filter: grayscale(1);
+    }
+}

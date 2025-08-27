@@ -334,7 +334,7 @@ export class RTC {
             pc.close();
 
             this.pcs.update(prev => {
-                console.log(`[WebRTC] Connection ${peerId} deleted`);
+                console.log(`[WebRTC] Connection with peer ID ${peerId} deleted`);
                 const next = new Map(prev);
                 next.delete(peerId);
                 return next;
