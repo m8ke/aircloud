@@ -4,7 +4,7 @@
 <a href="https://github.com/m8ke/aircloud">
     <picture>
           <source media="(prefers-color-scheme: dark)" srcset="docs/aircloud-white.svg">
-          <img alt="AirCloud" src="docs/aircloud-black.svg">
+          <source media="(prefers-color-scheme: light)" srcset="docs/aircloud-black.svg">
     </picture>
 </a>
 
@@ -92,5 +92,5 @@ ___
 <p align="center">
 Thank you!
 <br>
-<a href="https://aircloud.sh">www.aircloud.sh</a>
+<a href="https://aircloud.sh" target="_blank">www.aircloud.sh</a>
 </p>
