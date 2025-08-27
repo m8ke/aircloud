@@ -96,6 +96,7 @@ export class RTC {
      * @param peerId peer ID with which the connection will be established
      * @param name peer's name
      * @param device peer's device OS family
+     * @param connectionType
      */
     public async createOffer(peerId: string, name: string, device: string, connectionType: ConnectionType): Promise<string> {
         const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, connectionType);
@@ -120,6 +121,7 @@ export class RTC {
      * @param offer compressed offer from another peer
      * @param name peer's name
      * @param device peer's device OS family
+     * @param connectionType
      */
     public async createAnswer(peerId: string, offer: string, name: string, device: string, connectionType: ConnectionType): Promise<string> {
         const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, connectionType);
@@ -233,7 +235,7 @@ export class RTC {
         }
     }
 
-    // TODO: Add interface
+    // TODO: Add an interface
     //       Add docs
     private handleRequestedFileShare(dc: RTCDataChannel, data: any): void {
         const name: string = data.name;
@@ -262,7 +264,7 @@ export class RTC {
         });
     }
 
-    // TODO: Add interface
+    // TODO: Add an interface
     //       Add docs
     private async handleAcceptedFileShare(dc: RTCDataChannel, data: any): Promise<void> {
         const files: PendingFile[] | undefined = this.pendingFiles().get(data.peerId);
@@ -272,7 +274,7 @@ export class RTC {
         }
     }
 
-    // TODO: Add interface
+    // TODO: Add an interface
     //       Add docs
     private handleDeniedFileShare(dc: RTCDataChannel, data: any): void {
         // TODO: Show notification about denied request (maybe not)
@@ -378,7 +380,7 @@ export class RTC {
             return next;
         });
 
-        // TODO: Add interface
+        // TODO: Add an interface
         dc.send(JSON.stringify({
             type: RTCType.REQUESTED_FILE_SHARE,
             name: this.session.name,
@@ -398,7 +400,7 @@ export class RTC {
             return next;
         });
 
-        // TODO: Add interface
+        // TODO: Add an interface
         dc.send(JSON.stringify({
             type: RTCType.ACCEPTED_FILE_SHARE,
             peerId: this.session.peerId,

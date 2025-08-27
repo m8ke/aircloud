@@ -25,7 +25,7 @@ export class Socket {
         this.ws.onopen = (): void => {
             console.log("[WebSocket] Connection opened");
             this.connectWebSocket();
-            this.connectPersistedIds(); // TODO: Can't be here
+            this.connectPersistedIds();
         };
 
         // TODO: Share ICE candidates
@@ -164,6 +164,8 @@ export class Socket {
 
     // TODO: Add an interface
     private async handlePeerConnectSucceed(data: any): Promise<void> {
+        // TODO: Close modal instead of notification!
+
         console.log("[WebSocket] Direct connection succeed");
         this.notification.show({
             message: "Connected with a peer",
