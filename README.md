@@ -1,13 +1,29 @@
 <a name="top"></a>
 
-<h1 style="margin: 0;" align="center">AirCloud</h1>
+<div align="center">
+<a href="https://github.com/m8ke/aircloud">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/aircloud-white.svg">
+        <source media="(prefers-color-scheme: light)" srcset="docs/aircloud-black.svg">
+        <img alt="AirCloud" src="docs/aircloud-black.svg">
+    </picture>
+</a>
 
-<p align="center">
-AirCloud is a decentralized web-based application for end-to-end encrypted file sharing built on top of WebRTC. Secure
+<br>
+<br>
+
+<p>
+<a href="https://aircloud.sh" target="_blank">AirCloud</a> is a decentralized web-based application for end-to-end encrypted file sharing built on top of WebRTC. Secure
 way to transfer files across devices. We never upload, store, or track files.
 </p>
 
-![desktop-mobile.png](docs/cover.png)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/m8ke/aircloud/client-ci.yml?label=Client%20CI&style=flat-square)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/m8ke/aircloud/server-ci.yml?label=Server%20CI&style=flat-square)
+</div>
+
+<br>
+
+![aircloud-cover.png](docs/aircloud-cover.png)
 
 ## Features
 
@@ -18,10 +34,11 @@ way to transfer files across devices. We never upload, store, or track files.
 | **Cross-device**          | Use any device with a [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) supported browser  |
 | **Peer-to-peer**          | Direct connection and file transfer between peers without a central server or third-party storage              |
 | **Auto-discover peers**   | Detect other peers in the same network (including VPN, LAN, public Wi-Fi)                                      |
-| **Manual connection**     | Connect using a 6-digit code or QR code for peers outside the same network                                     |
+| **Manual connection**     | Connect using a 6-digit code or QR code for peers outside the network                                          |
 | **No limitations**        | Send as many or large files as you want, everything depends on WebRTC capabilities, and network speed of peers |
 | **No sign-up or ads**     | You don't see annoying ads, or need to sign-up after few transfers                                             |
 | **End-to-end encryption** | File transfers are always encrypted                                                                            |
+| **Session-based**         | All data will be deleted if you close the tab or browser                                                       |
 | **Anonymity**             | Never upload, store, or track files, IPs etc                                                                   |
 | **Open source**           | Review the source code, contribute, or share ideas to improve the project                                      |
 
@@ -51,15 +68,15 @@ way to transfer files across devices. We never upload, store, or track files.
 
 <sup><a href="#top">back to top</a></sup>
 
-| Technology     | Scope          | Description                                             |
-|----------------|----------------|---------------------------------------------------------|
-| Docker         | Core           | Containerization                                        |
-| GitHub Actions | Core           | CI/CD pipelines                                         |
-| Spring Boot    | Server         | Server-side application built in Java                   |
-| Angular        | Client         | Client-side application built in TypeScript             |
-| WebRTC         | Client         | Establish P2P connection between clients                |
-| Zip.js         | Client         | Zip files on client-side to send as a bundle            |
-| WebSocket      | Client, Server | Signaling service for data exchange between two clients |
+| Technology     | Scope          | Description                                                        |
+|----------------|----------------|--------------------------------------------------------------------|
+| Docker         | Core           | Containerization                                                   |
+| GitHub Actions | Core           | CI/CD pipelines                                                    |
+| Spring Boot    | Server         | Server-side application built in Java                              |
+| Angular        | Client         | Client-side application built in TypeScript                        |
+| WebRTC         | Client         | Establish P2P connection between clients                           |
+| Zip.js         | Client         | Zip files on client-side to send as a bundle                       |
+| WebSocket      | Client, Server | Signaling service to establish a WebRTC connection between clients |
 
 ## Recommendations
 
@@ -76,4 +93,8 @@ Feel free to open an issue, submit a pull request, or simply give the project a 
 
 ___
 
-<p align="center">Thank you!</p>
+<p align="center">
+Thank you!
+<br>
+<a href="https://aircloud.sh" target="_blank">www.aircloud.sh</a>
+</p>
