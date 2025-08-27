@@ -242,7 +242,7 @@ export class RTC {
         const metadata: PeerFileMetadata[] = data.metadata;
         const files: ReceivingFile[] = metadata.map(meta => new ReceivingFile(meta));
 
-        console.log(`[WebRTC] ${dc.label} requested to send files:`, metadata);
+        console.log(`[WebRTC] Peer ID ${data.peerId} requested to send ${metadata.length} files:`, metadata);
 
         this.notification.show({name, metadata}, NotificationType.FILE_REQUEST).subscribe({
             next: (result): void => {

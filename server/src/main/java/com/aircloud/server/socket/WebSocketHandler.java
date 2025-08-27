@@ -9,6 +9,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import ua_parser.Client;
+import ua_parser.Parser;
 
 import java.io.IOException;
 import java.util.*;
@@ -92,13 +94,12 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    public void connectPeer(final WebSocketSession session) {
+    private void connectPeer(final WebSocketSession session) {
         final Peer peer = new Peer(session);
         peers.add(peer);
-        // log.info("Peer ID {} established connection", peer.getPeerId());
     }
 
-    public void unconnectPeer(final WebSocketSession session) {
+    private void unconnectPeer(final WebSocketSession session) {
         final Peer peer = findPeerBySession(session);
         peers.remove(peer);
         unconnectPeerInNetwork(peer);
@@ -126,9 +127,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
         if (peerA != null) {
             final Peer peerB = findPeerBySession(session);
             establishConnectionBetweenPeers(peerA, peerB, ConnectionType.MANUAL);
-            sendMessage(session, new PeerConnectResponse(peerA.getPeerId(), true));
+            sendMessage(session, new PeerManualConnectResponse(peerA.getPeerId(), true));
         } else {
-            sendMessage(session, new PeerConnectResponse(null, false));
+            sendMessage(session, new PeerManualConnectResponse(null, false));
         }
     }
 
@@ -188,8 +189,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
         peer.setConnectionId(connectionId);
         peer.setDiscoverability(data.getDiscoverability());
 
-        sendMessage(session, new com.aircloud.server.socket.dto.response.PeerConnectResponse(peer.getPeerId(), peer.getConnectionId()));
+        sendMessage(session, new PeerConnectResponse(peer.getPeerId(), peer.getConnectionId()));
         log.info("Peer ID {} connected", peer.getPeerId());
+
         handlePeerConnection(peer);
     }
 

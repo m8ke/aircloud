@@ -1,6 +1,5 @@
-package com.aircloud.server.socket;
+package com.aircloud.server.socket.dto.response;
 
-import com.aircloud.server.socket.dto.response.ResponseType;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +8,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class PeerConnectResponse {
+public class PeerManualConnectResponse {
 
     private ResponseType type = ResponseType.PEER_CONNECT;
 
@@ -18,7 +17,7 @@ public class PeerConnectResponse {
     @JsonProperty("isConnected")
     private boolean isConnected;
 
-    public PeerConnectResponse(UUID peerId, boolean isConnected) {
+    public PeerManualConnectResponse(UUID peerId, boolean isConnected) {
         this.peerId = peerId;
         this.isConnected = isConnected;
     }

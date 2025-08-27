@@ -9,7 +9,7 @@ import java.util.UUID;
 @Setter
 public class PeerConnectResponse {
 
-    private final ResponseType type = ResponseType.CONNECT;
+    private ResponseType type = ResponseType.CONNECT;
 
     private UUID peerId;
 
