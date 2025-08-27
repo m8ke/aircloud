@@ -1,61 +1,79 @@
-# AirCloud
+<a name="top"></a>
 
+<h1 style="margin: 0;" align="center">AirCloud</h1>
+
+<p align="center">
 AirCloud is a decentralized web-based application for end-to-end encrypted file sharing built on top of WebRTC. Secure
 way to transfer files across devices. We never upload, store, or track files.
+</p>
 
-![desktop-mobile.png](docs/desktop-mobile.png)
+![desktop-mobile.png](docs/cover.png)
 
 ## Features
 
-| Feature                 | Description                                                                                |
-|-------------------------|--------------------------------------------------------------------------------------------|
-| **Cross-device**        | Use any device with supported browser                                                      |
-| **Peer-to-peer**        | Direct connection and file transfer between peers without a central server or storage      |
-| **Auto discover peers** | In the same network (VPN, LAN, public WiFi etc) you can see other peers                    |
-| **Connect manually**    | Use a 6-digit code or QR-code to connect with peer manually who is not in the same network |
-| **Anonymity**           | We never upload, store, or track files, IPs etc                                            |
-| **Open source**         | You can review the source code, contribute or help to improve with brilliant ideas         |
+<small><a href="#top">back to top</a></small>
+
+| Feature                   | Description                                                                                                    |
+|---------------------------|----------------------------------------------------------------------------------------------------------------|
+| **Cross-device**          | Use any device with a [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) supported browser  |
+| **Peer-to-peer**          | Direct connection and file transfer between peers without a central server or third-party storage              |
+| **Auto-discover peers**   | Detect other peers in the same network (including VPN, LAN, public Wi-Fi)                                      |
+| **Manual connection**     | Connect using a 6-digit code or QR code for peers outside the same network                                     |
+| **No limitations**        | Send as many or large files as you want, everything depends on WebRTC capabilities, and network speed of peers |
+| **No sign-up or ads**     | You don't see annoying ads, or need to sign-up after few transfer                                              |
+| **End-to-end encryption** | File transfers are always encrypted                                                                            |
+| **Anonymity**             | Never upload, store, or track files, IPs etc                                                                   |
+| **Open source**           | Review the source code, contribute, or share ideas to improve the project                                      |
 
 ## Roadmap
 
-| Feature                  | Description                                                                   |
-|--------------------------|-------------------------------------------------------------------------------|
-| **Metadata removing**    | Read and/or remove metadata from images, videos etc to ensure maximum privacy |
-| **Dark and light theme** | Switch between dark and light theme                                           |
-| **Localization**         | Translated to different languages (community help needed)                     |
-| **Self-hosting**         | Docker image to provide easy self-hosting                                     |
-| **Desktop app**          | Desktop app for MacOS, Windows, Linux                                         |
-| **Mobile app**           | Mobile app for iOS and Android                                                |
-| **TV app**               | TV app for tvOS and Android TV                                                |
+<small><a href="#top">back to top</a></small>
+
+| Feature                  | Description                                                                      |
+|--------------------------|----------------------------------------------------------------------------------|
+| **Metadata removal**     | Read and/or remove metadata from images, videos, etc., to ensure maximum privacy |
+| **Localization**         | Translate into multiple languages (community contributions welcome)              |
+| **Self-hostable**        | Docker image to provide easy self-hosting                                        |
+| **Dark and light theme** | Toggle between dark and light modes                                              |
+| **Desktop app**          | Desktop application for MacOS, Windows, and Linux                                |
+| **Mobile app**           | Mobile application for iOS and Android                                           |
+| **TV app**               | TV application for tvOS and Android TV                                           |
 
 ## Platforms
 
-### Browser (beta)
+<small><a href="#top">back to top</a></small>
 
-|               | Brave | Chrome | Firefox | Safari |
-|---------------|-------|--------|---------|--------|
-| **Version**   |       |        |         |        |
-| **Network**   |       |        |         |        |
-| **Bluetooth** |       |        |         |        |
+|            | **Browser** | **Desktop app** | **Mobile app** | **TV app** |
+|------------|-------------|-----------------|----------------|------------|
+| **Status** | Beta        | Planned         | Planned        | Planned    |
 
 ## Technology stack
 
-| Technology     | Description                                            |
-|----------------|--------------------------------------------------------|
-| Docker         | Containers                                             |
-| GitHub Actions | CI/CD pipelines                                        |
-| Angular        | Client-side application built in TypeScript            |
-| Spring Boot    | Server-side application built in Java                  |
-| WebRTC         | Establish P2P connection between two clients           |
-| WebSocket      | Signaling service to exchange data between two clients |
-| Zip.js         | Zip files on client-side                               |
-| TailwindCSS    | CSS framework for responsive UI                        |
+<small><a href="#top">back to top</a></small>
+
+| Technology     | Scope          | Description                                             |
+|----------------|----------------|---------------------------------------------------------|
+| Docker         | Core           | Containerization                                        |
+| GitHub Actions | Core           | CI/CD pipelines                                         |
+| Spring Boot    | Server         | Server-side application built in Java                   |
+| Angular        | Client         | Client-side application built in TypeScript             |
+| WebRTC         | Client         | Establish P2P connection between clients                |
+| Zip.js         | Client         | Zip files on client-side to send as a bundle            |
+| WebSocket      | Client, Server | Signaling service for data exchange between two clients |
 
 ## Recommendations
 
-Even though AirCloud tries to maximize the privacy when sharing files between peers, you should consider using VPN and
-user-agent spoofing at the operating system level.
+<small><a href="#top">back to top</a></small>
+
+Although AirCloud prioritizes privacy when sharing files between peers, for additional security you should consider
+using a (self-hosted) VPN and user-agent spoofing at the operating system level.
 
 ## Support
 
-Feel free to open an issue or a pull request, or give a star.
+<small><a href="#top">back to top</a></small>
+
+Feel free to open an issue, submit a pull request, or simply give the project a star to show your support.
+
+___
+
+<p align="center">Thank you!</p>
