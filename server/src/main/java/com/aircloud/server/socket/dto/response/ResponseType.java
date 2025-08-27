@@ -9,6 +9,7 @@ public enum ResponseType {
     DISCONNECT,
     OFFER,
     ANSWER,
-    APPROVE_ANSWER
+    APPROVE_ANSWER,
+    PEER_CONNECT,
 
 }

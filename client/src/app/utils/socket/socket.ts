@@ -11,12 +11,11 @@ import { ConnectRequest, RequestType, ResponseType } from "@/utils/socket/socket
 })
 export class Socket {
     private static readonly RECONNECT_DELAY = 3000;
-    private static readonly CONNECT_TIMEOUT = 5000;
 
     private ws!: WebSocket;
     private readonly env: Env = inject<Env>(Env);
     private readonly rtc: RTC = inject<RTC>(RTC);
-    private readonly session: Session = inject(Session);
+    private readonly session: Session = inject<Session>(Session);
     private readonly notification: NotificationService = inject<NotificationService>(NotificationService);
 
     public init(): void {
@@ -26,51 +25,30 @@ export class Socket {
         this.ws.onopen = (): void => {
             console.log("[WebSocket] Connection opened");
             this.connectWebSocket();
+            this.connectPersistedIds();
         };
 
-        // TODO: Add interfaces to prevent headache
         // TODO: Share ICE candidates
         this.ws.onmessage = async (event): Promise<void> => {
             const data = JSON.parse(event.data);
 
             switch (data.type as ResponseType) {
                 case ResponseType.CONNECT:
-                    this.session.peerId = data.peerId;
-                    this.notification.show({message: "Connected to P2P network"});
-                    break;
+                    return this.handleConnect(data);
                 case ResponseType.DISCONNECT:
-                    this.rtc.closeConnection(data.peerId);
-                    break;
+                    return this.handleDisconnect(data);
                 case ResponseType.OFFER:
-                    console.log("[WebSocket] Received offer request from peer", data);
-                    const offer: string = await this.rtc.createOffer(data.peerId, data.name, data.device);
-
-                    this.sendMessage({
-                        type: RequestType.OFFER,
-                        data: {
-                            peerId: data.peerId,
-                            offer: offer,
-                        },
-                    });
-                    break;
+                    return this.handleOffer(data);
                 case ResponseType.ANSWER:
-                    console.log("[WebSocket] Received offer from peer and creating an answer", data);
-                    const answer: string = await this.rtc.createAnswer(data.peerId, data.offer, data.name, data.device);
-
-                    this.sendMessage({
-                        type: RequestType.ANSWER,
-                        data: {
-                            answer: answer,
-                            peerId: data.peerId,
-                        },
-                    });
-                    break;
+                    return await this.handleAnswer(data);
                 case ResponseType.APPROVE_ANSWER:
-                    console.log("[WebSocket] Received and approving an answer from the peer to establish a connection", data);
-                    await this.rtc.approveAnswer(data.peerId, data.answer);
-                    break;
+                    return this.handleApproveAnswer(data);
+                case ResponseType.PEER_CONNECT:
+                    return data.isConnected
+                        ? this.handlePeerConnectSucceed(data)
+                        : this.handlePeerConnectFailed(data);
                 default:
-                    console.log("[WebSocket] Message received:", data);
+                    console.log("[WebSocket] Unhandled message received", data);
                     break;
             }
         };
@@ -90,27 +68,38 @@ export class Socket {
 
     private connectWebSocket(): void {
         const name: string | null = this.session.name;
+        const peerId: string | null = this.session.peerId;
 
-        if (!name) {
-            throw new Error("Name is not provided");
+        if (!name || !peerId) {
+            throw new Error("Name or peer ID is not provided");
         }
 
         this.sendMessage<ConnectRequest>({
             type: RequestType.CONNECT,
             data: {
                 name,
-                connectionId: this.session.connectionId,
+                peerId,
                 discoverability: this.session.discoverability,
             },
         });
     }
 
     public connectPeer(connectionId: string): void {
-        // TODO: Change <any> to specific type
+        // TODO: Add an interface
         this.sendMessage<any>({
-            type: RequestType.CONNECT_PEER,
+            type: RequestType.PEER_CONNECT,
             data: {
                 connectionId,
+            },
+        });
+    }
+
+    public reestablishConnection(peerId: string): void {
+        // TODO: Add an interface
+        this.sendMessage<any>({
+            type: RequestType.PEER_RECONNECT,
+            data: {
+                peerId,
             },
         });
     }
@@ -125,5 +114,84 @@ export class Socket {
         return new Promise<void>((resolve): void => {
             setTimeout(resolve, n);
         });
+    }
+
+    // TODO: Add an interface
+    private handleConnect(data: any): void {
+        this.session.connectionId = data.connectionId;
+        this.notification.show({message: "Connected to P2P network"});
+    }
+
+    // TODO: Add an interface
+    private handleDisconnect(data: any): void {
+        this.rtc.closeConnection(data.peerId);
+    }
+
+    // TODO: Add an interface
+    private async handleOffer(data: any): Promise<void> {
+        console.log(`[WebSocket] Received an offer request from peer ID ${data.peerId}`);
+        const offer: string = await this.rtc.createOffer(data.peerId, data.name, data.device, data.connectionType);
+
+        this.sendMessage({
+            type: RequestType.OFFER,
+            data: {
+                offer: offer,
+                peerId: data.peerId,
+                connectionType: data.connectionType,
+            },
+        });
+    }
+
+    // TODO: Add an interface
+    private async handleAnswer(data: any): Promise<void> {
+        console.log("[WebSocket] Received offer from peer and creating an answer");
+        const answer: string = await this.rtc.createAnswer(data.peerId, data.offer, data.name, data.device, data.connectionType);
+
+        this.sendMessage({
+            type: RequestType.ANSWER,
+            data: {
+                answer: answer,
+                peerId: data.peerId,
+            },
+        });
+    }
+
+    // TODO: Add an interface
+    private async handleApproveAnswer(data: any): Promise<void> {
+        console.log(`[WebSocket] Received an answer from the peer ID ${data.peerId}`);
+        await this.rtc.approveAnswer(data.peerId, data.answer);
+    }
+
+    // TODO: Add an interface
+    private async handlePeerConnectSucceed(data: any): Promise<void> {
+        // TODO: Close modal instead of notification!
+
+        console.log("[WebSocket] Direct connection succeed");
+        this.notification.show({
+            message: "Connected with a peer",
+            type: "success",
+        });
+    }
+
+    // TODO: Add an interface
+    private handlePeerConnectFailed(data: any): void {
+        console.log("[WebSocket] Direct connection failed");
+        this.notification.show({
+            message: "Wrong ID or peer is not online",
+            type: "error",
+        });
+    }
+
+    private connectPersistedIds(): void {
+        for (const peerId of this.session.connectedPeerIds) {
+            if (!this.rtc.pcs().get(peerId)) {
+                this.reestablishConnection(peerId);
+            }
+        }
+    }
+
+    private isConnectionEstablished(peerId: string): boolean {
+        console.warn(`[WebSocket] Connection has already been established with peer ID ${peerId}`);
+        return !!this.rtc.pcs().get(peerId);
     }
 }

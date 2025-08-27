@@ -1,7 +1,10 @@
 package com.aircloud.server.socket.dto.request;
 
+import com.aircloud.server.socket.ConnectionType;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -11,6 +14,8 @@ public class RTCOfferRequest {
 
     private String offer;
 
-    private String peerId;
+    private UUID peerId;
+
+    private ConnectionType connectionType;
 
 }

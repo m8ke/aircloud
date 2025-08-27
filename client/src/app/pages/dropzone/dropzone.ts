@@ -9,9 +9,10 @@ import { Modal } from "@/ui/modal/modal";
 import { Layout } from "@/ui/layout/layout";
 import { Socket } from "@/utils/socket/socket";
 import { Session } from "@/utils/session/session";
-import { FileManager } from "@/utils/file-manager/file-manager.service";
-import { PendingFile } from "@/utils/rtc/pending-file";
+import { FileManager } from "@/utils/file-manager/file-manager";
+import { SendingFile } from "@/utils/file-manager/sending-file";
 import { KeyValuePipe } from "@angular/common";
+import { QRCodeComponent } from "angularx-qrcode";
 
 @Component({
     selector: "app-dropzone",
@@ -21,6 +22,7 @@ import { KeyValuePipe } from "@angular/common";
         Modal,
         Peer,
         KeyValuePipe,
+        QRCodeComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: "./dropzone.html",
@@ -75,8 +77,8 @@ export class Dropzone implements OnInit {
         // TODO: Select file to send only selected files (not all together)
     }
 
-    protected sendFilesToPeer(peerId: string): void {
-        this.rtc.requestFileSending(peerId, this.fileManager.files());
+    protected async sendFilesToPeer(peerId: string): Promise<void> {
+        this.rtc.requestFileSending(peerId, await this.fileManager.bundleFiles());
     }
 
     protected cancelFileSending(peerId: string): void {
@@ -84,26 +86,18 @@ export class Dropzone implements OnInit {
     }
 
     protected isLoading(peerId: string): boolean {
-        const files: PendingFile[] | undefined = this.rtc.pendingFiles().get(peerId);
-
-        if (!files || files.length === 0) {
-            return false;
-        }
-
-        return files.some(file => !file.complete);
+        const file: SendingFile | undefined = this.rtc.sendingFiles().get(peerId);
+        return !!file;
     }
 
     protected getProgress(peerId: string): number {
-        const files: PendingFile[] | undefined = this.rtc.pendingFiles().get(peerId);
+        const file: SendingFile | undefined = this.rtc.sendingFiles().get(peerId);
 
-        if (!files || files.length === 0) {
+        if (!file) {
             return 0;
         }
 
-        const totalSize: number = files.reduce((sum, f) => sum + f.file.size, 0);
-        const sentSize: number = files.reduce((sum, f) => sum + f.receivedSize, 0);
-
-        return totalSize > 0 ? Number(((sentSize / totalSize) * 100).toFixed(0)) : 0;
+        return file.file.size > 0 ? Number(((file.receivedSize / file.file.size) * 100).toFixed(0)) : 0;
     }
 
     protected get directConnectionUrl(): string {
@@ -114,7 +108,7 @@ export class Dropzone implements OnInit {
         return this.route.snapshot.params["connectionId"];
     }
 
-    protected onJoinPeer(): void {
+    protected onConnectPeer(): void {
         this.socket.connectPeer(this.formJoinPeer.get("connectionId")?.value);
     }
 }

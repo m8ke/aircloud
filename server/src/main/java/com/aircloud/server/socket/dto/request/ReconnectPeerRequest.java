@@ -7,11 +7,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class RTCAnswerRequest {
-
-    private final RequestType type = RequestType.ANSWER;
-
-    private String answer;
+public class ReconnectPeerRequest {
 
     private UUID peerId;
 

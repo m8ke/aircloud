@@ -10,6 +10,8 @@ public class PeerChangeSettingsRequest {
 
     private String name;
 
+    private String connectionId;
+
     private Discoverability discoverability;
 
 }
