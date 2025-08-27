@@ -246,7 +246,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             final ConnectionType connectionType
     ) {
         if (!peerA.equals(peerB)) {
-            log.info("Peer A ID {} and Peer B ID {} connected through {} connection", peerA.getPeerId(), peerB.getPeerId(), connectionType);
+            log.info("Peer-A ID {} and peer-B ID {} connected through {} connection", peerA.getPeerId(), peerB.getPeerId(), connectionType);
             sendMessage(peerA.getSession(), new RTCOfferResponse(peerB.getPeerId(), peerB.getName(), peerA.getDevice(), connectionType));
         }
     }
@@ -258,12 +258,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     private Peer findPeerById(final UUID peerId) {
-        if (peerId == null) {
-            return null;
-        }
-
         return peers.stream()
-                .filter(p -> p.getPeerId().equals(peerId)).findFirst()
+                .filter(p -> p.getPeerId() != null && p.getPeerId().equals(peerId)).findFirst()
                 .orElse(null);
     }
 

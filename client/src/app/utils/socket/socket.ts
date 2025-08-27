@@ -129,7 +129,7 @@ export class Socket {
 
     // TODO: Add an interface
     private async handleOffer(data: any): Promise<void> {
-        console.log("[WebSocket] Received offer request from peer");
+        console.log(`[WebSocket] Received an offer request from peer ID ${data.peerId}`);
         const offer: string = await this.rtc.createOffer(data.peerId, data.name, data.device, data.connectionType);
 
         this.sendMessage({
@@ -158,7 +158,7 @@ export class Socket {
 
     // TODO: Add an interface
     private async handleApproveAnswer(data: any): Promise<void> {
-        console.log("[WebSocket] Received and approving an answer from the peer to establish a connection");
+        console.log(`[WebSocket] Received an answer from the peer ID ${data.peerId}`);
         await this.rtc.approveAnswer(data.peerId, data.answer);
     }
 

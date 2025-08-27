@@ -158,7 +158,7 @@ export class RTC {
             new RTCSessionDescription(JSON.parse(this.compression.decompress(answer))),
         );
 
-        console.log(`[WebRTC] Accepted answer from peer ID ${peerId}`);
+        console.log(`[WebRTC] Accepted an answer from peer ID ${peerId}`);
     }
 
     /**
@@ -572,7 +572,6 @@ export class RTC {
             ? Math.round((receivedSize / totalSize) * 100)
             : 0;
     });
-
 
     public get isReceiving(): boolean {
         return this.receivingFiles().size > 0;
