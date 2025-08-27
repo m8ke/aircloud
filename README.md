@@ -48,6 +48,7 @@ way to transfer files across devices. We never upload, store, or track files.
 | Spring Boot    | Server-side application built in Java                  |
 | WebRTC         | Establish P2P connection between two clients           |
 | WebSocket      | Signaling service to exchange data between two clients |
+| Zip.js         | Zip files on client-side                               |
 | TailwindCSS    | CSS framework for responsive UI                        |
 
 ## Recommendations
