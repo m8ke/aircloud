@@ -17,6 +17,8 @@ way to transfer files across devices. We never upload, store, or track files.
 </p>
 </div>
 
+<br>
+
 ![desktop-mobile.png](docs/cover.png)
 
 ## Features
