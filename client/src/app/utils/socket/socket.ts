@@ -86,7 +86,6 @@ export class Socket {
 
     public connectPeer(connectionId: string): void {
         // TODO: Add an interface
-        // TODO: Exclude IDs that already exists in pcs
         this.sendMessage<any>({
             type: RequestType.PEER_CONNECT,
             data: {
@@ -131,11 +130,6 @@ export class Socket {
     // TODO: Add an interface
     private async handleOffer(data: any): Promise<void> {
         console.log("[WebSocket] Received offer request from peer");
-
-        if (this.isConnectionEstablished(data.peerId)) {
-            return;
-        }
-
         const offer: string = await this.rtc.createOffer(data.peerId, data.name, data.device, data.connectionType);
 
         this.sendMessage({
