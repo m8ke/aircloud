@@ -11,7 +11,7 @@ way to transfer files across devices. We never upload, store, or track files.
 
 ## Features
 
-<small><a href="#top">back to top</a></small>
+<sup><a href="#top">back to top</a></sup>
 
 | Feature                   | Description                                                                                                    |
 |---------------------------|----------------------------------------------------------------------------------------------------------------|
@@ -27,7 +27,7 @@ way to transfer files across devices. We never upload, store, or track files.
 
 ## Roadmap
 
-<small><a href="#top">back to top</a></small>
+<sup><a href="#top">back to top</a></sup>
 
 | Feature                  | Description                                                                      |
 |--------------------------|----------------------------------------------------------------------------------|
@@ -41,7 +41,7 @@ way to transfer files across devices. We never upload, store, or track files.
 
 ## Platforms
 
-<small><a href="#top">back to top</a></small>
+<sup><a href="#top">back to top</a></sup>
 
 |            | **Browser** | **Desktop app** | **Mobile app** | **TV app** |
 |------------|-------------|-----------------|----------------|------------|
@@ -49,7 +49,7 @@ way to transfer files across devices. We never upload, store, or track files.
 
 ## Technology stack
 
-<small><a href="#top">back to top</a></small>
+<sup><a href="#top">back to top</a></sup>
 
 | Technology     | Scope          | Description                                             |
 |----------------|----------------|---------------------------------------------------------|
@@ -63,14 +63,14 @@ way to transfer files across devices. We never upload, store, or track files.
 
 ## Recommendations
 
-<small><a href="#top">back to top</a></small>
+<sup><a href="#top">back to top</a></sup>
 
 Although AirCloud prioritizes privacy when sharing files between peers, for additional security you should consider
 using a (self-hosted) VPN and user-agent spoofing at the operating system level.
 
 ## Support
 
-<small><a href="#top">back to top</a></small>
+<sup><a href="#top">back to top</a></sup>
 
 Feel free to open an issue, submit a pull request, or simply give the project a star to show your support.
 
