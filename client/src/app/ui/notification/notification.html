@@ -15,7 +15,7 @@
             @switch (notification.type) {
                 @case (NotificationType.FILE_REQUEST) {
                     <app-notification-file-request
-                        class="w-full flex justify-end"
+                        class="w-full flex justify-end z-100"
                         [data]="notification.data"
                         (accept)="onAccept(notification.id)"
                         (close)="onReject(notification.id)"
@@ -23,7 +23,7 @@
                 }
                 @default {
                     <app-notification-info
-                        class="w-full flex justify-end"
+                        class="w-full flex justify-end z-100"
                         [data]="notification.data"
                         (close)="onReject(notification.id)"
                     />
