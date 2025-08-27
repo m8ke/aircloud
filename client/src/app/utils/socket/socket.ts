@@ -151,11 +151,6 @@ export class Socket {
     // TODO: Add an interface
     private async handleAnswer(data: any): Promise<void> {
         console.log("[WebSocket] Received offer from peer and creating an answer", data);
-
-        if (this.isConnectionEstablished(data.peerId)) {
-            return;
-        }
-
         const answer: string = await this.rtc.createAnswer(data.peerId, data.offer, data.name, data.device, data.connectionType);
 
         this.sendMessage({
