@@ -25,7 +25,7 @@ export class Socket {
         this.ws.onopen = (): void => {
             console.log("[WebSocket] Connection opened");
             this.connectWebSocket();
-            this.connectPersistedIds();
+            this.connectPersistedIds(); // TODO: Can't be here
         };
 
         // TODO: Share ICE candidates
@@ -131,13 +131,19 @@ export class Socket {
     // TODO: Add an interface
     private async handleOffer(data: any): Promise<void> {
         console.log("[WebSocket] Received offer request from peer", data);
-        const offer: string = await this.rtc.createOffer(data.peerId, data.name, data.device);
+
+        if (this.isConnectionEstablished(data.peerId)) {
+            return;
+        }
+
+        const offer: string = await this.rtc.createOffer(data.peerId, data.name, data.device, data.connectionType);
 
         this.sendMessage({
             type: RequestType.OFFER,
             data: {
-                peerId: data.peerId,
                 offer: offer,
+                peerId: data.peerId,
+                connectionType: data.connectionType,
             },
         });
     }
@@ -145,7 +151,12 @@ export class Socket {
     // TODO: Add an interface
     private async handleAnswer(data: any): Promise<void> {
         console.log("[WebSocket] Received offer from peer and creating an answer", data);
-        const answer: string = await this.rtc.createAnswer(data.peerId, data.offer, data.name, data.device);
+
+        if (this.isConnectionEstablished(data.peerId)) {
+            return;
+        }
+
+        const answer: string = await this.rtc.createAnswer(data.peerId, data.offer, data.name, data.device, data.connectionType);
 
         this.sendMessage({
             type: RequestType.ANSWER,
@@ -164,20 +175,24 @@ export class Socket {
 
     // TODO: Add an interface
     private handlePeerConnectSucceed(data: any): void {
-        console.log("[WebSocket] Direct connection failed", data);
-        this.session.addConnectedPeerId(data.peerId);
+        console.log("[WebSocket] Direct connection succeed", data);
     }
 
     // TODO: Add an interface
     private handlePeerConnectFailed(data: any): void {
         console.log("[WebSocket] Direct connection failed", data);
-        this.session.removeConnectedPeerId(data.peerId);
     }
 
     private connectPersistedIds(): void {
-        // TODO: Exclude IDs that already exists in pcs
         for (const peerId of this.session.connectedPeerIds) {
-            this.reestablishConnection(peerId);
+            if (!this.rtc.pcs().get(peerId)) {
+                this.reestablishConnection(peerId);
+            }
         }
+    }
+
+    private isConnectionEstablished(peerId: string): boolean {
+        console.warn(`[WebSocket] Connection has already been established with peer ID ${peerId}`);
+        return !!this.rtc.pcs().get(peerId);
     }
 }

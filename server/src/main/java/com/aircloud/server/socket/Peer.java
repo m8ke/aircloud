@@ -34,11 +34,10 @@ public class Peer {
 
     private UUID peerId;
 
-    public Peer(WebSocketSession session, String connectionId) {
+    public Peer(WebSocketSession session) {
         this.session = session;
         this.ipAddress = parseIpAddress();
         this.device = parseDeviceName();
-        this.connectionId = connectionId;
     }
 
     private String parseIpAddress() {

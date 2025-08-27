@@ -5,8 +5,9 @@ import { Peer } from "@/utils/rtc/peer";
 import { Session } from "@/utils/session/session";
 import { PendingFile } from "@/utils/rtc/pending-file";
 import { Compression } from "@/utils/compression/compression";
-import { ReceivingFile, PeerFileMetadata } from "@/utils/rtc/receiving-file";
+import { PeerFileMetadata, ReceivingFile } from "@/utils/rtc/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
+import { ConnectionType } from "@/utils/rtc/connection-type";
 
 enum RTCType {
     EOF = "EOF",
@@ -38,9 +39,10 @@ export class RTC {
      * @param peerId peer ID with which the connection will be established
      * @param name peer's name
      * @param device peer's device OS family
+     * @param connectionType
      * @private
      */
-    private establishPeerConnection(peerId: string, name: string, device: string): RTCPeerConnection {
+    private establishPeerConnection(peerId: string, name: string, device: string, connectionType: ConnectionType): RTCPeerConnection {
         if (this.pcs().has(peerId)) {
             return this.pcs().get(peerId)?.pc!;
         }
@@ -81,6 +83,10 @@ export class RTC {
             return next;
         });
 
+        if (connectionType == ConnectionType.MANUAL) {
+            this.session.addConnectedPeerId(peerId);
+        }
+
         return pc;
     }
 
@@ -91,10 +97,9 @@ export class RTC {
      * @param name peer's name
      * @param device peer's device OS family
      */
-    public async createOffer(peerId: string, name: string, device: string): Promise<string> {
-        const dataChannelId: string = uuidv4();
-        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device);
-        const dc: RTCDataChannel = pc.createDataChannel(dataChannelId);
+    public async createOffer(peerId: string, name: string, device: string, connectionType: ConnectionType): Promise<string> {
+        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, connectionType);
+        const dc: RTCDataChannel = pc.createDataChannel(uuidv4());
 
         dc.bufferedAmountLowThreshold = RTC.CHUNK_SIZE;
         this.setupDataChannel(peerId, dc);
@@ -116,8 +121,8 @@ export class RTC {
      * @param name peer's name
      * @param device peer's device OS family
      */
-    public async createAnswer(peerId: string, offer: string, name: string, device: string): Promise<string> {
-        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device);
+    public async createAnswer(peerId: string, offer: string, name: string, device: string, connectionType: ConnectionType): Promise<string> {
+        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, connectionType);
 
         pc.ondatachannel = (event: RTCDataChannelEvent): void => {
             this.setupDataChannel(peerId, event.channel);
@@ -165,7 +170,7 @@ export class RTC {
      */
     private setupDataChannel(peerId: string, dc: RTCDataChannel): void {
         this.dcs.set(peerId, dc);
-        dc.onopen = (event) => this.handleDataChannelOpen(dc.label);
+        dc.onopen = (event) => this.handleDataChannelOpen(peerId);
         dc.onclose = (event) => this.handleDataChannelClose(peerId);
         dc.onmessage = async (event: MessageEvent<any>): Promise<void> => await this.handleDataChannelMessage(event, dc);
     }
@@ -505,11 +510,11 @@ export class RTC {
     }
 
     private handleDataChannelOpen(peerId: string): void {
-        console.log(`[WebRTC] DC open on connection ID ${peerId}`);
+        console.log(`[WebRTC] DC open on connection with peer ID ${peerId}`);
     }
 
     private handleDataChannelClose(peerId: string): void {
-        console.log(`[WebRTC] DC closed on connection ID ${peerId}`);
+        console.log(`[WebRTC] DC closed on connection with peer ID ${peerId}`);
         this.closeConnection(peerId);
     }
 

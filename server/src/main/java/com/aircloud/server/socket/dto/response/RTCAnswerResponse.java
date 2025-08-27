@@ -1,5 +1,6 @@
 package com.aircloud.server.socket.dto.response;
 
+import com.aircloud.server.socket.ConnectionType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,16 +20,20 @@ public class RTCAnswerResponse {
 
     private String device;
 
+    private ConnectionType connectionType;
+
     public RTCAnswerResponse(
             UUID peerId,
             String offer,
             String name,
-            String device
+            String device,
+            ConnectionType connectionType
     ) {
         this.peerId = peerId;
         this.offer = offer;
         this.name = name;
         this.device = device;
+        this.connectionType = connectionType;
     }
 
 }

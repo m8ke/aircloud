@@ -1,5 +1,6 @@
 package com.aircloud.server.socket.dto.response;
 
+import com.aircloud.server.socket.ConnectionType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,14 +18,18 @@ public class RTCOfferResponse {
 
     private String device;
 
+    private ConnectionType connectionType;
+
     public RTCOfferResponse(
             UUID peerId,
             String name,
-            String device
+            String device,
+            ConnectionType connectionType
     ) {
         this.peerId = peerId;
         this.name = name;
         this.device = device;
+        this.connectionType = connectionType;
     }
 
 }

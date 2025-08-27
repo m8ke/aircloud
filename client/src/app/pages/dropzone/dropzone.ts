@@ -116,7 +116,7 @@ export class Dropzone implements OnInit {
         return this.route.snapshot.params["connectionId"];
     }
 
-    protected onJoinPeer(): void {
+    protected onConnectPeer(): void {
         this.socket.connectPeer(this.formJoinPeer.get("connectionId")?.value);
     }
 }
