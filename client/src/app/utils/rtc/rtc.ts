@@ -5,8 +5,9 @@ import { Peer } from "@/utils/rtc/peer";
 import { Session } from "@/utils/session/session";
 import { PendingFile } from "@/utils/rtc/pending-file";
 import { Compression } from "@/utils/compression/compression";
-import { ReceivingFile, PeerFileMetadata } from "@/utils/rtc/receiving-file";
+import { PeerFileMetadata, ReceivingFile } from "@/utils/rtc/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
+import { ConnectionType } from "@/utils/rtc/connection-type";
 
 enum RTCType {
     EOF = "EOF",
@@ -38,9 +39,10 @@ export class RTC {
      * @param peerId peer ID with which the connection will be established
      * @param name peer's name
      * @param device peer's device OS family
+     * @param connectionType
      * @private
      */
-    private establishPeerConnection(peerId: string, name: string, device: string): RTCPeerConnection {
+    private establishPeerConnection(peerId: string, name: string, device: string, connectionType: ConnectionType): RTCPeerConnection {
         if (this.pcs().has(peerId)) {
             return this.pcs().get(peerId)?.pc!;
         }
@@ -81,6 +83,10 @@ export class RTC {
             return next;
         });
 
+        if (connectionType == ConnectionType.MANUAL) {
+            this.session.addConnectedPeerId(peerId);
+        }
+
         return pc;
     }
 
@@ -90,11 +96,11 @@ export class RTC {
      * @param peerId peer ID with which the connection will be established
      * @param name peer's name
      * @param device peer's device OS family
+     * @param connectionType
      */
-    public async createOffer(peerId: string, name: string, device: string): Promise<string> {
-        const dataChannelId: string = uuidv4();
-        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device);
-        const dc: RTCDataChannel = pc.createDataChannel(dataChannelId);
+    public async createOffer(peerId: string, name: string, device: string, connectionType: ConnectionType): Promise<string> {
+        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, connectionType);
+        const dc: RTCDataChannel = pc.createDataChannel(uuidv4());
 
         dc.bufferedAmountLowThreshold = RTC.CHUNK_SIZE;
         this.setupDataChannel(peerId, dc);
@@ -103,7 +109,7 @@ export class RTC {
         await pc.setLocalDescription(offer);
         await this.waitForICEGathering(peerId);
 
-        console.log("[WebRTC] Created an offer");
+        console.log(`[WebRTC] Created an offer for peer ID ${peerId}`);
 
         return this.compression.compress(JSON.stringify(pc.localDescription));
     }
@@ -115,9 +121,10 @@ export class RTC {
      * @param offer compressed offer from another peer
      * @param name peer's name
      * @param device peer's device OS family
+     * @param connectionType
      */
-    public async createAnswer(peerId: string, offer: string, name: string, device: string): Promise<string> {
-        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device);
+    public async createAnswer(peerId: string, offer: string, name: string, device: string, connectionType: ConnectionType): Promise<string> {
+        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, connectionType);
 
         pc.ondatachannel = (event: RTCDataChannelEvent): void => {
             this.setupDataChannel(peerId, event.channel);
@@ -131,7 +138,7 @@ export class RTC {
         await pc.setLocalDescription(answer);
         await this.waitForICEGathering(peerId);
 
-        console.log("[WebRTC] Created an answer");
+        console.log(`[WebRTC] Created an answer for peer ID ${peerId}`);
 
         return this.compression.compress(JSON.stringify(pc.localDescription));
     }
@@ -153,7 +160,7 @@ export class RTC {
             new RTCSessionDescription(JSON.parse(this.compression.decompress(answer))),
         );
 
-        console.log("[WebRTC] Accepted answer");
+        console.log(`[WebRTC] Accepted an answer from peer ID ${peerId}`);
     }
 
     /**
@@ -165,7 +172,7 @@ export class RTC {
      */
     private setupDataChannel(peerId: string, dc: RTCDataChannel): void {
         this.dcs.set(peerId, dc);
-        dc.onopen = (event) => this.handleDataChannelOpen(dc.label);
+        dc.onopen = (event) => this.handleDataChannelOpen(peerId);
         dc.onclose = (event) => this.handleDataChannelClose(peerId);
         dc.onmessage = async (event: MessageEvent<any>): Promise<void> => await this.handleDataChannelMessage(event, dc);
     }
@@ -228,14 +235,14 @@ export class RTC {
         }
     }
 
-    // TODO: Add interface
+    // TODO: Add an interface
     //       Add docs
     private handleRequestedFileShare(dc: RTCDataChannel, data: any): void {
         const name: string = data.name;
         const metadata: PeerFileMetadata[] = data.metadata;
         const files: ReceivingFile[] = metadata.map(meta => new ReceivingFile(meta));
 
-        console.log(`[WebRTC] ${dc.label} requested to send files:`, metadata);
+        console.log(`[WebRTC] Peer ID ${data.peerId} requested to send ${metadata.length} files:`, metadata);
 
         this.notification.show({name, metadata}, NotificationType.FILE_REQUEST).subscribe({
             next: (result): void => {
@@ -257,7 +264,7 @@ export class RTC {
         });
     }
 
-    // TODO: Add interface
+    // TODO: Add an interface
     //       Add docs
     private async handleAcceptedFileShare(dc: RTCDataChannel, data: any): Promise<void> {
         const files: PendingFile[] | undefined = this.pendingFiles().get(data.peerId);
@@ -267,7 +274,7 @@ export class RTC {
         }
     }
 
-    // TODO: Add interface
+    // TODO: Add an interface
     //       Add docs
     private handleDeniedFileShare(dc: RTCDataChannel, data: any): void {
         // TODO: Show notification about denied request (maybe not)
@@ -329,6 +336,7 @@ export class RTC {
             pc.close();
 
             this.pcs.update(prev => {
+                console.log(`[WebRTC] Connection with peer ID ${peerId} deleted`);
                 const next = new Map(prev);
                 next.delete(peerId);
                 return next;
@@ -372,7 +380,7 @@ export class RTC {
             return next;
         });
 
-        // TODO: Add interface
+        // TODO: Add an interface
         dc.send(JSON.stringify({
             type: RTCType.REQUESTED_FILE_SHARE,
             name: this.session.name,
@@ -392,7 +400,7 @@ export class RTC {
             return next;
         });
 
-        // TODO: Add interface
+        // TODO: Add an interface
         dc.send(JSON.stringify({
             type: RTCType.ACCEPTED_FILE_SHARE,
             peerId: this.session.peerId,
@@ -505,11 +513,11 @@ export class RTC {
     }
 
     private handleDataChannelOpen(peerId: string): void {
-        console.log(`[WebRTC] DC open on connection ID ${peerId}`);
+        console.log(`[WebRTC] DC open on connection with peer ID ${peerId}`);
     }
 
     private handleDataChannelClose(peerId: string): void {
-        console.log(`[WebRTC] DC closed on connection ID ${peerId}`);
+        console.log(`[WebRTC] DC closed on connection with peer ID ${peerId}`);
         this.closeConnection(peerId);
     }
 
@@ -566,7 +574,6 @@ export class RTC {
             ? Math.round((receivedSize / totalSize) * 100)
             : 0;
     });
-
 
     public get isReceiving(): boolean {
         return this.receivingFiles().size > 0;

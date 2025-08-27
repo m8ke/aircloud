@@ -8,6 +8,7 @@ import ua_parser.Client;
 import ua_parser.Parser;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -25,11 +26,13 @@ public class Peer {
     @JsonIgnore
     private int heartBeat;
 
-    private String connectionId = randomizeConnectionId();
+    private String connectionId;
 
     private String device;
 
     private String name;
+
+    private UUID peerId;
 
     public Peer(WebSocketSession session) {
         this.session = session;
@@ -53,15 +56,6 @@ public class Peer {
     public void updatePeerSession(WebSocketSession session) {
         this.session = session;
         this.ipAddress = parseIpAddress();
-    }
-
-    public String getSessionId() {
-        return session.getId();
-    }
-
-    // TODO
-    private String randomizeConnectionId() {
-        return "123GDA";
     }
 
     @JsonIgnore

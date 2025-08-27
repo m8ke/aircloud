@@ -12,6 +12,7 @@ import { Session } from "@/utils/session/session";
 import { FileManager } from "@/utils/file-manager/file-manager.service";
 import { PendingFile } from "@/utils/rtc/pending-file";
 import { KeyValuePipe } from "@angular/common";
+import { QRCodeComponent } from "angularx-qrcode";
 
 @Component({
     selector: "app-dropzone",
@@ -21,6 +22,7 @@ import { KeyValuePipe } from "@angular/common";
         Modal,
         Peer,
         KeyValuePipe,
+        QRCodeComponent,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: "./dropzone.html",
@@ -114,7 +116,7 @@ export class Dropzone implements OnInit {
         return this.route.snapshot.params["connectionId"];
     }
 
-    protected onJoinPeer(): void {
+    protected onConnectPeer(): void {
         this.socket.connectPeer(this.formJoinPeer.get("connectionId")?.value);
     }
 }

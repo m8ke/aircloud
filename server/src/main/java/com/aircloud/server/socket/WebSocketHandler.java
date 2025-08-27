@@ -9,6 +9,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+import ua_parser.Client;
+import ua_parser.Parser;
 
 import java.io.IOException;
 import java.util.*;
@@ -20,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
+
+    private final static int HEARTBEAT_PERIOD = 15;
 
     private final Set<Peer> peers = ConcurrentHashMap.newKeySet();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -44,20 +48,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     ) {
         final Peer peer = findPeerBySession(session);
         peer.updatePeerSession(session);
-        log.info("Pong received from peer ID {}", session.getId());
-    }
-
-    public void connectPeer(WebSocketSession session) {
-        final Peer peer = new Peer(session);
-        peers.add(peer);
-        log.info("Peer ID {} established connection", session.getId());
-    }
-
-    public void unconnectPeer(WebSocketSession session) {
-        final Peer peer = findPeerBySession(session);
-        peers.remove(peer);
-        unconnectPeerInNetwork(peer);
-        log.info("Peer ID {} disconnected", session.getId());
+        log.info("Pong received from peer ID {}", peer.getPeerId());
     }
 
     @PostConstruct
@@ -72,19 +63,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     }
                 }
             }
-        }, 0, 5, TimeUnit.SECONDS);
-    }
-
-    public Peer findPeerBySession(WebSocketSession session) {
-        return peers.stream()
-                .filter(peer -> peer.getSession().equals(session)).findFirst()
-                .orElse(null);
-    }
-
-    public Peer findPeerById(String peerId) {
-        return peers.stream()
-                .filter(p -> p.getSessionId().equals(peerId)).findFirst()
-                .orElse(null);
+        }, 0, WebSocketHandler.HEARTBEAT_PERIOD, TimeUnit.SECONDS);
     }
 
     /**
@@ -105,37 +84,124 @@ public class WebSocketHandler extends TextWebSocketHandler {
             peer.updatePeerSession(session);
 
             switch (payload.getType()) {
-                case RequestType.CONNECT -> {
-                    final PeerConnectRequest data = new ObjectMapper().convertValue(payload.getData(), PeerConnectRequest.class);
-                    peer.setName(data.getName());
-                    peer.setDiscoverability(data.getDiscoverability());
-                    sendMessage(session, new PeerConnectResponse(peer.getSessionId()));
-                    log.info("Peer ID {} connected", peer.getSessionId());
-                    handlePeerConnection(peer);
-                }
-                case RequestType.CHANGE_SETTINGS -> {
-                    final PeerChangeSettingsRequest data = new ObjectMapper().convertValue(payload.getData(), PeerChangeSettingsRequest.class);
-                    peer.setName(data.getName());
-                    peer.setDiscoverability(data.getDiscoverability());
-                }
-                case RequestType.OFFER -> {
-                    final RTCOfferRequest data = new ObjectMapper().convertValue(payload.getData(), RTCOfferRequest.class);
-                    final Peer recipientPeer = findPeerById(data.getPeerId());
-
-                    if (recipientPeer != null) {
-                        sendMessage(recipientPeer.getSession(), new RTCAnswerResponse(peer.getSessionId(), data.getOffer(), peer.getName(), peer.getDevice()));
-                    }
-                }
-                case RequestType.ANSWER -> {
-                    final RTCAnswerRequest data = new ObjectMapper().convertValue(payload.getData(), RTCAnswerRequest.class);
-                    final Peer recipientPeer = findPeerById(data.getPeerId());
-
-                    if (recipientPeer != null) {
-                        sendMessage(recipientPeer.getSession(), new RTCApproveAnswerResponse(peer.getSessionId(), data.getAnswer()));
-                    }
-                }
+                case RequestType.CONNECT -> handleConnect(session, peer, payload);
+                case RequestType.OFFER -> handleOffer(peer, payload);
+                case RequestType.ANSWER -> handleAnswer(peer, payload);
+                case RequestType.PEER_CONNECT -> handlePeerConnect(session, payload);
+                case RequestType.PEER_RECONNECT -> handlePeerReconnect(session, payload);
+                case RequestType.CHANGE_SETTINGS -> handleChangeSettings(peer, payload);
             }
         }
+    }
+
+    private void connectPeer(final WebSocketSession session) {
+        final Peer peer = new Peer(session);
+        peers.add(peer);
+    }
+
+    private void unconnectPeer(final WebSocketSession session) {
+        final Peer peer = findPeerBySession(session);
+        peers.remove(peer);
+        unconnectPeerInNetwork(peer);
+        log.info("Peer ID {} disconnected", peer.getPeerId());
+    }
+
+    private void handleChangeSettings(
+            final Peer peer,
+            final BaseRequest payload
+    ) {
+        final PeerChangeSettingsRequest data = new ObjectMapper().convertValue(payload.getData(), PeerChangeSettingsRequest.class);
+        peer.setName(data.getName());
+        peer.setConnectionId(data.getConnectionId());
+        peer.setDiscoverability(data.getDiscoverability());
+    }
+
+    private void handlePeerConnect(
+            final WebSocketSession session,
+            final BaseRequest payload
+    ) {
+        final ConnectPeerRequest data = new ObjectMapper().convertValue(payload.getData(), ConnectPeerRequest.class);
+        final String connectionId = data.getConnectionId();
+        final Peer peerA = findPeerByConnectionId(connectionId);
+
+        if (peerA != null) {
+            final Peer peerB = findPeerBySession(session);
+            establishConnectionBetweenPeers(peerA, peerB, ConnectionType.MANUAL);
+            sendMessage(session, new PeerManualConnectResponse(peerA.getPeerId(), true));
+        } else {
+            sendMessage(session, new PeerManualConnectResponse(null, false));
+        }
+    }
+
+    private void handlePeerReconnect(WebSocketSession session, BaseRequest payload) {
+        final ReconnectPeerRequest data = new ObjectMapper().convertValue(payload.getData(), ReconnectPeerRequest.class);
+        final Peer peerA = findPeerById(data.getPeerId());
+
+        if (peerA != null) {
+            final Peer peerB = findPeerBySession(session);
+            establishConnectionBetweenPeers(peerA, peerB, ConnectionType.MANUAL); // TODO: Is it manual?
+        }
+    }
+
+    private void handleAnswer(
+            final Peer peerA,
+            final BaseRequest payload
+    ) {
+        final RTCAnswerRequest data = new ObjectMapper().convertValue(payload.getData(), RTCAnswerRequest.class);
+        final Peer peerB = findPeerById(data.getPeerId());
+
+        if (peerB != null) {
+            sendMessage(peerB.getSession(), new RTCApproveAnswerResponse(
+                    peerA.getPeerId(),
+                    data.getAnswer())
+            );
+        }
+    }
+
+    private void handleOffer(
+            final Peer peerA,
+            final BaseRequest payload
+    ) {
+        final RTCOfferRequest data = new ObjectMapper().convertValue(payload.getData(), RTCOfferRequest.class);
+        final Peer peerB = findPeerById(data.getPeerId());
+
+        if (peerB != null) {
+            sendMessage(peerB.getSession(), new RTCAnswerResponse(
+                    peerA.getPeerId(),
+                    data.getOffer(),
+                    peerA.getName(),
+                    peerA.getDevice(),
+                    data.getConnectionType()
+            ));
+        }
+    }
+
+    private void handleConnect(
+            final WebSocketSession session,
+            final Peer peer,
+            final BaseRequest payload
+    ) {
+        final String connectionId = ConnectionIdGenerator.generateConnectionId(6, peers);
+        final PeerConnectRequest data = new ObjectMapper().convertValue(payload.getData(), PeerConnectRequest.class);
+
+        peer.setName(data.getName());
+        peer.setPeerId(data.getPeerId());
+        peer.setConnectionId(connectionId);
+        peer.setDiscoverability(data.getDiscoverability());
+
+        sendMessage(session, new PeerConnectResponse(peer.getPeerId(), peer.getConnectionId()));
+        log.info("Peer ID {} connected", peer.getPeerId());
+
+        handlePeerConnection(peer);
+    }
+
+    private Peer findPeerByConnectionId(
+            final String connectionId
+    ) {
+        return peers.stream()
+                .filter(p -> p.getConnectionId().equals(connectionId))
+                .findFirst()
+                .orElse(null);
     }
 
     private void sendMessage(
@@ -153,10 +219,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    private void handlePeerConnection(final Peer peer) {
-        if (peer.getDiscoverability().equals(Discoverability.NETWORK)) {
-            for (Peer p : findPeersInNetwork(peer)) {
-                establishConnectionBetweenPeers(p, peer);
+    private void handlePeerConnection(final Peer peerA) {
+        if (peerA.getDiscoverability().equals(Discoverability.NETWORK)) {
+            for (Peer peerB : findPeersInNetwork(peerA)) {
+                establishConnectionBetweenPeers(peerB, peerA, ConnectionType.NETWORK);
             }
         }
     }
@@ -172,15 +238,31 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     private void unconnectPeerInNetwork(final Peer peer) {
         for (Peer p : findPeersInNetwork(peer)) {
-            sendMessage(p.getSession(), new PeerDisconnectResponse(peer.getSessionId()));
+            sendMessage(p.getSession(), new PeerDisconnectResponse(peer.getPeerId()));
         }
     }
 
-    private void establishConnectionBetweenPeers(Peer peerA, Peer peerB) {
+    private void establishConnectionBetweenPeers(
+            final Peer peerA,
+            final Peer peerB,
+            final ConnectionType connectionType
+    ) {
         if (!peerA.equals(peerB)) {
-            log.info("Peer A {} and Peer B {} connected", peerA.getSessionId(), peerB.getSessionId());
-            sendMessage(peerA.getSession(), new RTCOfferResponse(peerB.getSessionId(), peerB.getName(), peerA.getDevice()));
+            log.info("Peer-A ID {} and peer-B ID {} connected through {} connection", peerA.getPeerId(), peerB.getPeerId(), connectionType);
+            sendMessage(peerA.getSession(), new RTCOfferResponse(peerB.getPeerId(), peerB.getName(), peerA.getDevice(), connectionType));
         }
+    }
+
+    private Peer findPeerBySession(final WebSocketSession session) {
+        return peers.stream()
+                .filter(peer -> peer.getSession().equals(session)).findFirst()
+                .orElse(null);
+    }
+
+    private Peer findPeerById(final UUID peerId) {
+        return peers.stream()
+                .filter(p -> p.getPeerId() != null && p.getPeerId().equals(peerId)).findFirst()
+                .orElse(null);
     }
 
 }

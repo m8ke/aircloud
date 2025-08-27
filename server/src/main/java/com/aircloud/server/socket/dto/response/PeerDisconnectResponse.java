@@ -3,15 +3,17 @@ package com.aircloud.server.socket.dto.response;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class PeerDisconnectResponse {
 
     private ResponseType type = ResponseType.DISCONNECT;
 
-    private String peerId;
+    private UUID peerId;
 
-    public PeerDisconnectResponse(String peerId) {
+    public PeerDisconnectResponse(UUID peerId) {
         this.peerId = peerId;
     }
 
