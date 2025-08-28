@@ -8,12 +8,15 @@ services:
       - type: bind
         source: ./nginx/nginx.conf
         target: /etc/nginx/nginx.conf
+        read_only: true
       - type: bind
         source: ./nginx/templates
         target: /etc/nginx/templates
+        read_only: true
       - type: bind
-        source: ./ssl/aircloud.sh
-        target: /etc/ssl/aircloud.sh
+        source: ./ssl
+        target: /etc/ssl
+        read_only: true
     ports:
       - "80:80"
       - "443:443"
