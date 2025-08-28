@@ -19,20 +19,12 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
             Map<String, Object> attributes
     ) {
         if (request instanceof ServletServerHttpRequest servletRequest) {
-            HttpServletRequest httpRequest = servletRequest.getServletRequest();
-            String userAgent = servletRequest.getServletRequest().getHeader("User-Agent");
+            final HttpServletRequest httpRequest = servletRequest.getServletRequest();
+
+            final String userAgent = httpRequest.getHeader("User-Agent");
+            final String ipAddress = httpRequest.getRemoteAddr();
+
             attributes.put("userAgent", userAgent);
-
-            String ipAddress = httpRequest.getHeader("X-Forwarded-For");
-
-            if (ipAddress == null) {
-                ipAddress = httpRequest.getHeader("X-Real-IP");
-            }
-
-            if (ipAddress == null) {
-                ipAddress = httpRequest.getRemoteAddr(); // fallback
-            }
-
             attributes.put("ipAddress", ipAddress);
         }
         return true;
