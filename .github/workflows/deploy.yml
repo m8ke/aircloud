@@ -26,12 +26,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.AIRCLOUD_PAT }}
 
-      - name: Set SSL
-        run: |
-          mkdir -p ./ssl/aircloud.sh
-          echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_PRIVATE_KEY_BASE64 }} | base64 -d > ./ssl/aircloud.sh/key.pem
-          echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_CERTIFICATE_BASE64 }} | base64 -d > ./ssl/aircloud.sh/certificate.pem
-
       - name: Build Docker image
         run: docker compose -f docker-compose.yml build
 
