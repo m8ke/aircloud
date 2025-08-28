@@ -9,7 +9,7 @@ RUN npm ci
 
 COPY . ./
 
-RUN npm run build--configuration=production
+RUN npm run build --configuration=production
 
 # STAGE 2: BOOT
 FROM node:24-alpine
