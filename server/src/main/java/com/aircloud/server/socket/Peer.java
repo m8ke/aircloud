@@ -41,7 +41,7 @@ public class Peer {
     }
 
     private String parseIpAddress() {
-        return Objects.requireNonNull(session.getRemoteAddress()).getAddress().getHostAddress();
+        return (String) session.getAttributes().get("ipAddress");
     }
 
     private String parseDeviceName() {

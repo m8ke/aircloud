@@ -1,5 +1,6 @@
 package com.aircloud.server.socket;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -18,8 +19,21 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
             Map<String, Object> attributes
     ) {
         if (request instanceof ServletServerHttpRequest servletRequest) {
+            HttpServletRequest httpRequest = servletRequest.getServletRequest();
             String userAgent = servletRequest.getServletRequest().getHeader("User-Agent");
             attributes.put("userAgent", userAgent);
+
+            String ipAddress = httpRequest.getHeader("X-Forwarded-For");
+
+            if (ipAddress == null) {
+                ipAddress = httpRequest.getHeader("X-Real-IP");
+            }
+
+            if (ipAddress == null) {
+                ipAddress = httpRequest.getRemoteAddr(); // fallback
+            }
+
+            attributes.put("ipAddress", ipAddress);
         }
         return true;
     }
