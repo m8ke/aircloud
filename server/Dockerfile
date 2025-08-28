@@ -1,5 +1,5 @@
 # STAGE 1: BUILD
-FROM gradle:jdk24-jammy AS build
+FROM gradle:jdk24-corretto AS build
 
 WORKDIR /home/gradle/src
 
