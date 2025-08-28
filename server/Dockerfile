@@ -1,16 +1,14 @@
 # STAGE 1: BUILD
 FROM gradle:jdk24-jammy AS build
 
-COPY . /server
-
-COPY --chown=gradle:gradle . /home/gradle/src
-
 WORKDIR /home/gradle/src
+
+COPY --chown=gradle:gradle . .
 
 RUN gradle build --no-daemon -x test
 
 # STAGE 2: BOOT
-FROM eclipse-temurin:24-jdk-jammy
+FROM eclipse-temurin:24-jdk-ubi9-minimal
 
 ENV PORT=$PORT
 
