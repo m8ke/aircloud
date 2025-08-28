@@ -17,8 +17,9 @@
 way to transfer files across devices. We never upload, store, or track files.
 </p>
 
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/m8ke/aircloud/client-ci.yml?label=Client%20CI&style=flat-square)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/m8ke/aircloud/server-ci.yml?label=Server%20CI&style=flat-square)
+[//]: # (![GitHub Actions Workflow Status]&#40;https://img.shields.io/github/actions/workflow/status/m8ke/aircloud/client-ci.yml?label=Client%20CI&style=flat-square&#41;)
+
+[//]: # (![GitHub Actions Workflow Status]&#40;https://img.shields.io/github/actions/workflow/status/m8ke/aircloud/server-ci.yml?label=Server%20CI&style=flat-square&#41;)
 </div>
 
 <br>
