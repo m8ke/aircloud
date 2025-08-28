@@ -1,10 +1,11 @@
 aircloud:
   cors:
-    origin: ${DOMAIN}
+    origin: "*"
 
 spring:
   application:
     name: AirCloud
 
 server:
-  port: ${PORT}
+  port: 8080
+  address: 0.0.0.0

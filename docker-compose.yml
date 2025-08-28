@@ -1,0 +1,51 @@
+services:
+  aircloud-nginx:
+    image: nginx:1.29-alpine
+    restart: always
+    pull_policy: always
+    container_name: aircloud-nginx
+    volumes:
+      - type: bind
+        source: ./nginx/nginx.conf
+        target: /etc/nginx/nginx.conf
+        read_only: true
+      - type: bind
+        source: ./nginx/templates
+        target: /etc/nginx/templates
+        read_only: true
+      - type: bind
+        source: ./ssl
+        target: /etc/ssl
+        read_only: true
+    ports:
+      - "80:80"
+      - "443:443"
+
+  aircloud-server:
+    image: ghcr.io/${GH_REPOSITORY}/aircloud-server:latest
+    restart: always
+    pull_policy: always
+    container_name: aircloud-server
+    build:
+      context: ./server
+    environment:
+      PORT: ${SERVER_PORT}
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    depends_on:
+      - aircloud-nginx
+
+  aircloud-client:
+    image: ghcr.io/${GH_REPOSITORY}/aircloud-client:latest
+    restart: always
+    pull_policy: always
+    container_name: aircloud-client
+    build:
+      context: ./client
+    environment:
+      PORT: ${CLIENT_PORT}
+    ports:
+      - "${CLIENT_PORT}:${CLIENT_PORT}"
+    depends_on:
+      - aircloud-server

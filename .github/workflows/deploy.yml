@@ -1,0 +1,72 @@
+name: CD
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      GH_REPOSITORY: ${{ github.repository }}
+      DOMAIN: ${{ vars.DOMAIN }}
+      CLIENT_PORT: ${{ vars.CLIENT_PORT }}
+      SERVER_PORT: ${{ vars.SERVER_PORT }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.AIRCLOUD_PAT }}
+
+      - name: Build Docker image
+        run: docker compose -f docker-compose.yml build
+
+      - name: Push Docker image
+        run: docker compose -f docker-compose.yml push
+
+      - name: Remove other Docker images
+        run: docker image prune -a -f
+
+  deploy:
+    name: Deploy
+    needs:
+      - build
+    runs-on:
+      - self-hosted
+      - production
+      - aircloud
+    environment:
+      name: aircloud.sh
+    env:
+      GH_REPOSITORY: ${{ github.repository }}
+      DOMAIN: ${{ vars.DOMAIN }}
+      CLIENT_PORT: ${{ vars.CLIENT_PORT }}
+      SERVER_PORT: ${{ vars.SERVER_PORT }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.AIRCLOUD_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Set SSL
+        run: |
+          mkdir -p ./ssl/aircloud.sh
+          echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_PRIVATE_KEY_BASE64 }} | base64 -d > ./ssl/aircloud.sh/key.pem
+          echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_CERTIFICATE_BASE64 }} | base64 -d > ./ssl/aircloud.sh/certificate.pem
+
+      - name: Remove Docker image
+        run: docker compose -f docker-compose.yml down --remove-orphans
+
+      - name: Pull Docker image
+        run: docker compose pull
+
+      - name: Run Docker image
+        run: docker compose up -d --force-recreate
