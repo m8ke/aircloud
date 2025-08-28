@@ -12,9 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_REPOSITORY: ${{ github.repository }}
-      DOMAIN: ${{ vars.DOMAIN }}
-      CLIENT_PORT: ${{ vars.CLIENT_PORT }}
-      SERVER_PORT: ${{ vars.SERVER_PORT }}
+      DOMAIN: https://aircloud.sh
+      CLIENT_PORT: 4000
+      SERVER_PORT: 8000
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
