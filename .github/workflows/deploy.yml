@@ -29,6 +29,7 @@ jobs:
       - name: Set SSL
         run: |
           mkdir -p ./nginx/ssl/aircloud.sh
+          touch ./nginx/ssl/aircloud.sh/key.pem ./nginx/ssl/aircloud.sh/certificate.pem
           echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_PRIVATE_KEY_BASE64 }} | base64 -d > ./nginx/ssl/aircloud.sh/key.pem
           echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_CERTIFICATE_BASE64 }} | base64 -d > ./nginx/ssl/aircloud.sh/certificate.pem
 
