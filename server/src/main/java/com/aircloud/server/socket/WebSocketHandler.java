@@ -231,7 +231,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         return peers.stream()
                 .filter(p -> p.getDiscoverability().equals(Discoverability.NETWORK))
                 .filter(p -> p.getIpAddress().equals(peer.getIpAddress()))
-                .filter(p -> !p.getPeerId().equals(peer.getPeerId()))
+                .filter(p -> !p.equals(peer))
                 .filter(Peer::isActive)
                 .toList();
     }
@@ -249,13 +249,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
     ) {
         if (!peerA.equals(peerB)) {
             log.info("Peer-A ID {} and peer-B ID {} connected through {} connection", peerA.getPeerId(), peerB.getPeerId(), connectionType);
-            sendMessage(peerA.getSession(), new RTCOfferResponse(peerB.getPeerId(), peerB.getName(), peerA.getDevice(), connectionType));
+            sendMessage(peerA.getSession(), new RTCOfferResponse(peerB.getPeerId(), peerB.getName(), peerB.getDevice(), connectionType));
         }
     }
 
     private Peer findPeerBySession(final WebSocketSession session) {
         return peers.stream()
-                .filter(peer -> peer.getSession().equals(session)).findFirst()
+                .filter(peer -> peer.getSession().equals(session))
+                .findFirst()
                 .orElse(null);
     }
 

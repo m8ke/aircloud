@@ -24,7 +24,6 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
             final String userAgent = httpRequest.getHeader("User-Agent");
             String ipAddress = httpRequest.getRemoteAddr();
 
-            // As fallback, check headers manually
             if (ipAddress == null || ipAddress.startsWith("127.") || ipAddress.startsWith("0:0:0:0:0:0:0:1")) {
                 ipAddress = httpRequest.getHeader("X-Forwarded-For");
                 if (ipAddress == null) {

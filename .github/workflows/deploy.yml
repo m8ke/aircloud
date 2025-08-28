@@ -70,3 +70,6 @@ jobs:
 
       - name: Run Docker image
         run: docker compose up -d --force-recreate
+
+      - name: Prune Docker system
+        run: yes | docker system prune -a
