@@ -54,12 +54,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set SSL
-        run: |
-          mkdir -p ./ssl/aircloud.sh
-          echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_PRIVATE_KEY_BASE64 }} | base64 -d > ./ssl/aircloud.sh/key.pem
-          echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_CERTIFICATE_BASE64 }} | base64 -d > ./ssl/aircloud.sh/certificate.pem
-
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.AIRCLOUD_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
