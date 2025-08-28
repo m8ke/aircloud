@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "client"
+    labels:
+      - "build"
+    commit-message:
+      prefix: "build"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gradle"
+    directory: "server"
+    labels:
+      - "build"
+    commit-message:
+      prefix: "build"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: ".github/workflows"
+    labels:
+      - "ci"
+    commit-message:
+      prefix: "ci"
+    schedule:
+      interval: "weekly"
