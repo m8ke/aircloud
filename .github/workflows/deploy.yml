@@ -32,6 +32,11 @@ jobs:
           echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_PRIVATE_KEY_BASE64 }} | base64 -d > ./ssl/aircloud.sh/key.pem
           echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_CERTIFICATE_BASE64 }} | base64 -d > ./ssl/aircloud.sh/certificate.pem
 
+      - name: Verify SSL files
+        run: |
+          ls -l ./ssl/aircloud.sh
+          file ./ssl/aircloud.sh/*
+
       - name: Build Docker image
         run: docker compose -f docker-compose.yml build
 
