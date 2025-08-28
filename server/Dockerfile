@@ -11,6 +11,7 @@ RUN gradle build --no-daemon -x test
 FROM eclipse-temurin:24-jdk-ubi9-minimal
 
 ENV PORT=$PORT
+ENV DOMAIN=$DOMAIN
 
 COPY --from=build /home/gradle/src/build/libs/*.jar server.jar
 

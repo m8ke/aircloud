@@ -1,4 +1,4 @@
-name: Deploy
+name: CD
 
 on:
   pull_request: # For testing purposes
@@ -12,9 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_REPOSITORY: ${{ github.repository }}
-      DOMAIN: https://aircloud.sh
-      CLIENT_PORT: 4000
-      SERVER_PORT: 8000
+      DOMAIN: ${{ vars.DOMAIN }}
+      CLIENT_PORT: ${{ vars.CLIENT_PORT }}
+      SERVER_PORT: ${{ vars.SERVER_PORT }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -54,6 +54,9 @@ jobs:
       name: aircloud.sh
     env:
       GH_REPOSITORY: ${{ github.repository }}
+      DOMAIN: ${{ vars.DOMAIN }}
+      CLIENT_PORT: ${{ vars.CLIENT_PORT }}
+      SERVER_PORT: ${{ vars.SERVER_PORT }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
