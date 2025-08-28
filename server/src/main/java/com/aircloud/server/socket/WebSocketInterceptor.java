@@ -22,7 +22,15 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
             final HttpServletRequest httpRequest = servletRequest.getServletRequest();
 
             final String userAgent = httpRequest.getHeader("User-Agent");
-            final String ipAddress = httpRequest.getRemoteAddr();
+            String ipAddress = httpRequest.getRemoteAddr();
+
+            // As fallback, check headers manually
+            if (ipAddress == null || ipAddress.startsWith("127.") || ipAddress.startsWith("0:0:0:0:0:0:0:1")) {
+                ipAddress = httpRequest.getHeader("X-Forwarded-For");
+                if (ipAddress == null) {
+                    ipAddress = httpRequest.getHeader("X-Real-IP");
+                }
+            }
 
             attributes.put("userAgent", userAgent);
             attributes.put("ipAddress", ipAddress);

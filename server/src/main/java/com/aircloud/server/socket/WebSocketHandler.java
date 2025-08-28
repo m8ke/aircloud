@@ -231,7 +231,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         return peers.stream()
                 .filter(p -> p.getDiscoverability().equals(Discoverability.NETWORK))
                 .filter(p -> p.getIpAddress().equals(peer.getIpAddress()))
-                .filter(p -> !p.equals(peer))
+                .filter(p -> !p.getPeerId().equals(peer.getPeerId()))
                 .filter(Peer::isActive)
                 .toList();
     }
