@@ -26,6 +26,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.AIRCLOUD_PAT }}
 
+      - name: Set SSL
+        run: |
+          mkdir -p ./ssl/aircloud.sh
+          echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_PRIVATE_KEY_BASE64 }} | base64 -d > ./ssl/aircloud.sh/key.pem
+          echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_CERTIFICATE_BASE64 }} | base64 -d > ./ssl/aircloud.sh/certificate.pem
+
       - name: Build Docker image
         run: docker compose -f docker-compose.yml build
 
@@ -43,8 +49,8 @@ jobs:
       - self-hosted
       - production
       - aircloud
-    environment:
-      name: aircloud.sh
+    # environment:
+      # name: aircloud.sh
     env:
       GH_REPOSITORY: ${{ github.repository }}
       DOMAIN: ${{ vars.DOMAIN }}
@@ -56,6 +62,12 @@ jobs:
 
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.AIRCLOUD_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Set SSL
+        run: |
+          mkdir -p ./ssl/aircloud.sh
+          echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_PRIVATE_KEY_BASE64 }} | base64 -d > ./ssl/aircloud.sh/key.pem
+          echo ${{ secrets.DOMAIN_AIRCLOUD_SH_SSL_CERTIFICATE_BASE64 }} | base64 -d > ./ssl/aircloud.sh/certificate.pem
 
       - name: Remove Docker image
         run: docker compose -f docker-compose.yml down --remove-orphans

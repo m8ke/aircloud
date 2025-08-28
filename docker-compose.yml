@@ -12,8 +12,8 @@ services:
         source: ./nginx/templates
         target: /etc/nginx/templates
       - type: bind
-        source: ./ssl
-        target: /etc/ssl
+        source: ./ssl/aircloud.sh
+        target: /etc/ssl/aircloud.sh
     ports:
       - "80:80"
       - "443:443"
