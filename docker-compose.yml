@@ -12,7 +12,7 @@ services:
         source: ./nginx/templates
         target: /etc/nginx/templates
       - type: bind
-        source: ./ssl
+        source: ./nginx/ssl
         target: /etc/ssl
     ports:
       - "80:80"
