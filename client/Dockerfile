@@ -18,6 +18,6 @@ ENV PORT=$PORT
 
 COPY --from=build /client/package.json ./
 COPY --from=build /client/node_modules ./node_modules
-COPY --from=build /client/dist/aircloud/server ./dist
+COPY --from=build /client/dist ./dist
 
 CMD ["sh", "-c", "npm run serve:ssr:aircloud"]
