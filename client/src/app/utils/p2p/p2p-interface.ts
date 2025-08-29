@@ -1,10 +1,9 @@
-export enum RequestType {
+export enum SocketRequestType {
     CONNECT = "CONNECT",
     OFFER = "OFFER",
     ANSWER = "ANSWER",
     PEER_CONNECT = "PEER_CONNECT",
     PEER_RECONNECT = "PEER_RECONNECT",
-    CHANGE_SETTINGS = "CHANGE_SETTINGS",
 }
 
 export enum ResponseType {
@@ -17,12 +16,11 @@ export enum ResponseType {
 }
 
 export enum Discoverability {
-    HIDDEN = "HIDDEN",
     NETWORK = "NETWORK"
 }
 
 export interface ConnectRequest {
-    type: RequestType,
+    type: SocketRequestType,
     data: {
         name: string;
         peerId: string;

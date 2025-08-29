@@ -1,7 +1,7 @@
 import { NgStyle, TitleCasePipe } from "@angular/common";
 import { Component, inject, signal } from "@angular/core";
 
-import { RTC } from "@/utils/rtc/rtc";
+import { P2P } from "@/utils/p2p/p2p";
 import { Navbar } from "@/ui/navbar/navbar";
 import { Session } from "@/utils/session/session";
 import { CdkDropList } from "@angular/cdk/drag-drop";
@@ -22,7 +22,7 @@ import { NotificationService, NotificationType } from "@/ui/notification/notific
     styleUrl: "./layout.scss",
 })
 export class Layout {
-    protected readonly rtc: RTC = inject<RTC>(RTC);
+    protected readonly p2p: P2P = inject<P2P>(P2P);
     protected readonly session: Session = inject<Session>(Session);
     private readonly fileManager: FileManager = inject(FileManager);
     private readonly notification: NotificationService = inject(NotificationService);

@@ -1,13 +1,13 @@
 import { TestBed } from "@angular/core/testing";
 
-import { Socket } from "@/utils/socket/socket";
+import { P2P } from "@/utils/p2p/p2p";
 
 describe("Socket", () => {
-    let service: Socket;
+    let service: P2P;
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
-        service = TestBed.inject(Socket);
+        service = TestBed.inject(P2P);
     });
 
     it("should be created", () => {

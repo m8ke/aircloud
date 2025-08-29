@@ -215,7 +215,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Can't send the message due to disconnection");
         }
     }
 
