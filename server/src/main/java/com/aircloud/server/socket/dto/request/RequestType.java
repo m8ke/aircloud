@@ -11,6 +11,8 @@ public enum RequestType {
     PEER_CONNECT,
     PEER_RECONNECT,
     OFFER,
-    ANSWER
+    ANSWER,
+    ICE_CANDIDATE,
+    END_OF_ICE_CANDIDATES,
 
 }

@@ -1,7 +1,7 @@
 import { RouterOutlet } from "@angular/router";
 import { Component, inject } from "@angular/core";
 
-import { Socket } from "@/utils/socket/socket";
+import { P2P } from "@/utils/p2p/p2p";
 import { Session } from "@/utils/session/session";
 
 @Component({
@@ -11,11 +11,11 @@ import { Session } from "@/utils/session/session";
     styleUrl: "./app.scss",
 })
 export class App {
-    private readonly socket: Socket = inject<Socket>(Socket);
+    private readonly p2p: P2P = inject<P2P>(P2P);
     private readonly session: Session = inject<Session>(Session);
 
     public constructor() {
         this.session.init();
-        this.socket.init();
+        this.p2p.init();
     }
 }

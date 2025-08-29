@@ -8,12 +8,10 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class RTCAnswerRequest {
-
-    private final RequestType type = RequestType.ANSWER;
-
-    private JsonNode answer;
+public class IceCandidateRequest {
 
     private UUID peerId;
+
+    private JsonNode ice;
 
 }

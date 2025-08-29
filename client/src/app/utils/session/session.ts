@@ -3,7 +3,7 @@ import { inject, Injectable } from "@angular/core";
 
 import animals from "@/utils/session/dict/animals";
 import { SessionStorage } from "@/utils/storage/session-storage";
-import { Discoverability } from "@/utils/socket/socket-interface";
+import { Discoverability } from "@/utils/p2p/p2p-interface";
 
 enum SessionKey {
     NAME = "NAME",

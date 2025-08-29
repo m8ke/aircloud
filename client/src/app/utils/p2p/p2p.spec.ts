@@ -1,13 +1,13 @@
 import { TestBed } from "@angular/core/testing";
 
-import { Compression } from "@/utils/compression/compression";
+import { P2P } from "@/utils/p2p/p2p";
 
-describe("Compression", () => {
-    let service: Compression;
+describe("Socket", () => {
+    let service: P2P;
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
-        service = TestBed.inject(Compression);
+        service = TestBed.inject(P2P);
     });
 
     it("should be created", () => {

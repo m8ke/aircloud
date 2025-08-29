@@ -3,11 +3,10 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angula
 import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, viewChild } from "@angular/core";
 
 import { Env } from "@/utils/env/env";
-import { RTC } from "@/utils/rtc/rtc";
+import { P2P } from "@/utils/p2p/p2p";
 import { Peer } from "@/ui/peer/peer";
 import { Modal } from "@/ui/modal/modal";
 import { Layout } from "@/ui/layout/layout";
-import { Socket } from "@/utils/socket/socket";
 import { Session } from "@/utils/session/session";
 import { FileManager } from "@/utils/file-manager/file-manager";
 import { SendingFile } from "@/utils/file-manager/sending-file";
@@ -30,13 +29,12 @@ import { QRCodeComponent } from "angularx-qrcode";
 })
 export class Dropzone implements OnInit {
     protected formJoinPeer!: FormGroup;
-    protected readonly rtc: RTC = inject<RTC>(RTC);
+    protected readonly p2p: P2P = inject<P2P>(P2P);
     protected readonly session: Session = inject<Session>(Session);
     protected readonly fileManager: FileManager = inject<FileManager>(FileManager);
 
     private readonly env: Env = inject<Env>(Env);
     private readonly route: ActivatedRoute = inject<ActivatedRoute>(ActivatedRoute);
-    private readonly socket: Socket = inject<Socket>(Socket);
     private readonly formBuilder: FormBuilder = inject<FormBuilder>(FormBuilder);
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
@@ -53,7 +51,7 @@ export class Dropzone implements OnInit {
         });
 
         if (this.connectionId) {
-            this.socket.connectPeer(this.connectionId);
+            this.p2p.connectPeer(this.connectionId);
         }
     }
 
@@ -78,20 +76,20 @@ export class Dropzone implements OnInit {
     }
 
     protected async sendFilesToPeer(peerId: string): Promise<void> {
-        this.rtc.requestFileSending(peerId, await this.fileManager.bundleFiles());
+        this.p2p.requestFileSending(peerId, await this.fileManager.bundleFiles());
     }
 
     protected cancelFileSending(peerId: string): void {
-        this.rtc.removePendingFilesByPeerId(peerId);
+        this.p2p.removePendingFilesByPeerId(peerId);
     }
 
     protected isLoading(peerId: string): boolean {
-        const file: SendingFile | undefined = this.rtc.sendingFiles().get(peerId);
+        const file: SendingFile | undefined = this.p2p.sendingFiles().get(peerId);
         return !!file;
     }
 
     protected getProgress(peerId: string): number {
-        const file: SendingFile | undefined = this.rtc.sendingFiles().get(peerId);
+        const file: SendingFile | undefined = this.p2p.sendingFiles().get(peerId);
 
         if (!file) {
             return 0;
@@ -109,6 +107,6 @@ export class Dropzone implements OnInit {
     }
 
     protected onConnectPeer(): void {
-        this.socket.connectPeer(this.formJoinPeer.get("connectionId")?.value);
+        this.p2p.connectPeer(this.formJoinPeer.get("connectionId")?.value);
     }
 }

@@ -11,5 +11,7 @@ public enum ResponseType {
     ANSWER,
     APPROVE_ANSWER,
     PEER_CONNECT,
+    ICE_CANDIDATE,
+    END_OF_ICE_CANDIDATES
 
 }

@@ -9,8 +9,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-import ua_parser.Client;
-import ua_parser.Parser;
 
 import java.io.IOException;
 import java.util.*;
@@ -90,6 +88,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 case RequestType.PEER_CONNECT -> handlePeerConnect(session, payload);
                 case RequestType.PEER_RECONNECT -> handlePeerReconnect(session, payload);
                 case RequestType.CHANGE_SETTINGS -> handleChangeSettings(peer, payload);
+                case RequestType.ICE_CANDIDATE -> handleIceCandidate(session, payload);
+                case RequestType.END_OF_ICE_CANDIDATES -> handleEndOfIceCandidates(session, payload);
             }
         }
     }
@@ -140,6 +140,26 @@ public class WebSocketHandler extends TextWebSocketHandler {
         if (peerA != null) {
             final Peer peerB = findPeerBySession(session);
             establishConnectionBetweenPeers(peerA, peerB, ConnectionType.MANUAL); // TODO: Is it manual?
+        }
+    }
+
+    private void handleIceCandidate(WebSocketSession session, BaseRequest payload) {
+        final IceCandidateRequest data = new ObjectMapper().convertValue(payload.getData(), IceCandidateRequest.class);
+        final Peer peerA = findPeerById(data.getPeerId());
+
+        if (peerA != null) {
+            final Peer peerB = findPeerBySession(session);
+            sendMessage(peerA.getSession(), new IceCandidateResponse(peerB.getPeerId(), data.getIce()));
+        }
+    }
+
+    private void handleEndOfIceCandidates(WebSocketSession session, BaseRequest payload) {
+        final EndOfIceCandidateRequest data = new ObjectMapper().convertValue(payload.getData(), EndOfIceCandidateRequest.class);
+        final Peer peerA = findPeerById(data.getPeerId());
+
+        if (peerA != null) {
+            final Peer peerB = findPeerBySession(session);
+            sendMessage(peerA.getSession(), new EndOfIceCandidatesResponse(peerB.getPeerId()));
         }
     }
 
@@ -215,7 +235,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Can't send the message due to disconnection");
         }
     }
 

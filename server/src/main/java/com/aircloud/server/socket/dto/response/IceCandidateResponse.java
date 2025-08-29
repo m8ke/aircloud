@@ -8,17 +8,17 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class RTCApproveAnswerResponse {
+public class IceCandidateResponse {
 
-    private final ResponseType type = ResponseType.APPROVE_ANSWER;
+    private ResponseType type = ResponseType.ICE_CANDIDATE;
 
     private UUID peerId;
 
-    private JsonNode answer;
+    private JsonNode ice;
 
-    public RTCApproveAnswerResponse(UUID peerId, JsonNode answer) {
+    public IceCandidateResponse(UUID peerId, JsonNode ice) {
         this.peerId = peerId;
-        this.answer = answer;
+        this.ice = ice;
     }
 
 }
