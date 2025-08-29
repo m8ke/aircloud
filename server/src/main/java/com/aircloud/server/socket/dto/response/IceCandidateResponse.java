@@ -1,5 +1,6 @@
 package com.aircloud.server.socket.dto.response;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,9 +14,9 @@ public class IceCandidateResponse {
 
     private UUID peerId;
 
-    private String ice;
+    private JsonNode ice;
 
-    public IceCandidateResponse(UUID peerId, String ice) {
+    public IceCandidateResponse(UUID peerId, JsonNode ice) {
         this.peerId = peerId;
         this.ice = ice;
     }

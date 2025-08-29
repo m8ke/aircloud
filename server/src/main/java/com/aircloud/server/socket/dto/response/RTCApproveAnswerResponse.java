@@ -1,5 +1,6 @@
 package com.aircloud.server.socket.dto.response;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,9 +14,9 @@ public class RTCApproveAnswerResponse {
 
     private UUID peerId;
 
-    private String answer;
+    private JsonNode answer;
 
-    public RTCApproveAnswerResponse(UUID peerId, String answer) {
+    public RTCApproveAnswerResponse(UUID peerId, JsonNode answer) {
         this.peerId = peerId;
         this.answer = answer;
     }

@@ -1,5 +1,6 @@
 package com.aircloud.server.socket.dto.request;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,6 @@ public class IceCandidateRequest {
 
     private UUID peerId;
 
-    private String ice;
+    private JsonNode ice;
 
 }

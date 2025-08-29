@@ -1,5 +1,6 @@
 package com.aircloud.server.socket.dto.request;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +12,7 @@ public class RTCAnswerRequest {
 
     private final RequestType type = RequestType.ANSWER;
 
-    private String answer;
+    private JsonNode answer;
 
     private UUID peerId;
 
