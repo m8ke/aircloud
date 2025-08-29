@@ -327,11 +327,11 @@ export class P2P {
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
         const peer: Peer | undefined = this.pcs().get(peerId);
 
-        if (peer?.candidateQueue) {
-            for (const candidate of peer.candidateQueue) {
+        if (peer?.candidates) {
+            for (const candidate of peer.candidates) {
                 if (candidate && candidate.candidate) await pc.addIceCandidate(candidate).catch(console.error);
             }
-            peer.candidateQueue = [];
+            peer.candidates = [];
         }
 
         const answer: RTCSessionDescriptionInit = await pc.createAnswer();
@@ -368,11 +368,11 @@ export class P2P {
             return;
         }
 
-        if (peer?.candidateQueue?.length) {
-            for (const c of peer.candidateQueue) {
+        if (peer?.candidates?.length) {
+            for (const c of peer.candidates) {
                 if (c && c.candidate) await pc.addIceCandidate(new RTCIceCandidate(c)).catch(console.error);
             }
-            peer.candidateQueue = [];
+            peer.candidates = [];
         }
     }
 
@@ -742,8 +742,8 @@ export class P2P {
         if (pc.remoteDescription) {
             await pc.addIceCandidate(data.ice).catch(console.error);
         } else {
-            peer.candidateQueue = peer.candidateQueue || [];
-            peer.candidateQueue.push(data.ice);
+            peer.candidates = peer.candidates || [];
+            peer.candidates.push(data.ice);
         }
     }
 

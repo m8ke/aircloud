@@ -3,7 +3,7 @@ export class Peer {
     public name: string;
     public device: string;
     public isSendingFiles: boolean;
-    public candidateQueue: RTCIceCandidateInit[] = [];
+    public candidates: RTCIceCandidateInit[] = [];
 
     public constructor(
         name: string,
