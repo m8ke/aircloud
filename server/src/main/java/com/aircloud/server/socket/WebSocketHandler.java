@@ -250,7 +250,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private List<Peer> findPeersInNetwork(final Peer peer) {
         return peers.stream()
                 .filter(p -> p.getDiscoverability().equals(Discoverability.NETWORK))
-                .filter(p -> Objects.equals(p.getIpAddress(), peer.getIpAddress()))
+                .filter(p -> p.getIpAddress().equals(peer.getIpAddress()))
                 .filter(p -> !p.equals(peer))
                 .filter(Peer::isActive)
                 .toList();
