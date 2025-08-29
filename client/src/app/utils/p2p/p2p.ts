@@ -9,7 +9,7 @@ import { SendingFile } from "@/utils/file-manager/sending-file";
 import { ConnectionType } from "@/utils/p2p/connection-type";
 import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
-import { ConnectRequest, SocketRequestType, ResponseType } from "@/utils/p2p/p2p-interface";
+import { ConnectRequest, SocketRequestType, SocketResponseType } from "@/utils/p2p/p2p-interface";
 
 enum RTCType {
     EOF = "EOF",
@@ -27,7 +27,7 @@ export class P2P {
     private ws!: WebSocket;
     private readonly env: Env = inject<Env>(Env);
     private readonly session: Session = inject<Session>(Session);
-    // private readonly compression: Compression = inject<Compression>(Compression);
+    private readonly compression: Compression = inject<Compression>(Compression);
     private readonly notification: NotificationService = inject<NotificationService>(NotificationService);
 
     public readonly pcs = signal<Map<string, Peer>>(new Map<string, Peer>());
@@ -54,21 +54,25 @@ export class P2P {
         this.ws.onmessage = async (event): Promise<void> => {
             const data = JSON.parse(event.data);
 
-            switch (data.type as ResponseType) {
-                case ResponseType.CONNECT:
+            switch (data.type as SocketResponseType) {
+                case SocketResponseType.CONNECT:
                     return this.handleConnect(data);
-                case ResponseType.DISCONNECT:
+                case SocketResponseType.DISCONNECT:
                     return this.handleDisconnect(data);
-                case ResponseType.OFFER:
+                case SocketResponseType.OFFER:
                     return this.handleOffer(data);
-                case ResponseType.ANSWER:
+                case SocketResponseType.ANSWER:
                     return await this.handleAnswer(data);
-                case ResponseType.APPROVE_ANSWER:
+                case SocketResponseType.APPROVE_ANSWER:
                     return this.handleApproveAnswer(data);
-                case ResponseType.PEER_CONNECT:
+                case SocketResponseType.PEER_CONNECT:
                     return data.isConnected
                         ? this.handlePeerConnectSucceed(data)
                         : this.handlePeerConnectFailed(data);
+                case SocketResponseType.ICE_CANDIDATE:
+                    return this.handleIceCandidate(data);
+                case SocketResponseType.END_OF_ICE_CANDIDATES:
+                    return this.handleEndOfIceCandidates(data);
                 default:
                     console.log("[WebSocket] Unhandled message received", data);
                     break;
@@ -155,7 +159,6 @@ export class P2P {
         console.log(`[WebSocket] Received an offer request from peer ID ${data.peerId}`);
         const offer: string = await this.createOffer(data.peerId, data.name, data.device, data.connectionType);
 
-        console.log("SEND OFFER MESSAGE");
         this.sendSignal({
             type: SocketRequestType.OFFER,
             data: {
@@ -264,6 +267,33 @@ export class P2P {
             }
         };
 
+        pc.oniceconnectionstatechange = () => {
+            console.log(`[WebRTC] ICE state for peer ID ${peerId}: ${pc.iceConnectionState}`);
+        };
+
+        pc.onsignalingstatechange = () => {
+            console.log(`[WebRTC] Signaling state for peer ID ${peerId}: ${pc.signalingState}`);
+        };
+
+        pc.onicecandidate = (event) => {
+            if (event.candidate) {
+                this.sendSignal({
+                    type: SocketRequestType.ICE_CANDIDATE,
+                    data: {
+                        peerId,
+                        ice: JSON.stringify(event.candidate),
+                    },
+                });
+            } else {
+                this.sendSignal({
+                    type: SocketRequestType.END_OF_ICE_CANDIDATES,
+                    data: {
+                        peerId,
+                    },
+                });
+            }
+        };
+
         this.pcs.update(prev => {
             const next = new Map(prev);
             next.set(peerId, new Peer(name, device, pc));
@@ -288,15 +318,11 @@ export class P2P {
     public async createOffer(peerId: string, name: string, device: string, connectionType: ConnectionType): Promise<string> {
         const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, connectionType);
         const dc: RTCDataChannel = pc.createDataChannel(uuidv4());
-
         dc.bufferedAmountLowThreshold = P2P.CHUNK_SIZE;
         this.setupDataChannel(peerId, dc);
 
         const offer: RTCSessionDescriptionInit = await pc.createOffer();
         await pc.setLocalDescription(offer);
-
-        console.log("STARTED ICE GATHERING");
-        await this.waitForICEGathering(peerId);
 
         console.log(`[WebRTC] Created an offer for peer ID ${peerId}`);
         return JSON.stringify(pc.localDescription);
@@ -318,13 +344,19 @@ export class P2P {
             this.setupDataChannel(peerId, event.channel);
         };
 
-        pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer))).then(() => {
-            pc.createAnswer().then(answer => {
-                pc.setLocalDescription(answer).then(() => {
-                    await this.waitForICEGathering(peerId);
-                });
-            });
-        });
+        await pc.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer)));
+
+        const peer = this.pcs().get(peerId);
+
+        if (peer?.candidateQueue) {
+            for (const candidate of peer.candidateQueue) {
+                await pc.addIceCandidate(candidate).catch(console.error);
+            }
+            peer.candidateQueue = [];
+        }
+
+        const answer: RTCSessionDescriptionInit = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
 
         console.log(`[WebRTC] Created an answer for peer ID ${peerId}`);
         return JSON.stringify(pc.localDescription);
@@ -343,9 +375,27 @@ export class P2P {
             throw new Error(`No RTCPeerConnection for connection ID ${peerId}`);
         }
 
-        await pc.setRemoteDescription(
-            new RTCSessionDescription(JSON.parse(answer)),
-        );
+        if (pc.signalingState === "have-local-offer") {
+            await pc.setRemoteDescription(
+                new RTCSessionDescription(JSON.parse(answer)),
+            );
+        } else {
+            console.warn(`[WebRTC] Ignored answer for ${peerId}, state=${pc.signalingState}`);
+        }
+
+        const peer = this.pcs().get(peerId);
+
+        if (peer?.candidateQueue?.length) {
+            console.log(`[WebRTC] Flushing ${peer.candidateQueue.length} ICE candidates for ${peerId}`);
+
+            for (const candidate of peer.candidateQueue) {
+                if (candidate && candidate.candidate) {
+                    await pc.addIceCandidate(candidate).catch(console.error);
+                }
+            }
+
+            peer.candidateQueue = [];
+        }
 
         console.log(`[WebRTC] Accepted an answer from peer ID ${peerId}`);
     }
@@ -735,5 +785,23 @@ export class P2P {
 
     public get isReceiving(): boolean {
         return this.receivingFiles().size > 0;
+    }
+
+    private async handleIceCandidate(data: any) {
+        const pc = this.pcs().get(data.peerId)?.pc;
+
+        if (pc?.remoteDescription) {
+            await pc.addIceCandidate(JSON.parse(data.ice)).catch(console.error);
+        } else {
+            this.pcs().get(data.peerId)?.candidateQueue.push(JSON.parse(data.ice));
+        }
+    }
+
+    private async handleEndOfIceCandidates(data: any) {
+        const pc = this.pcs().get(data.peerId)?.pc;
+
+        if (pc) {
+            await pc.addIceCandidate(null);
+        }
     }
 }
