@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { computed, inject, Injectable, signal } from "@angular/core";
+import { computed, inject, Injectable, Signal, signal } from "@angular/core";
 
 import { Env } from "@/utils/env/env";
 import { Peer } from "@/utils/p2p/peer";
@@ -227,11 +227,11 @@ export class P2P {
 
         const pc: RTCPeerConnection = new RTCPeerConnection({
             iceServers: [{urls: "stun:stun.l.google.com:19302"}],
-            bundlePolicy: "max-bundle",
         });
 
         pc.onconnectionstatechange = (): void => {
-            const cs = pc.connectionState;
+            const cs: RTCPeerConnectionState = pc.connectionState;
+
             if (cs === "failed" || cs === "closed" || cs === "disconnected") {
                 console.warn(`[WebRTC] PC state changed to ${cs} for peer ID ${peerId}`);
                 this.closeConnection(peerId);
@@ -246,7 +246,7 @@ export class P2P {
             console.log(`[WebRTC] Signaling state for peer ID ${peerId}: ${pc.signalingState}`);
         };
 
-        pc.onicecandidate = (event) => {
+        pc.onicecandidate = (event: RTCPeerConnectionIceEvent): void => {
             if (event.candidate) {
                 this.sendSignal({
                     type: SocketRequestType.ICE_CANDIDATE,
@@ -278,6 +278,16 @@ export class P2P {
         return pc;
     }
 
+    private filterHostCandidates(sdp: string): string {
+        return sdp
+            .split("\n")
+            .filter(line => {
+                if (!line.startsWith("a=candidate:")) return true;
+                return line.includes(" typ host");
+            })
+            .join("\n");
+    }
+
     public async createOffer(peerId: string, name: string, device: string, connectionType: ConnectionType): Promise<RTCSessionDescription | null> {
         const pc = this.establishPeerConnection(peerId, name, device, connectionType);
 
@@ -288,7 +298,14 @@ export class P2P {
         const offer: RTCSessionDescriptionInit = await pc.createOffer();
         await pc.setLocalDescription(offer);
 
-        return pc.localDescription;
+        if (pc.localDescription) {
+            return {
+                type: pc.localDescription.type,
+                sdp: this.filterHostCandidates(pc.localDescription.sdp!),
+            } as RTCSessionDescription;
+        }
+
+        return null;
     }
 
     /**
@@ -307,11 +324,6 @@ export class P2P {
             this.setupDataChannel(peerId, event.channel);
         };
 
-        if (pc.signalingState === "have-local-offer") {
-            await pc.setLocalDescription({
-                type: "rollback" as RTCSdpType,
-            });
-        }
 
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
         const peer: Peer | undefined = this.pcs().get(peerId);
@@ -327,7 +339,14 @@ export class P2P {
         await pc.setLocalDescription(answer);
 
         console.log(`[WebRTC] Created an answer for peer ID ${peerId}`);
-        return pc.localDescription;
+        if (pc.localDescription) {
+            // Filter host-only candidates for Safari compatibility
+            return {
+                type: pc.localDescription.type,
+                sdp: this.filterHostCandidates(pc.localDescription.sdp!),
+            } as RTCSessionDescription;
+        }
+        return null;
     }
 
     /**
@@ -340,7 +359,9 @@ export class P2P {
         const peer: Peer | undefined = this.pcs().get(peerId);
         const pc: RTCPeerConnection | undefined = peer?.pc;
 
-        if (!pc) throw new Error(`No RTCPeerConnection for ${peerId}`);
+        if (!pc) {
+            throw new Error(`[WebRTC] No RTCPeerConnection for peer ID ${peerId}`);
+        }
 
         if (pc.signalingState === "have-local-offer") {
             await pc.setRemoteDescription(answer);
@@ -695,7 +716,7 @@ export class P2P {
         });
     }
 
-    public readonly progress = computed(() => {
+    public readonly progress: Signal<number> = computed((): number => {
         let totalSize: number = 0;
         let receivedSize: number = 0;
 
