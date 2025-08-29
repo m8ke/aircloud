@@ -289,9 +289,9 @@ export class P2P {
     }
 
     public async createOffer(peerId: string, name: string, device: string, connectionType: ConnectionType): Promise<RTCSessionDescription | null> {
-        const pc = this.establishPeerConnection(peerId, name, device, connectionType);
+        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, connectionType);
+        const dc: RTCDataChannel = pc.createDataChannel(uuidv4());
 
-        const dc = pc.createDataChannel(uuidv4());
         dc.bufferedAmountLowThreshold = P2P.CHUNK_SIZE;
         this.setupDataChannel(peerId, dc);
 
@@ -324,7 +324,6 @@ export class P2P {
             this.setupDataChannel(peerId, event.channel);
         };
 
-
         await pc.setRemoteDescription(new RTCSessionDescription(offer));
         const peer: Peer | undefined = this.pcs().get(peerId);
 
@@ -340,7 +339,6 @@ export class P2P {
 
         console.log(`[WebRTC] Created an answer for peer ID ${peerId}`);
         if (pc.localDescription) {
-            // Filter host-only candidates for Safari compatibility
             return {
                 type: pc.localDescription.type,
                 sdp: this.filterHostCandidates(pc.localDescription.sdp!),
@@ -377,7 +375,6 @@ export class P2P {
             peer.candidateQueue = [];
         }
     }
-
 
     /**
      * Setup data channels to listen to events (open, close, message).
