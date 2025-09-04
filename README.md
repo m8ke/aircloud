@@ -28,18 +28,19 @@ way to transfer files across devices. We never upload, store, or track files.
 
 <sup><a href="#top">back to top</a></sup>
 
-| Feature                   | Description                                                                                                    |
-|---------------------------|----------------------------------------------------------------------------------------------------------------|
-| **Cross-device**          | Use any device with a [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) supported browser  |
-| **Peer-to-peer**          | Direct connection and file transfer between peers without a central server or third-party storage              |
-| **Auto-discover peers**   | Detect other peers in the same network (including VPN, LAN, public Wi-Fi)                                      |
-| **Manual connection**     | Connect using a 6-digit code or QR code for peers outside the network                                          |
-| **No limitations**        | Send as many or large files as you want, everything depends on WebRTC capabilities, and network speed of peers |
-| **No sign-up or ads**     | You don't see annoying ads, or need to sign-up after few transfers                                             |
-| **End-to-end encryption** | File transfers are always encrypted                                                                            |
-| **Session-based**         | All data will be deleted if you close the tab or browser                                                       |
-| **Anonymity**             | Never upload, store, or track files, IPs etc                                                                   |
-| **Open source**           | Review the source code, contribute, or share ideas to improve the project                                      |
+| Feature                              | Description                                                                                                    |
+|--------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| **Cross-device**                     | Use any device with a [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) supported browser  |
+| **Peer-to-peer**                     | Direct connection and file transfer between peers without a central server or third-party storage              |
+| **Bypass NATs and strict firewalls** | Usable with devices that may be behind strict firewalls or NATs                                                |
+| **Auto-discover peers**              | Detect other peers in the same network (including VPN, LAN, public Wi-Fi)                                      |
+| **Manual connection**                | Connect using a 6-digit code or QR code for peers outside the network                                          |
+| **No limitations**                   | Send as many or large files as you want, everything depends on WebRTC capabilities, and network speed of peers |
+| **No sign-up or ads**                | You don't see annoying ads, or need to sign-up after few transfers                                             |
+| **End-to-end encryption**            | File transfers are always encrypted                                                                            |
+| **Session-based**                    | All data will be deleted if you close the tab or browser                                                       |
+| **Anonymity**                        | Never upload, store, or track files, IPs etc                                                                   |
+| **Open source**                      | Review the source code, contribute, or share ideas to improve the project                                      |
 
 ## Roadmap
 
