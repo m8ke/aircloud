@@ -10,6 +10,7 @@ import { ConnectionType } from "@/utils/p2p/connection-type";
 import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 import { ConnectRequest, SocketRequestType, SocketResponseType } from "@/utils/p2p/p2p-interface";
+import { Location } from "@angular/common";
 
 enum RTCType {
     EOF = "EOF",
@@ -28,6 +29,7 @@ export class P2P {
     private readonly env: Env = inject<Env>(Env);
     private readonly router: Router = inject<Router>(Router);
     private readonly session: Session = inject<Session>(Session);
+    private readonly location: Location = inject<Location>(Location);
     private readonly notification: NotificationService = inject<NotificationService>(NotificationService);
 
     private readonly dcs: Map<string, RTCDataChannel> = new Map<string, RTCDataChannel>();
@@ -49,6 +51,7 @@ export class P2P {
             if (this.connectionId) {
                 // TODO: It causes "InvalidStateError: Failed to execute 'setLocalDescription' on 'RTCPeerConnection': Failed to set local answer sdp: Called in wrong state: stable"
                 this.connectPeer(this.connectionId);
+                this.location.replaceState("/");
             }
         };
 
