@@ -12,3 +12,12 @@
         display: none;  /* Older Safari and Chromium */
     }
 }
+
+.progress-bar {
+    width: auto;
+    height: auto;
+    border-radius: 50%;
+    background:
+        radial-gradient(closest-side, white 79%, transparent 80%),
+        conic-gradient(oklch(51.1% 0.262 276.966) var(--progress), rgba(255, 255, 255, 0.15) 0);
+}
