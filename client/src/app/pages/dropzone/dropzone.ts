@@ -41,7 +41,7 @@ export class Dropzone implements OnInit {
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
     protected readonly modalRemoveFiles = viewChild<Modal>("modalRemoveFilesRef");
-    public readonly modalConnectWithPeer = viewChild<Modal>("modalConnectWithPeerRef");
+    protected readonly modalConnectWithPeer = viewChild<Modal>("modalConnectWithPeerRef");
 
     public ngOnInit(): void {
         this.formJoinPeer = this.formBuilder.group({
