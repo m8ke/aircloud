@@ -2,10 +2,10 @@ package com.aircloud.server.socket;
 
 import com.aircloud.server.socket.dto.request.*;
 import com.aircloud.server.socket.dto.response.*;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
@@ -20,6 +20,12 @@ import java.util.concurrent.TimeUnit;
 @Log4j2
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
+
+    @Value("${aircloud.turn.stun-ip}")
+    private String STUN_IP;
+
+    @Value("${aircloud.turn.turn-ip}")
+    private String TURN_IP;
 
     private final static int HEARTBEAT_PERIOD = 15;
 
@@ -74,7 +80,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public void handleTextMessage(
             final WebSocketSession session,
             final TextMessage message
-    ) throws JsonProcessingException {
+    ) throws Exception {
         final BaseRequest payload = new ObjectMapper().readValue(message.getPayload(), BaseRequest.class);
         final Peer peer = findPeerBySession(session);
 
@@ -149,7 +155,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         if (peerA != null) {
             final Peer peerB = findPeerBySession(session);
-            sendMessage(peerA.getSession(), new IceCandidateResponse(peerB.getPeerId(), data.getIce()));
+            sendMessage(peerA.getSession(), new IceCandidateResponse(peerB.getPeerId(), data.getCandidate()));
         }
     }
 
@@ -200,7 +206,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             final WebSocketSession session,
             final Peer peer,
             final BaseRequest payload
-    ) {
+    ) throws Exception {
         final String connectionId = ConnectionIdGenerator.generateConnectionId(6, peers);
         final PeerConnectRequest data = new ObjectMapper().convertValue(payload.getData(), PeerConnectRequest.class);
 
@@ -209,7 +215,19 @@ public class WebSocketHandler extends TextWebSocketHandler {
         peer.setConnectionId(connectionId);
         peer.setDiscoverability(data.getDiscoverability());
 
-        sendMessage(session, new PeerConnectResponse(peer.getPeerId(), peer.getConnectionId()));
+        final TurnServerCredential.EphemeralCred cred = TurnServerCredential.generate(session.getId(), 3600);
+
+        final IceServer stun = new IceServer();
+        stun.setUrls(STUN_IP);
+
+        final IceServer turn = new IceServer();
+        turn.setUrls(TURN_IP);
+        turn.setUsername(cred.username());
+        turn.setCredential(cred.credential());
+
+        final List<IceServer> iceServers = Arrays.asList(stun, turn);
+
+        sendMessage(session, new PeerConnectResponse(peer.getPeerId(), peer.getConnectionId(), iceServers));
         log.info("Peer ID {} connected", peer.getPeerId());
 
         handlePeerConnection(peer);
@@ -250,7 +268,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private List<Peer> findPeersInNetwork(final Peer peer) {
         return peers.stream()
                 .filter(p -> p.getDiscoverability().equals(Discoverability.NETWORK))
-                .filter(p -> p.getIpAddress().equals(peer.getIpAddress()))
+                .filter(p -> Objects.equals(p.getIpAddress(), peer.getIpAddress()))
                 .filter(p -> !p.equals(peer))
                 .filter(Peer::isActive)
                 .toList();

@@ -2,13 +2,13 @@ export class Peer {
     public pc: RTCPeerConnection;
     public name: string;
     public device: string;
-    public isSendingFiles: boolean;
     public candidates: RTCIceCandidateInit[] = [];
+    public isSendingFiles: boolean = false;
 
     public constructor(
+        pc: RTCPeerConnection,
         name: string,
         device: string,
-        pc: RTCPeerConnection,
         isSendingFiles: boolean = false,
     ) {
         this.pc = pc;

@@ -12,6 +12,6 @@ public class IceCandidateRequest {
 
     private UUID peerId;
 
-    private JsonNode ice;
+    private JsonNode candidate;
 
 }
