@@ -11,31 +11,7 @@
 
     <div class="flex grow-1 flex-col border border-slate-500/10 mx-4 mb-4 rounded-2xl bg-zinc-900">
         <div class="flex flex-row justify-between gap-2 items-center py-3 px-4 rounded-t-2xl text-white/70 text-xs">
-            <div>
-                Known as <strong class="text-white">{{ session.name | titlecase }}</strong> &bull; Network
-            </div>
-
-            <!--            <div class="h-4 w-px bg-white/25"></div>-->
-
-            <!--            <div (click)="modalChangeSettings()?.open()" class="cursor-pointer">-->
-            <!--                Change settings-->
-            <!--            </div>-->
-
-            <div class="flex items-center">
-                @if (p2p.isReceiving) {
-                    <div>
-                        Receiving files {{ p2p.progress() }}%
-                    </div>
-
-                    <div
-                        [ngStyle]="{'--progress': `${p2p.progress()}%`}"
-                        class="progress-bar p-2 ms-2">
-                        <div
-                            class="relative w-2 h-2 overflow-hidden bg-zinc-900 rounded-full ring-6 ring-zinc-900">
-                        </div>
-                    </div>
-                }
-            </div>
+            <ng-content select="[slot=header]"></ng-content>
         </div>
 
         <div class="relative flex grow-1 rounded-2xl bg-black border-t border-white/15">

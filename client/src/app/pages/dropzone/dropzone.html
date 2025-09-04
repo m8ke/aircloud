@@ -1,4 +1,38 @@
 <app-layout>
+    <div slot="header">
+        <div class="flex flex-row items-center gap-x-2">
+            <button
+                (click)="modalConnectWithPeer()?.open()"
+                class="cursor-pointer flex flex-row gap-x-1 items-center rounded-xl px-2.5 py-1.5 text-xs text-white shadow-xs border border-zinc-700 hover:bg-zinc-800 transition duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+                </svg>
+
+                <span>Connect</span>
+            </button>
+            <div>
+                Known as <strong class="text-white">{{ session.name | titlecase }}</strong>
+            </div>
+        </div>
+
+        <div class="flex items-center">
+            @if (p2p.isReceiving) {
+                <div>
+                    Receiving files {{ p2p.progress() }}%
+                </div>
+
+                <div
+                    [ngStyle]="{'--progress': `${p2p.progress()}%`}"
+                    class="progress-bar p-2 ms-2">
+                    <div
+                        class="relative w-2 h-2 overflow-hidden bg-zinc-900 rounded-full ring-6 ring-zinc-900">
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
     <section class="py-3 h-full">
         @if (fileManager.files().length > 0) {
             <div class="flex flex-col w-full grid gap-y-3">
@@ -21,14 +55,16 @@
                             Added {{ fileManager.files().length || 0 }} {{ fileManager.files().length > 1 ? 'files' : 'file' }}
                         </h1>
 
-                        <span class="text-xs cursor-pointer" (click)="modalRemoveFiles()?.open()">
+                        <button
+                            (click)="modalRemoveFiles()?.open()"
+                            class="cursor-pointer rounded-xl px-2.5 py-1.5 text-xs text-white shadow-xs border border-zinc-700 hover:bg-zinc-800 transition duration-300">
                             Clear all
-                        </span>
+                        </button>
                     </div>
 
                     <button
                         (click)="openFileExplorer()"
-                        class="rounded-xl bg-indigo-500 px-2.5 py-1.5 text-sm text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
+                        class="cursor-pointer rounded-xl bg-indigo-500 px-2.5 py-1.5 text-sm text-white shadow-xs hover:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 transition duration-300">
                         Add files
                     </button>
                 </div>
@@ -74,7 +110,16 @@
                         <div
                             (click)="modalConnectWithPeer()?.open()"
                             class="ps-4 py-2 -mb-1 grow-1 cursor-pointer bg-zinc-100 text-black hover:bg-indigo-500 hover:text-white hover:mb-0 transition-all">
-                            Connect with peer
+                            <div class="flex justify-center align-items gap-x-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 3.75 9.375v-4.5ZM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 0 1-1.125-1.125v-4.5ZM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0 1 13.5 9.375v-4.5Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75ZM6.75 16.5h.75v.75h-.75v-.75ZM16.5 6.75h.75v.75h-.75v-.75ZM13.5 13.5h.75v.75h-.75v-.75ZM13.5 19.5h.75v.75h-.75v-.75ZM19.5 13.5h.75v.75h-.75v-.75ZM19.5 19.5h.75v.75h-.75v-.75ZM16.5 16.5h.75v.75h-.75v-.75Z" />
+                                </svg>
+
+                                <span>
+                                Connect with peer
+                            </span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -9,4 +9,8 @@ import { Component, input, output } from "@angular/core";
 export class NotificationInfo {
     public data = input.required<{ message: string, type: "success" | "error" }>();
     public close = output<any>();
+
+    closeNotification() {
+        this.close.emit(true);
+    }
 }
