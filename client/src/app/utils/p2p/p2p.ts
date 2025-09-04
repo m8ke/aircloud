@@ -45,7 +45,6 @@ export class P2P {
             this.connectPersistedIds();
         };
 
-        // TODO: Share ICE candidates
         this.ws.onmessage = async (event): Promise<void> => {
             const data = JSON.parse(event.data);
 
@@ -139,6 +138,7 @@ export class P2P {
     // TODO: Add an interface
     private handleConnect(data: any): void {
         this.session.connectionId = data.connectionId;
+        this.session.iceServers = data.iceServers;
         this.notification.show({message: "Connected to P2P network"});
     }
 
@@ -225,9 +225,7 @@ export class P2P {
             return this.pcs().get(peerId)?.pc!;
         }
 
-        const pc: RTCPeerConnection = new RTCPeerConnection({
-            iceServers: [{urls: "stun:stun.l.google.com:19302"}],
-        });
+        const pc: RTCPeerConnection = new RTCPeerConnection(this.session.iceServers);
 
         pc.onconnectionstatechange = (): void => {
             const cs: RTCPeerConnectionState = pc.connectionState;
@@ -252,7 +250,7 @@ export class P2P {
                     type: SocketRequestType.ICE_CANDIDATE,
                     data: {
                         peerId,
-                        ice: event.candidate.toJSON(),
+                        candidate: event.candidate.toJSON(),
                     },
                 });
             } else {
@@ -265,9 +263,10 @@ export class P2P {
             }
         };
 
+        // TODO: Do not add until "cs == connected"
         this.pcs.update(prev => {
             const next = new Map(prev);
-            next.set(peerId, new Peer(name, device, pc));
+            next.set(peerId, new Peer(pc, name, device));
             return next;
         });
 
@@ -364,13 +363,15 @@ export class P2P {
         if (pc.signalingState === "have-local-offer") {
             await pc.setRemoteDescription(answer);
         } else {
-            console.warn(`[WebRTC] Ignored answer for ${peerId}, state=${pc.signalingState}`);
+            console.warn(`[WebRTC] Ignored answer for ${peerId}, state: ${pc.signalingState}`);
             return;
         }
 
         if (peer?.candidates?.length) {
             for (const c of peer.candidates) {
-                if (c && c.candidate) await pc.addIceCandidate(new RTCIceCandidate(c)).catch(console.error);
+                if (c && c.candidate) {
+                    await pc.addIceCandidate(new RTCIceCandidate(c)).catch(console.error);
+                }
             }
             peer.candidates = [];
         }
@@ -740,10 +741,10 @@ export class P2P {
         }
 
         if (pc.remoteDescription) {
-            await pc.addIceCandidate(data.ice).catch(console.error);
+            await pc.addIceCandidate(data.candidate).catch(console.error);
         } else {
             peer.candidates = peer.candidates || [];
-            peer.candidates.push(data.ice);
+            peer.candidates.push(data.candidate);
         }
     }
 

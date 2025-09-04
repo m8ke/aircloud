@@ -1,6 +1,10 @@
 aircloud:
   cors:
-    origin: ${DOMAIN}
+    origin: https://${DOMAIN}
+  turn:
+    secret: ${TURN_SECRET}
+    stun-ip: ${STUN_IP}
+    turn-ip: ${TURN_IP}
 
 spring:
   application:

@@ -1,6 +1,7 @@
 <a name="top"></a>
 
 <div align="center">
+
 <a href="https://github.com/m8ke/aircloud">
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="docs/aircloud-white.svg">
@@ -17,9 +18,6 @@
 way to transfer files across devices. We never upload, store, or track files.
 </p>
 
-[//]: # (![GitHub Actions Workflow Status]&#40;https://img.shields.io/github/actions/workflow/status/m8ke/aircloud/client-ci.yml?label=Client%20CI&style=flat-square&#41;)
-
-[//]: # (![GitHub Actions Workflow Status]&#40;https://img.shields.io/github/actions/workflow/status/m8ke/aircloud/server-ci.yml?label=Server%20CI&style=flat-square&#41;)
 </div>
 
 <br>
@@ -47,15 +45,15 @@ way to transfer files across devices. We never upload, store, or track files.
 
 <sup><a href="#top">back to top</a></sup>
 
-| Feature                  | Description                                                                      |
-|--------------------------|----------------------------------------------------------------------------------|
-| **Metadata removal**     | Read and/or remove metadata from images, videos, etc., to ensure maximum privacy |
-| **Localization**         | Translate into multiple languages (community contributions welcome)              |
-| **Self-hostable**        | Docker image to provide easy self-hosting                                        |
-| **Dark and light theme** | Toggle between dark and light modes                                              |
-| **Desktop app**          | Desktop application for MacOS, Windows, and Linux                                |
-| **Mobile app**           | Mobile application for iOS and Android                                           |
-| **TV app**               | TV application for tvOS and Android TV                                           |
+| Feature              | Description                                                                      |
+|----------------------|----------------------------------------------------------------------------------|
+| **PWA**              | Progressive web application                                                      |
+| **Metadata removal** | Read and/or remove metadata from images, videos, etc., to ensure maximum privacy |
+| **Localization**     | Translate into multiple languages (community contributions welcome)              |
+| **Self-hostable**    | Docker image to provide easy self-hosting                                        |
+| **Desktop app**      | Desktop application for MacOS, Windows, and Linux                                |
+| **Mobile app**       | Mobile application for iOS and Android                                           |
+| **TV app**           | TV application for tvOS and Android TV                                           |
 
 ## Platforms
 
@@ -69,15 +67,16 @@ way to transfer files across devices. We never upload, store, or track files.
 
 <sup><a href="#top">back to top</a></sup>
 
-| Technology     | Scope          | Description                                                        |
-|----------------|----------------|--------------------------------------------------------------------|
-| Docker         | Core           | Containerization                                                   |
-| GitHub Actions | Core           | CI/CD pipelines                                                    |
-| Spring Boot    | Server         | Server-side application built in Java                              |
-| Angular        | Client         | Client-side application built in TypeScript                        |
-| WebRTC         | Client         | Establish P2P connection between clients                           |
-| Zip.js         | Client         | Zip files on client-side to send as a bundle                       |
-| WebSocket      | Client, Server | Signaling service to establish a WebRTC connection between clients |
+| Technology     | Scope          | Description                                                                   |
+|----------------|----------------|-------------------------------------------------------------------------------|
+| Docker         | Core           | Containerization                                                              |
+| GitHub Actions | Core           | CI/CD pipelines                                                               |
+| Spring Boot    | Server         | Server-side application built in Java                                         |
+| Angular        | Client         | Client-side application built in TypeScript                                   |
+| WebRTC         | Client         | Establish P2P connection between clients                                      |
+| Zip.js         | Client         | Zip files on client-side to send as a bundle                                  |
+| WebSocket      | Client, Server | Signaling service to establish a WebRTC connection between clients            |
+| Coturn         | Server         | Facilitate communication between devices that may be behind firewalls or NATs |
 
 ## Recommendations
 

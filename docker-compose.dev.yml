@@ -1,0 +1,31 @@
+services:
+  coturn:
+    image: coturn/coturn:4.7.0-alpine
+    restart: unless-stopped
+    container_name: aircloud-coturn
+    command:
+      - --realm=127.0.0.1
+      - --server-name=aircloud
+      - --use-auth-secret
+      - --static-auth-secret=secret-only-for-development
+      - --listening-ip=0.0.0.0
+      - --listening-port=3478
+      - --tls-listening-port=5349
+      - --min-port=10000
+      - --max-port=20000
+      # - --cert=./ssl/coturn/certificate.pem
+      # - --pkey=./ssl/coturn/key.pem
+      - --verbose
+      - --fingerprint
+      - --no-rfc5780
+      - --no-tlsv1_2
+      - --no-cli
+      - --no-multicast-peers
+      - --no-software-attribute
+      - --check-origin-consistency
+    ports:
+      - "3478:3478"
+      - "3478:3478/udp"
+      - "5349:5349"
+      - "5349:5349/udp"
+      - "10000-10010:10000-10010/udp" # DO NOT USE WIDE RANGE IN DEV!

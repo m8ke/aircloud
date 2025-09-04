@@ -11,7 +11,15 @@ enum SessionKey {
     CONNECTION_ID = "CONNECTION_ID",
     DISCOVERABILITY = "DISCOVERABILITY",
     CONNECTED_PEER_IDS = "CONNECTED_PEER_IDS",
+    ICE_SERVERS = "ICE_SERVERS",
 }
+
+export interface IceServer {
+    urls: string;
+    username?: string;
+    credential?: string;
+}
+
 
 @Injectable({
     providedIn: "root",
@@ -93,5 +101,30 @@ export class Session {
 
     private randomInt(min: number, max: number): number {
         return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // TODO: Add an interface
+    public set iceServers(iceServers: any) {
+        this.sessionStorage.setItem(SessionKey.ICE_SERVERS, iceServers);
+    }
+
+    public get iceServers(): { iceServers: IceServer[] } {
+        const iceServers = this.sessionStorage.getItem(SessionKey.ICE_SERVERS) as IceServer[] | null;
+
+        if (iceServers == null) {
+            console.warn("[Session] ICE servers not found, fallback to public STUN server");
+
+            return {
+                iceServers: [
+                    {urls: "stun:stun.l.google.com:19302"},
+                ],
+            };
+        }
+
+        console.log("[Session] Found ICE servers")
+
+        return {
+            iceServers
+        };
     }
 }

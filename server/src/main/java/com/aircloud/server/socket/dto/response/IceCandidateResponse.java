@@ -14,11 +14,11 @@ public class IceCandidateResponse {
 
     private UUID peerId;
 
-    private JsonNode ice;
+    private JsonNode candidate;
 
-    public IceCandidateResponse(UUID peerId, JsonNode ice) {
+    public IceCandidateResponse(UUID peerId, JsonNode candidate) {
         this.peerId = peerId;
-        this.ice = ice;
+        this.candidate = candidate;
     }
 
 }

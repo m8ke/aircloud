@@ -1,45 +1,51 @@
 services:
-  aircloud-nginx:
+  nginx:
     image: nginx:1.29-alpine
-    restart: always
-    pull_policy: always
+    restart: unless-stopped
     container_name: aircloud-nginx
+    environment:
+      DOMAIN: ${DOMAIN}
+      CLIENT_PORT: ${CLIENT_PORT}
+      SERVER_PORT: ${SERVER_PORT}
     volumes:
-      - type: bind
-        source: ./nginx/nginx.conf
-        target: /etc/nginx/nginx.conf
-        read_only: true
-      - type: bind
-        source: ./nginx/templates
-        target: /etc/nginx/templates
-        read_only: true
-      - type: bind
-        source: ./ssl
-        target: /etc/ssl
-        read_only: true
+      - letsencrypt:/etc/letsencrypt
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # - ./nginx/coturn.conf:/etc/nginx/stream.d/coturn.conf
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/www:/var/www/certbot
     ports:
       - "80:80"
       - "443:443"
 
-  aircloud-server:
+  certbot:
+    image: certbot/certbot:v4.2.0
+    container_name: aircloud-certbot
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - ./nginx/www:/var/www/certbot
+    depends_on:
+      - nginx
+
+  server:
     image: ghcr.io/${GH_REPOSITORY}/aircloud-server:latest
-    restart: always
-    pull_policy: always
+    restart: unless-stopped
     container_name: aircloud-server
     build:
       context: ./server
     environment:
       PORT: ${SERVER_PORT}
       DOMAIN: ${DOMAIN}
+      TURN_SECRET: ${TURN_SECRET}
+      STUN_IP: stun:turn.${DOMAIN}:3478
+      TURN_IP: turns:turn.${DOMAIN}:5349
     ports:
       - "${SERVER_PORT}:${SERVER_PORT}"
     depends_on:
-      - aircloud-nginx
+      - nginx
 
-  aircloud-client:
+  client:
     image: ghcr.io/${GH_REPOSITORY}/aircloud-client:latest
-    restart: always
-    pull_policy: always
+    restart: unless-stopped
     container_name: aircloud-client
     build:
       context: ./client
@@ -48,4 +54,42 @@ services:
     ports:
       - "${CLIENT_PORT}:${CLIENT_PORT}"
     depends_on:
-      - aircloud-server
+      - server
+
+  coturn:
+    image: coturn/coturn:4.7.0-alpine
+    restart: unless-stopped
+    container_name: aircloud-coturn
+    network_mode: host
+    environment:
+      DOMAIN: ${DOMAIN}
+      TURN_SECRET: ${TURN_SECRET}
+    command:
+      - --realm=turn.${DOMAIN}
+      - --server-name=turn.${DOMAIN}
+      - --use-auth-secret
+      - --static-auth-secret=${TURN_SECRET}
+      - --listening-ip=0.0.0.0
+      - --listening-port=3478
+      - --tls-listening-port=5349
+      - --min-port=10000
+      - --max-port=15000
+      - --cert=/etc/letsencrypt/live/${DOMAIN}/fullchain.pem
+      - --pkey=/etc/letsencrypt/live/${DOMAIN}/privkey.pem
+      - --verbose
+      - --fingerprint
+      - --no-rfc5780
+      - --no-tlsv1_2
+      - --no-cli
+      - --no-multicast-peers
+      - --no-software-attribute
+      - --check-origin-consistency
+      - --log-file=-
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+    depends_on:
+      - nginx
+      - certbot
+
+volumes:
+  letsencrypt:
