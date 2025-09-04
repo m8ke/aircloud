@@ -43,6 +43,8 @@ jobs:
       - self-hosted
       - production
       - aircloud
+    environment:
+      name: aircloud.sh
     env:
       GH_REPOSITORY: ${{ github.repository }}
       DOMAIN: ${{ vars.DOMAIN }}
