@@ -1,4 +1,3 @@
-import { ActivatedRoute } from "@angular/router";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, viewChild } from "@angular/core";
 
@@ -36,7 +35,6 @@ export class Dropzone implements OnInit {
     protected readonly fileManager: FileManager = inject<FileManager>(FileManager);
 
     private readonly env: Env = inject<Env>(Env);
-    private readonly route: ActivatedRoute = inject<ActivatedRoute>(ActivatedRoute);
     private readonly formBuilder: FormBuilder = inject<FormBuilder>(FormBuilder);
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
@@ -51,10 +49,6 @@ export class Dropzone implements OnInit {
                 Validators.maxLength(255),
             ]],
         });
-
-        if (this.connectionId) {
-            this.p2p.connectPeer(this.connectionId);
-        }
     }
 
     protected onRemoveFiles(): void {
@@ -101,10 +95,6 @@ export class Dropzone implements OnInit {
 
     protected get directConnectionUrl(): string {
         return `${this.env.clientUrl}/pair/${this.session.connectionId}`;
-    }
-
-    private get connectionId(): string | null {
-        return this.route.snapshot.params["connectionId"];
     }
 
     protected onConnectPeer(): void {

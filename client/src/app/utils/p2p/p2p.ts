@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { Router } from "@angular/router";
 import { computed, inject, Injectable, Signal, signal } from "@angular/core";
 
 import { Env } from "@/utils/env/env";
@@ -25,6 +26,7 @@ export class P2P {
 
     private ws!: WebSocket;
     private readonly env: Env = inject<Env>(Env);
+    private readonly router: Router = inject<Router>(Router);
     private readonly session: Session = inject<Session>(Session);
     private readonly notification: NotificationService = inject<NotificationService>(NotificationService);
 
@@ -43,6 +45,11 @@ export class P2P {
             console.log("[WebSocket] Connection opened");
             this.connectWebSocket();
             this.connectPersistedIds();
+
+            if (this.connectionId) {
+                // TODO: It causes "InvalidStateError: Failed to execute 'setLocalDescription' on 'RTCPeerConnection': Failed to set local answer sdp: Called in wrong state: stable"
+                this.connectPeer(this.connectionId);
+            }
         };
 
         this.ws.onmessage = async (event): Promise<void> => {
@@ -754,5 +761,9 @@ export class P2P {
         if (pc) {
             await pc.addIceCandidate(null);
         }
+    }
+
+    private get connectionId(): string | null {
+        return this.router.routerState.snapshot.root.firstChild?.paramMap.get("connectionId") ?? null;
     }
 }
