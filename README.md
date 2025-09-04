@@ -67,16 +67,16 @@ way to transfer files across devices. We never upload, store, or track files.
 
 <sup><a href="#top">back to top</a></sup>
 
-| Technology     | Scope          | Description                                                                   |
-|----------------|----------------|-------------------------------------------------------------------------------|
-| Docker         | Core           | Containerization                                                              |
-| GitHub Actions | Core           | CI/CD pipelines                                                               |
-| Spring Boot    | Server         | Server-side application built in Java                                         |
-| Angular        | Client         | Client-side application built in TypeScript                                   |
-| WebRTC         | Client         | Establish P2P connection between clients                                      |
-| Zip.js         | Client         | Zip files on client-side to send as a bundle                                  |
-| WebSocket      | Client, Server | Signaling service to establish a WebRTC connection between clients            |
-| Coturn         | Server         | Facilitate communication between devices that may be behind firewalls or NATs |
+| Technology     | Scope  | Description                                                                   |
+|----------------|--------|-------------------------------------------------------------------------------|
+| Docker         | Core   | Containerization                                                              |
+| GitHub Actions | Core   | CI/CD pipelines                                                               |
+| Spring Boot    | Server | Server-side application built in Java                                         |
+| WebSocket      | Server | Signaling service to establish a WebRTC connection between peers              |
+| Angular        | Client | Client-side application built in TypeScript                                   |
+| WebRTC         | Client | Establish P2P connection between peers                                        |
+| Zip.js         | Client | Zip files on the client-side to send as a bundle                              |
+| Coturn         | Server | Facilitate communication between devices that may be behind firewalls or NATs |
 
 ## Recommendations
 
