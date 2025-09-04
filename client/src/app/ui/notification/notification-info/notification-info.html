@@ -1,23 +1,31 @@
 <div
     class="notification max-w-md w-full bg-white shadow-lg rounded-xl pointer-events-auto flex ring-1 ring-white ring-opacity-5 divide-x divide-gray-200"
     role="alert">
-    <div class="w-full flex-1 flex items-center px-6 py-3 text-black gap-x-2">
-        @if (data().type == "error") {
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                 stroke="currentColor" class="size-6 text-rose-500">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-            </svg>
-        } @else {
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                 stroke="currentColor" class="size-6 text-green-500">
-                <path stroke-linecap="round" stroke-linejoin="round"
-                      d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-            </svg>
-        }
+    <div class="w-full flex items-center px-3 py-3 text-black gap-x-2">
+        <div class="flex flex-1 items-center gap-x-2">
+            @if (data().type == "error") {
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="size-6 text-rose-500">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                </svg>
+            } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="size-6 text-green-500">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                </svg>
+            }
 
-        <div>
-            {{ data().message }}
+            <div>
+                {{ data().message }}
+            </div>
         </div>
+
+        <button
+            (click)="closeNotification()"
+            class="cursor-pointer flex flex-row gap-x-1 items-center rounded-xl px-2.5 py-1.5 text-xs text-black shadow-xs border border-zinc-500 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 transition duration-300">
+            Close
+        </button>
     </div>
 </div>

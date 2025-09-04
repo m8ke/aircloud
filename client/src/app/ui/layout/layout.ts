@@ -1,4 +1,3 @@
-import { NgStyle, TitleCasePipe } from "@angular/common";
 import { Component, inject, signal } from "@angular/core";
 
 import { P2P } from "@/utils/p2p/p2p";
@@ -15,8 +14,6 @@ import { NotificationService, NotificationType } from "@/ui/notification/notific
         Navbar,
         CdkDropList,
         Notification,
-        TitleCasePipe,
-        NgStyle,
     ],
     templateUrl: "./layout.html",
     styleUrl: "./layout.scss",

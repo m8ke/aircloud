@@ -10,7 +10,7 @@ import { Layout } from "@/ui/layout/layout";
 import { Session } from "@/utils/session/session";
 import { FileManager } from "@/utils/file-manager/file-manager";
 import { SendingFile } from "@/utils/file-manager/sending-file";
-import { KeyValuePipe } from "@angular/common";
+import { KeyValuePipe, NgStyle, TitleCasePipe } from "@angular/common";
 import { QRCodeComponent } from "angularx-qrcode";
 
 @Component({
@@ -22,6 +22,8 @@ import { QRCodeComponent } from "angularx-qrcode";
         Peer,
         KeyValuePipe,
         QRCodeComponent,
+        TitleCasePipe,
+        NgStyle,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: "./dropzone.html",
@@ -84,8 +86,7 @@ export class Dropzone implements OnInit {
     }
 
     protected isLoading(peerId: string): boolean {
-        const file: SendingFile | undefined = this.p2p.sendingFiles().get(peerId);
-        return !!file;
+        return !!this.p2p.sendingFiles().get(peerId);
     }
 
     protected getProgress(peerId: string): number {
