@@ -9,12 +9,14 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    outputs:
+      turn_secret: ${{ steps.generate-secret.outputs.turn_secret }}
     env:
       GH_REPOSITORY: ${{ github.repository }}
       DOMAIN: ${{ vars.DOMAIN }}
       CLIENT_PORT: ${{ vars.CLIENT_PORT }}
       SERVER_PORT: ${{ vars.SERVER_PORT }}
-      TURN_SECRET: ${{ secrets.TURN_SECRET }}
+      TURN_SECRET: ${{ steps.generate_secret.outputs.turn_secret }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
@@ -25,6 +27,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.AIRCLOUD_PAT }}
+
+      - name: Generate TURN secret
+        id: generate_secret
+        shell: bash
+        run: |
+          TURN_SECRET=$(openssl rand -hex 32)
+          echo "::add-mask::TURN_SECRET"
+          echo "turn_secret=$TURN_SECRET" >> "$GITHUB_OUTPUT"
 
       - name: Build Docker image
         run: docker compose -f docker-compose.yml build
@@ -50,7 +60,7 @@ jobs:
       DOMAIN: ${{ vars.DOMAIN }}
       CLIENT_PORT: ${{ vars.CLIENT_PORT }}
       SERVER_PORT: ${{ vars.SERVER_PORT }}
-      TURN_SECRET: ${{ secrets.TURN_SECRET }}
+      TURN_SECRET: ${{ needs.build.outputs.turn_secret }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
