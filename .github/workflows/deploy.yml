@@ -16,7 +16,6 @@ jobs:
       DOMAIN: ${{ vars.DOMAIN }}
       CLIENT_PORT: ${{ vars.CLIENT_PORT }}
       SERVER_PORT: ${{ vars.SERVER_PORT }}
-      TURN_SECRET: ${{ steps.generate_secret.outputs.turn_secret }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
@@ -33,10 +32,12 @@ jobs:
         shell: bash
         run: |
           TURN_SECRET=$(openssl rand -hex 32)
-          echo "::add-mask::TURN_SECRET"
+          echo "::add-mask::$TURN_SECRET"
           echo "turn_secret=$TURN_SECRET" >> "$GITHUB_OUTPUT"
 
       - name: Build Docker image
+        env:
+          TURN_SECRET: ${{ steps.generate_secret.outputs.turn_secret }}
         run: docker compose -f docker-compose.yml build
 
       - name: Push Docker image
