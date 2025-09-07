@@ -14,6 +14,7 @@ ENV PORT=$PORT
 ENV DOMAIN=$DOMAIN
 ENV STUN_IP=$STUN_IP
 ENV TURN_IP=$TURN_IP
+ARG TURN_SECRET
 ENV TURN_SECRET=$TURN_SECRET
 
 COPY --from=build /home/gradle/src/build/libs/*.jar server.jar

@@ -32,6 +32,8 @@ services:
     container_name: aircloud-server
     build:
       context: ./server
+      args:
+        TURN_SECRET: ${TURN_SECRET}
     environment:
       PORT: ${SERVER_PORT}
       DOMAIN: ${DOMAIN}

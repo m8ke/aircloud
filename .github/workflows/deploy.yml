@@ -64,6 +64,7 @@ jobs:
       DOMAIN: ${{ vars.DOMAIN }}
       CLIENT_PORT: ${{ vars.CLIENT_PORT }}
       SERVER_PORT: ${{ vars.SERVER_PORT }}
+      TURN_SECRET: ${{ needs.build.outputs.turn_secret }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -96,8 +97,6 @@ jobs:
         run: docker compose pull
 
       - name: Run Docker image
-        env:
-          TURN_SECRET: ${{ needs.build.outputs.turn_secret }}
         run: docker compose up -d --force-recreate server client coturn
 
       - name: Cleanup Docker
