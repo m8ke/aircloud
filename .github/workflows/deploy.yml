@@ -41,6 +41,8 @@ jobs:
         run: docker compose -f docker-compose.yml build
 
       - name: Push Docker image
+        env:
+          TURN_SECRET: ${{ steps.generate_secret.outputs.turn_secret }}
         run: docker compose -f docker-compose.yml push
 
       - name: Remove other Docker images
@@ -61,7 +63,6 @@ jobs:
       DOMAIN: ${{ vars.DOMAIN }}
       CLIENT_PORT: ${{ vars.CLIENT_PORT }}
       SERVER_PORT: ${{ vars.SERVER_PORT }}
-      TURN_SECRET: ${{ needs.build.outputs.turn_secret }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -94,6 +95,8 @@ jobs:
         run: docker compose pull
 
       - name: Run Docker image
+        env:
+          TURN_SECRET: ${{ needs.build.outputs.turn_secret }}
         run: docker compose up -d --force-recreate server client coturn
 
       - name: Cleanup Docker
