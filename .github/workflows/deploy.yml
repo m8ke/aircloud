@@ -10,7 +10,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     outputs:
-      turn_secret: ${{ steps.generate-secret.outputs.turn_secret }}
+      turn_secret: ${{ steps.generate_secret.outputs.turn_secret }}
     env:
       GH_REPOSITORY: ${{ github.repository }}
       DOMAIN: ${{ vars.DOMAIN }}

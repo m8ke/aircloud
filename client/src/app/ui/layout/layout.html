@@ -15,9 +15,27 @@
         </div>
 
         <div class="relative flex grow-1 rounded-2xl bg-black border-t border-white/15">
-            <div class="container mx-auto p-5">
-                <app-notification/>
-                <ng-content/>
+            <div class="flex grow-1 flex-col">
+                <div class="container mx-auto p-5 h-full">
+                    <app-notification/>
+                    <ng-content/>
+                </div>
+
+                <footer class="flex flex-row justify-end items-center grow-0 p-3 gap-x-1">
+                    <a
+                        href="https://reddit.com/r/aircloud"
+                        target="_blank"
+                        class="cursor-pointer flex flex-row gap-x-1 items-center rounded-xl px-2.5 py-1.5 text-xs text-white shadow-xs border border-zinc-700 hover:bg-zinc-800 transition duration-300">
+                        Reddit
+                    </a>
+
+                    <a
+                        href="https://github.com/m8ke/aircloud"
+                        target="_blank"
+                        class="cursor-pointer flex flex-row gap-x-1 items-center rounded-xl px-2.5 py-1.5 text-xs text-white shadow-xs border border-zinc-700 hover:bg-zinc-800 transition duration-300">
+                        Github
+                    </a>
+                </footer>
             </div>
 
             <section

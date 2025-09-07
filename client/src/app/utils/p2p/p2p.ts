@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { Router } from "@angular/router";
+import { Location } from "@angular/common";
 import { computed, inject, Injectable, Signal, signal } from "@angular/core";
 
 import { Env } from "@/utils/env/env";
@@ -10,7 +11,6 @@ import { ConnectionType } from "@/utils/p2p/connection-type";
 import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 import { ConnectRequest, SocketRequestType, SocketResponseType } from "@/utils/p2p/p2p-interface";
-import { Location } from "@angular/common";
 
 enum RTCType {
     EOF = "EOF",
