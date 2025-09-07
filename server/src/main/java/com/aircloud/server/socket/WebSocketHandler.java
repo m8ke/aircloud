@@ -1,9 +1,13 @@
 package com.aircloud.server.socket;
 
+import com.aircloud.server.security.ConnectionIdGenerator;
+import com.aircloud.server.security.JwtService;
+import com.aircloud.server.security.TurnCredentialService;
 import com.aircloud.server.socket.dto.request.*;
 import com.aircloud.server.socket.dto.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -19,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 @Log4j2
 @Component
+@RequiredArgsConstructor
 public class WebSocketHandler extends TextWebSocketHandler {
 
     @Value("${aircloud.turn.stun-ip}")
@@ -31,6 +36,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     private final Set<Peer> peers = ConcurrentHashMap.newKeySet();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    private final JwtService jwtService;
 
     @Override
     public void afterConnectionEstablished(final WebSocketSession session) {
@@ -82,7 +89,14 @@ public class WebSocketHandler extends TextWebSocketHandler {
             final TextMessage message
     ) throws Exception {
         final BaseRequest payload = new ObjectMapper().readValue(message.getPayload(), BaseRequest.class);
-        final Peer peer = findPeerBySession(session);
+        final String token = payload.getToken();
+
+        if (token.isEmpty() && !jwtService.isTokenValid(token)) {
+            return;
+        }
+
+        // final Peer peer = findPeerBySession(session);
+        final Peer peer = findPeerById(UUID.fromString(jwtService.parseToken(token).getPayload().getSubject()));
 
         if (peer != null) {
             peer.updatePeerSession(session);
@@ -215,7 +229,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         peer.setConnectionId(connectionId);
         peer.setDiscoverability(data.getDiscoverability());
 
-        final TurnServerCredential.EphemeralCred cred = TurnServerCredential.generate(session.getId(), 3600);
+        final TurnCredentialService.EphemeralCred cred = TurnCredentialService.generate(session.getId(), 3600);
 
         final IceServer stun = new IceServer();
         stun.setUrls(STUN_IP);
@@ -226,8 +240,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
         turn.setCredential(cred.credential());
 
         final List<IceServer> iceServers = Arrays.asList(stun, turn);
+        final String token = jwtService.generateToken(peer.getPeerId(), peer.getConnectionId());
 
-        sendMessage(session, new PeerConnectResponse(peer.getPeerId(), peer.getConnectionId(), iceServers));
+        sendMessage(session, new PeerConnectResponse(token, peer.getConnectionId(), iceServers));
         log.info("Peer ID {} connected", peer.getPeerId());
 
         handlePeerConnection(peer);

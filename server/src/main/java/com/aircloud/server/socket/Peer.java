@@ -26,13 +26,15 @@ public class Peer {
     @JsonIgnore
     private int heartBeat;
 
-    private String connectionId;
+    private UUID peerId; // Private ID to manipulate session and reconnect
+
+    private UUID publicId; // Public ID to handle connections on the client-side (only informative meaning)
+
+    private String connectionId; // Short code (usually 6-8 chars) for easier connection
 
     private String device;
 
     private String name;
-
-    private UUID peerId;
 
     public Peer(WebSocketSession session) {
         this.session = session;

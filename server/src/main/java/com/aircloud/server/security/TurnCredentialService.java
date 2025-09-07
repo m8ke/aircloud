@@ -1,15 +1,15 @@
-package com.aircloud.server.socket;
+package com.aircloud.server.security;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-@Component
-public class TurnServerCredential {
+@Service
+public class TurnCredentialService {
 
     private static String TURN_SECRET;
 

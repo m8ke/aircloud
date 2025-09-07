@@ -10,6 +10,8 @@ public class BaseRequest {
 
     private RequestType type;
 
+    private String token;
+
     private JsonNode data;
 
 }
