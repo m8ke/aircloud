@@ -66,6 +66,7 @@ export class Navbar implements OnInit, OnDestroy {
     }
 
     protected onConnectPeer(): void {
+        // TODO: Close modal
         this.p2p.connectPeer(this.formJoinPeer.get("connectionId")?.value);
     }
 

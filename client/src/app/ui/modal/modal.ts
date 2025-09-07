@@ -14,7 +14,7 @@ export class Modal {
 
     // TODO: Use output()
     @Output() public onSubmit = new EventEmitter<unknown>();
-    @Output() public onClose = new EventEmitter<unknown>();
+    @Output() public onCancel = new EventEmitter<unknown>();
 
     protected get state(): Signal<boolean> {
         return this.isOpen.asReadonly();
@@ -25,7 +25,7 @@ export class Modal {
     }
 
     protected close(): void {
-        this.onClose.emit();
+        this.onCancel.emit();
         this.isOpen.set(false);
     }
 

@@ -1,15 +1,15 @@
-import { Router } from "@angular/router";
 import jsQR, { QRCode } from "jsqr";
 import { inject, Injectable } from "@angular/core";
 
 import { Env } from "@/utils/env/env";
+import { P2P } from "@/utils/p2p/p2p";
 
 @Injectable({
     providedIn: "root",
 })
 export class QrScanner {
     private readonly env: Env = inject<Env>(Env);
-    private readonly router: Router = inject<Router>(Router);
+    private readonly p2p: P2P = inject<P2P>(P2P);
 
     private ctx!: CanvasRenderingContext2D;
     private animationFrameId: number | null = null;
@@ -70,11 +70,9 @@ export class QrScanner {
             const url: URL = new URL(code.data);
 
             if (this.animationFrameId && this.isValidRoute(url)) {
-                // TODO: Additionally check if the connection ID valid. If true then connect. Do not redirect (pointless)!
-
-                console.log(`[QrScanner] Scanned url ${url} and will be redirected`);
-                await this.router.navigateByUrl(url.pathname);
-                console.log(url.pathname);
+                // TODO: Close modal
+                console.log(`[QrScanner] Scanned url ${url} and will be connected`);
+                this.p2p.connectPeer(this.parseConnectionId(url.pathname));
                 cancelAnimationFrame(this.animationFrameId);
                 this.animationFrameId = null;
                 this.stopCamera(video);
@@ -91,5 +89,10 @@ export class QrScanner {
             console.log(`[QrScanner] Scanned invalid URL ${url}`);
             return false;
         }
+    }
+
+    private parseConnectionId(path: string): string {
+        const segments = path.split("/").filter(Boolean);
+        return segments[segments.length - 1];
     }
 }

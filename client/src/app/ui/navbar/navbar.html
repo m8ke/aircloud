@@ -28,7 +28,7 @@
     </div>
 </nav>
 
-<app-modal #modalConnectWithPeerRef [isWarning]="true" (onClose)="closeCamera()">
+<app-modal #modalConnectWithPeerRef [isWarning]="true" (onCancel)="closeCamera()">
     <h3
         class="text-xl font-semibold text-gray-900 font-serif"
         slot="header">
