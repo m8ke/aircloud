@@ -1,6 +1,7 @@
 name: CD
 
 on:
+  pull_request: # TEST
   release:
     types:
       - published
