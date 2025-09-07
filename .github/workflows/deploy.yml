@@ -97,6 +97,8 @@ jobs:
         run: docker compose pull
 
       - name: Run Docker image
+        env:
+          TURN_SECRET: ${{ needs.build.outputs.turn_secret }}
         run: docker compose up -d --force-recreate server client coturn
 
       - name: Cleanup Docker
