@@ -1,7 +1,6 @@
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import { ReactiveFormsModule } from "@angular/forms";
 import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, viewChild } from "@angular/core";
 
-import { Env } from "@/utils/env/env";
 import { P2P } from "@/utils/p2p/p2p";
 import { Peer } from "@/ui/peer/peer";
 import { Modal } from "@/ui/modal/modal";
@@ -10,7 +9,6 @@ import { Session } from "@/utils/session/session";
 import { FileManager } from "@/utils/file-manager/file-manager";
 import { SendingFile } from "@/utils/file-manager/sending-file";
 import { KeyValuePipe, NgStyle, TitleCasePipe } from "@angular/common";
-import { QRCodeComponent } from "angularx-qrcode";
 
 @Component({
     selector: "app-dropzone",
@@ -20,7 +18,6 @@ import { QRCodeComponent } from "angularx-qrcode";
         Modal,
         Peer,
         KeyValuePipe,
-        QRCodeComponent,
         TitleCasePipe,
         NgStyle,
     ],
@@ -28,28 +25,13 @@ import { QRCodeComponent } from "angularx-qrcode";
     templateUrl: "./dropzone.html",
     styleUrl: "./dropzone.scss",
 })
-export class Dropzone implements OnInit {
-    protected formJoinPeer!: FormGroup;
+export class Dropzone {
     protected readonly p2p: P2P = inject<P2P>(P2P);
     protected readonly session: Session = inject<Session>(Session);
     protected readonly fileManager: FileManager = inject<FileManager>(FileManager);
 
-    private readonly env: Env = inject<Env>(Env);
-    private readonly formBuilder: FormBuilder = inject<FormBuilder>(FormBuilder);
-
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
     protected readonly modalRemoveFiles = viewChild<Modal>("modalRemoveFilesRef");
-    protected readonly modalConnectWithPeer = viewChild<Modal>("modalConnectWithPeerRef");
-
-    public ngOnInit(): void {
-        this.formJoinPeer = this.formBuilder.group({
-            connectionId: [null, [
-                Validators.required,
-                Validators.minLength(6),
-                Validators.maxLength(255),
-            ]],
-        });
-    }
 
     protected onRemoveFiles(): void {
         this.fileManager.removeFiles();
@@ -91,13 +73,5 @@ export class Dropzone implements OnInit {
         }
 
         return file.file.size > 0 ? Number(((file.receivedSize / file.file.size) * 100).toFixed(0)) : 0;
-    }
-
-    protected get directConnectionUrl(): string {
-        return `${this.env.clientUrl}/pair/${this.session.connectionId}`;
-    }
-
-    protected onConnectPeer(): void {
-        this.p2p.connectPeer(this.formJoinPeer.get("connectionId")?.value);
     }
 }
