@@ -2,7 +2,6 @@ import {
     ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, OnInit, viewChild,
 } from "@angular/core";
 
-import { Clipboard } from "@angular/cdk/clipboard";
 import { RouterLink } from "@angular/router";
 import { QRCodeComponent } from "angularx-qrcode";
 import { NgOptimizedImage } from "@angular/common";
@@ -13,6 +12,7 @@ import { P2P } from "@/utils/p2p/p2p";
 import { Modal } from "@/ui/modal/modal";
 import { Session } from "@/utils/session/session";
 import { QrScanner } from "@/utils/qr-scanner/qr-scanner";
+import { CopyClipboard } from "@/utils/copy-clipboard/copy-clipboard";
 
 @Component({
     selector: "app-navbar",
@@ -23,6 +23,7 @@ import { QrScanner } from "@/utils/qr-scanner/qr-scanner";
         ReactiveFormsModule,
         Modal,
         QRCodeComponent,
+        CopyClipboard,
     ],
     templateUrl: "./navbar.html",
     styleUrl: "./navbar.scss",
@@ -33,7 +34,6 @@ export class Navbar implements OnInit, OnDestroy {
 
     private readonly env: Env = inject<Env>(Env);
     private readonly qrScanner: QrScanner = inject<QrScanner>(QrScanner);
-    private readonly clipboard: Clipboard = inject<Clipboard>(Clipboard);
     private readonly formBuilder: FormBuilder = inject<FormBuilder>(FormBuilder);
 
     protected readonly p2p: P2P = inject<P2P>(P2P);
@@ -89,12 +89,6 @@ export class Navbar implements OnInit, OnDestroy {
         }
     }
 
-    protected copyConnectionId(connectionId: string | null): void {
-        if (connectionId) {
-            this.clipboard.copy(connectionId);
-        }
-    }
-
     public get state(): string {
         return this._state;
     }
@@ -108,5 +102,4 @@ export class Navbar implements OnInit, OnDestroy {
 
         this._state = state;
     }
-
 }
