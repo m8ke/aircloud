@@ -9,13 +9,14 @@ import { ModalService } from "@/utils/modal/modal";
 })
 export class Modal {
     public modalId = input.required<string>();
-    public onCancel = output<void>();
+    public onClose = output<void>();
     private readonly modal = inject(ModalService);
 
     protected readonly isOpen = () => this.modal.isOpen(this.modalId())();
 
     public close(): void {
         this.modal.close(this.modalId());
+        this.onClose.emit();
     }
 
     protected get data() {

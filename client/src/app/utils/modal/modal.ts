@@ -5,7 +5,9 @@ interface ModalState {
     data?: unknown;
 }
 
-@Injectable({providedIn: "root"})
+@Injectable({
+    providedIn: "root",
+})
 export class ModalService {
     private readonly modals = signal<Record<string, ModalState>>({});
 
