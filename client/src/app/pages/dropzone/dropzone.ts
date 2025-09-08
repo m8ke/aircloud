@@ -1,5 +1,5 @@
 import { ReactiveFormsModule } from "@angular/forms";
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, viewChild } from "@angular/core";
+import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from "@angular/core";
 
 import { P2P } from "@/utils/p2p/p2p";
 import { Peer } from "@/ui/peer/peer";
@@ -8,6 +8,7 @@ import { Layout } from "@/ui/layout/layout";
 import { Session } from "@/utils/session/session";
 import { FileManager } from "@/utils/file-manager/file-manager";
 import { SendingFile } from "@/utils/file-manager/sending-file";
+import { ModalService } from "@/utils/modal/modal";
 import { KeyValuePipe, NgStyle, TitleCasePipe } from "@angular/common";
 
 @Component({
@@ -27,11 +28,11 @@ import { KeyValuePipe, NgStyle, TitleCasePipe } from "@angular/common";
 })
 export class Dropzone {
     protected readonly p2p: P2P = inject<P2P>(P2P);
+    protected readonly modal: ModalService = inject<ModalService>(ModalService);
     protected readonly session: Session = inject<Session>(Session);
     protected readonly fileManager: FileManager = inject<FileManager>(FileManager);
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
-    protected readonly modalRemoveFiles = viewChild<Modal>("modalRemoveFilesRef");
 
     protected onRemoveFiles(): void {
         this.fileManager.removeFiles();
@@ -73,5 +74,10 @@ export class Dropzone {
         }
 
         return file.file.size > 0 ? Number(((file.receivedSize / file.file.size) * 100).toFixed(0)) : 0;
+    }
+
+    protected clearAll(): void {
+        this.onRemoveFiles();
+        this.modal.close("connectPeer");
     }
 }
