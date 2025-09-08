@@ -31,7 +31,7 @@
     "@angular/router": "^20.1.0",
     "@angular/ssr": "^20.1.4",
     "@tailwindcss/postcss": "^4.1.11",
-    "@typescript/native-preview": "^7.0.0-dev.20250824.1",
+    "@typescript/native-preview": "^7.0.0-dev.20250907.1",
     "@zip.js/zip.js": "^2.7.72",
     "angularx-qrcode": "^20.0.0",
     "express": "^5.1.0",
