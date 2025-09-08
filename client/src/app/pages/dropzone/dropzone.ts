@@ -78,6 +78,6 @@ export class Dropzone {
 
     protected clearAll(): void {
         this.onRemoveFiles();
-        this.modal.close("connectPeer");
+        this.modal.close("clearFiles");
     }
 }
