@@ -1,7 +1,6 @@
 name: CD
 
 on:
-  pull_request: # TEST
   release:
     types:
       - published
@@ -15,6 +14,7 @@ jobs:
       DOMAIN: ${{ vars.DOMAIN }}
       CLIENT_PORT: ${{ vars.CLIENT_PORT }}
       SERVER_PORT: ${{ vars.SERVER_PORT }}
+      TURN_SECRET: ${{ secrets.TURN_SECRET }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
@@ -50,18 +50,10 @@ jobs:
       DOMAIN: ${{ vars.DOMAIN }}
       CLIENT_PORT: ${{ vars.CLIENT_PORT }}
       SERVER_PORT: ${{ vars.SERVER_PORT }}
-      TURN_SECRET: ${{ needs.build.outputs.turn_secret }}
+      TURN_SECRET: ${{ secrets.TURN_SECRET }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
-
-      - name: Generate TURN secret
-        id: generate_secret
-        shell: bash
-        run: |
-          TURN_SECRET=$(openssl rand -hex 32)
-          echo "::add-mask::$TURN_SECRET"
-          echo "TURN_SECRET=$TURN_SECRET" >> "$GITHUB_ENV"
 
       - name: Login to GitHub Container Registry
         run: echo "${{ secrets.AIRCLOUD_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
@@ -91,8 +83,6 @@ jobs:
         run: docker compose pull
 
       - name: Run Docker image
-        env:
-          TURN_SECRET: ${{ needs.build.outputs.turn_secret }}
         run: docker compose up -d --force-recreate server client coturn
 
       - name: Cleanup Docker
