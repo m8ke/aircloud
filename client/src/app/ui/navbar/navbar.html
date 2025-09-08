@@ -38,7 +38,7 @@
     <div class="mt-5 flex gap-y-2 flex-col">
         @if (state == "camera") {
             <p class="mb-2">
-                Scan other peer's QR Code to connect
+                Scan the other peer's QR code to connect
             </p>
         }
 
@@ -49,14 +49,32 @@
             @case ("qr") {
                 <div class="flex flex-col gap-y-3">
                     <p>
-                        Share and scan this QR Code to connect with other peers
+                        Share link or QR code to connect with other peers
                     </p>
 
-                    <p
-                        (click)="copyConnectionId(session.connectionId)"
-                        class="cursor-pointer text-2xl font-bold bg-zinc-100 rounded-xl w-full px-2 py-2 tracking-wider text-center">
-                        {{ session.connectionId }}
-                    </p>
+                    <div class="flex flex-row items-center justify-around bg-zinc-100 rounded-xl w-full ps-4 pe-2 py-2">
+                        <p class="text-2xl font-bold tracking-wider grow-1">
+                            {{ session.connectionId }}
+                        </p>
+
+                        <div class="flex flex-row items-center gap-x-1">
+                            <div
+                                [copyClipboard]="session.connectionId"
+                                copiedText="Copied!"
+                                [duration]="3000"
+                                class="cursor-pointer font-medium rounded-lg px-2.5 py-1.5 text-xs text-black bg-zinc-300 hover:bg-zinc-400 transition duration-300">
+                                Copy code
+                            </div>
+
+                            <div
+                                [copyClipboard]="directConnectionUrl"
+                                copiedText="Copied!"
+                                [duration]="3000"
+                                class="cursor-pointer font-medium rounded-lg px-2.5 py-1.5 text-xs text-black bg-zinc-300 hover:bg-zinc-400 transition duration-300">
+                                Copy link
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="w-full bg-black rounded-xl p-5">
                         <qrcode

@@ -20,7 +20,6 @@ export interface IceServer {
     credential?: string;
 }
 
-
 @Injectable({
     providedIn: "root",
 })
@@ -121,10 +120,10 @@ export class Session {
             };
         }
 
-        console.log("[Session] Found ICE servers")
+        console.log("[Session] Found ICE servers");
 
         return {
-            iceServers
+            iceServers,
         };
     }
 }

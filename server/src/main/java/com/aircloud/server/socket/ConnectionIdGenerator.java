@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class ConnectionIdGenerator {
 
-    private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final SecureRandom RANDOM = new SecureRandom();
 
     public static String generateConnectionId(final int length, final Set<Peer> peers) {
