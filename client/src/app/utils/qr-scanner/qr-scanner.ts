@@ -3,6 +3,7 @@ import { inject, Injectable } from "@angular/core";
 
 import { Env } from "@/utils/env/env";
 import { P2P } from "@/utils/p2p/p2p";
+import { ModalService } from "@/utils/modal/modal";
 
 @Injectable({
     providedIn: "root",
@@ -10,6 +11,7 @@ import { P2P } from "@/utils/p2p/p2p";
 export class QrScanner {
     private readonly env: Env = inject<Env>(Env);
     private readonly p2p: P2P = inject<P2P>(P2P);
+    private readonly modal: ModalService = inject<ModalService>(ModalService);
 
     private ctx!: CanvasRenderingContext2D;
     private animationFrameId: number | null = null;
@@ -70,9 +72,9 @@ export class QrScanner {
             const url: URL = new URL(code.data);
 
             if (this.animationFrameId && this.isValidRoute(url)) {
-                // TODO: Close modal
                 console.log(`[QrScanner] Scanned url ${url} and will be connected`);
                 this.p2p.connectPeer(this.parseConnectionId(url.pathname));
+                this.modal.close("connectPeer");
                 cancelAnimationFrame(this.animationFrameId);
                 this.animationFrameId = null;
                 this.stopCamera(video);

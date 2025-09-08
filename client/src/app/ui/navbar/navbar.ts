@@ -12,6 +12,7 @@ import { P2P } from "@/utils/p2p/p2p";
 import { Modal } from "@/ui/modal/modal";
 import { Session } from "@/utils/session/session";
 import { QrScanner } from "@/utils/qr-scanner/qr-scanner";
+import { ModalService } from "@/utils/modal/modal";
 import { CopyClipboard } from "@/utils/copy-clipboard/copy-clipboard";
 
 @Component({
@@ -37,11 +38,11 @@ export class Navbar implements OnInit, OnDestroy {
     private readonly formBuilder: FormBuilder = inject<FormBuilder>(FormBuilder);
 
     protected readonly p2p: P2P = inject<P2P>(P2P);
+    protected readonly modal: ModalService = inject<ModalService>(ModalService);
     protected readonly session: Session = inject<Session>(Session);
 
     protected readonly video = viewChild<ElementRef<HTMLVideoElement>>("videoRef");
     protected readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>("canvasRef");
-    protected readonly modalConnectWithPeer = viewChild<Modal>("modalConnectWithPeerRef");
 
     public async ngOnInit(): Promise<void> {
         this.formJoinPeer = this.formBuilder.group({
@@ -61,12 +62,7 @@ export class Navbar implements OnInit, OnDestroy {
         }
     }
 
-    protected get directConnectionUrl(): string {
-        return `${this.env.clientUrl}/pair/${this.session.connectionId}`;
-    }
-
     protected onConnectPeer(): void {
-        // TODO: Close modal
         this.p2p.connectPeer(this.formJoinPeer.get("connectionId")?.value);
     }
 
@@ -89,11 +85,20 @@ export class Navbar implements OnInit, OnDestroy {
         }
     }
 
-    public get state(): string {
+    protected openConnectPeerModal(): void {
+        this.state = "qr";
+        this.modal.open("connectPeer");
+    }
+
+    protected get directConnectionUrl(): string {
+        return `${this.env.clientUrl}/pair/${this.session.connectionId}`;
+    }
+
+    protected get state(): string {
         return this._state;
     }
 
-    public set state(state: string) {
+    protected set state(state: string) {
         const video: HTMLVideoElement | undefined = this.video()?.nativeElement;
 
         if (video) {
