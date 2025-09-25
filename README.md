@@ -39,7 +39,7 @@ way to transfer files across devices. We never upload, store, or track files.
 | **No sign-up or ads**                | You don't see annoying ads, or need to sign-up after few transfers                                             |
 | **End-to-end encryption**            | File transfers are always encrypted                                                                            |
 | **Session-based**                    | All data will be deleted if you close the tab or browser                                                       |
-| **Self-hosted**                      | Host AirCloud on your own server or homelab                                                                    |
+| **Self-hosted**                      | Host AirCloud on your own cloud server or homelab                                                              |
 | **Anonymity**                        | Never upload, store, or track files, IPs etc                                                                   |
 | **Open source**                      | Review the source code, contribute, or share ideas to improve the project                                      |
 
