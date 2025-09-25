@@ -39,6 +39,7 @@ way to transfer files across devices. We never upload, store, or track files.
 | **No sign-up or ads**                | You don't see annoying ads, or need to sign-up after few transfers                                             |
 | **End-to-end encryption**            | File transfers are always encrypted                                                                            |
 | **Session-based**                    | All data will be deleted if you close the tab or browser                                                       |
+| **Self-hosted**                      | Host AirCloud on your own server or homelab                                                                    |
 | **Anonymity**                        | Never upload, store, or track files, IPs etc                                                                   |
 | **Open source**                      | Review the source code, contribute, or share ideas to improve the project                                      |
 
@@ -115,32 +116,32 @@ In case you need to facilitate communication between devices that may be behind 
 using TURN server. Coturn server minimum requirements should be 2 CPU machine with 4 GB of RAM.
 
 ```bash
-  coturn:
-    image: coturn/coturn:4.7.0-alpine
-    container_name: coturn
-    network_mode: host
-    restart: unless-stopped
-    command:
-      - --realm=turn.${DOMAIN}
-      - --server-name=turn.${DOMAIN}
-      - --use-auth-secret
-      - --static-auth-secret=${TURN_SECRET}
-      - --listening-ip=0.0.0.0
-      - --listening-port=3478
-      - --tls-listening-port=5349
-      - --min-port=10000
-      - --max-port=20000
-      - --cert=/certs/fullchain.pem
-      - --pkey=/certs/privkey.pem
-      - --verbose
-      - --fingerprint
-      - --no-rfc5780
-      - --no-tlsv1_2
-      - --no-cli
-      - --no-multicast-peers
-      - --no-software-attribute
-      - --check-origin-consistency
-      - --log-file=-
+coturn:
+  image: coturn/coturn:4.7.0-alpine
+  container_name: coturn
+  network_mode: host
+  restart: unless-stopped
+  command:
+    - --realm=turn.${DOMAIN}
+    - --server-name=turn.${DOMAIN}
+    - --use-auth-secret
+    - --static-auth-secret=${TURN_SECRET}
+    - --listening-ip=0.0.0.0
+    - --listening-port=3478
+    - --tls-listening-port=5349
+    - --min-port=10000
+    - --max-port=20000
+    - --cert=/certs/fullchain.pem
+    - --pkey=/certs/privkey.pem
+    - --verbose
+    - --fingerprint
+    - --no-rfc5780
+    - --no-tlsv1_2
+    - --no-cli
+    - --no-multicast-peers
+    - --no-software-attribute
+    - --check-origin-consistency
+    - --log-file=-
 ```
 
 ## Recommendations
@@ -149,7 +150,8 @@ using TURN server. Coturn server minimum requirements should be 2 CPU machine wi
 
 Although AirCloud prioritizes privacy when sharing files between peers, for additional security you should consider
 using a (self-hosted) VPN and user-agent spoofing at the operating system level. Since we haven't implemented [metadata
-removal](https://emmatrowbridge.github.io/Excuse-Me-Your-Data-Is-Leaking/2025/05/27/Exposed-by-Metadata.html), we recommend to sanitize files, images etc. before sending.
+removal](https://emmatrowbridge.github.io/Excuse-Me-Your-Data-Is-Leaking/2025/05/27/Exposed-by-Metadata.html), we
+recommend to sanitize files, images etc. before sending.
 
 ## Support
 
