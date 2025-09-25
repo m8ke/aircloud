@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  pull_request:
   release:
     types:
       - published
@@ -41,8 +40,9 @@ jobs:
           context: ./server
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/server:${{ github.event.release.tag_name }}
+            ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/server:latest
 
   build-client-ghcr:
     name: Build and push client to GHCR
@@ -80,5 +80,6 @@ jobs:
           context: ./client
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/client:${{ github.event.release.tag_name }}
+            ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/client:latest
