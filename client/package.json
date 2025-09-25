@@ -29,7 +29,7 @@
     "@angular/platform-browser": "^20.1.0",
     "@angular/platform-server": "^20.1.0",
     "@angular/router": "^20.1.0",
-    "@angular/ssr": "^20.3.1",
+    "@angular/ssr": "^20.3.3",
     "@tailwindcss/postcss": "^4.1.11",
     "@typescript/native-preview": "^7.0.0-dev.20250914.1",
     "@zip.js/zip.js": "^2.7.72",
@@ -43,8 +43,8 @@
     "uuid": "^12.0.0"
   },
   "devDependencies": {
-    "@angular/build": "^20.1.4",
-    "@angular/cli": "^20.1.4",
+    "@angular/build": "^20.3.3",
+    "@angular/cli": "^20.3.3",
     "@angular/compiler-cli": "^20.1.0",
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
