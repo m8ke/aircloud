@@ -1,28 +1,24 @@
 services:
   server:
-    image: ghcr.io/${GH_REPOSITORY}/server:latest
+    image: ghcr.io/m8ke/aircloud/server:${AIRCLOUD_VERSION:-latest}
     restart: unless-stopped
-    container_name: server
-    build:
-      context: ./server
+    container_name: aircloud-server
     environment:
-      PORT: ${SERVER_PORT}
-      DOMAIN: ${DOMAIN}
+      PORT: ${SERVER_PORT:-8000}
+      DOMAIN: ${DOMAIN:-aircloud.sh}
       TURN_SECRET: ${TURN_SECRET}
-      STUN_IP: ${STUN_IP}
-      TURN_IP: ${TURN_IP}
+      STUN_IP: stun:${DOMAIN:-turn.aircloud.sh}:3478  # optional
+      TURN_IP: turns:${DOMAIN:-turn.aircloud.sh}:5349 # optional
     ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
+      - "${SERVER_PORT:-8000}:${SERVER_PORT:-8000}"
 
   client:
-    image: ghcr.io/${GH_REPOSITORY}/client:latest
+    image: ghcr.io/m8ke/aircloud/client:${AIRCLOUD_VERSION:-latest}
     restart: unless-stopped
-    container_name: client
-    build:
-      context: ./client
+    container_name: aircloud-client
     environment:
-      PORT: ${CLIENT_PORT}
+      PORT: ${CLIENT_PORT:-4000}
     ports:
-      - "${CLIENT_PORT}:${CLIENT_PORT}"
+      - "${CLIENT_PORT:-4000}:${CLIENT_PORT:-4000}"
     depends_on:
       - server
