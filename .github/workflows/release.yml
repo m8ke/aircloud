@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-server-ghcr:
-    name: Build server GHCR
+    name: Server
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
@@ -45,7 +45,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/server:latest
 
   build-client-ghcr:
-    name: Build client GHCR
+    name: Client
     runs-on: ubuntu-latest
     needs:
       - build-server-ghcr

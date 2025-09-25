@@ -5,7 +5,7 @@ WORKDIR /home/gradle/src
 
 COPY --chown=gradle:gradle . .
 
-RUN gradle build --no-daemon -x test
+RUN gradle build --no-daemon -x test --build-cache
 
 # STAGE 2: BOOT
 FROM eclipse-temurin:24-jdk-ubi9-minimal
