@@ -108,7 +108,10 @@ export class Session {
 
     // TODO: Add an interface
     public set iceServers(iceServers: any) {
-        this.sessionStorage.setItem(SessionKey.ICE_SERVERS, iceServers);
+        if (iceServers) {
+            this.sessionStorage.setItem(SessionKey.ICE_SERVERS, iceServers);
+        }
+        this.sessionStorage.removeItem(SessionKey.ICE_SERVERS);
     }
 
     public get iceServers(): { iceServers: IceServer[] } {

@@ -7,11 +7,11 @@ import { Env } from "@/utils/env/env";
 import { Peer } from "@/utils/p2p/peer";
 import { Session } from "@/utils/session/session";
 import { SendingFile } from "@/utils/file-manager/sending-file";
+import { ModalService } from "@/utils/modal/modal";
 import { ConnectionType } from "@/utils/p2p/connection-type";
 import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 import { ConnectRequest, SocketRequestType, SocketResponseType } from "@/utils/p2p/p2p-interface";
-import { ModalService } from "@/utils/modal/modal";
 
 enum RTCType {
     EOF = "EOF",

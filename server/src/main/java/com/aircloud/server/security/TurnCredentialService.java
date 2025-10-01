@@ -18,24 +18,27 @@ public class TurnCredentialService {
         TURN_SECRET = turnSecret;
     }
 
-    public static String getTurnSecret() {
-        return TURN_SECRET;
-    }
+    public static EphemeralCredentials generate(
+            final String userId,
+            final int ttlSeconds
+    ) throws Exception {
+        if (TURN_SECRET == null || TURN_SECRET.isEmpty()) {
+            return null;
+        }
 
-    public static EphemeralCred generate(final String userId, final int ttlSeconds) throws Exception {
         final long expiry = (System.currentTimeMillis() / 1000) + ttlSeconds;
         final String username = expiry + ":" + userId;
 
         final Mac hmac = Mac.getInstance("HmacSHA1");
-        hmac.init(new SecretKeySpec(getTurnSecret().getBytes(StandardCharsets.UTF_8), "HmacSHA1"));
+        hmac.init(new SecretKeySpec(TURN_SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA1"));
 
         final byte[] hash = hmac.doFinal(username.getBytes(StandardCharsets.UTF_8));
         final String credential = Base64.getEncoder().encodeToString(hash);
 
-        return new EphemeralCred(username, credential);
+        return new EphemeralCredentials(username, credential);
     }
 
-    public record EphemeralCred(String username, String credential) {
+    public record EphemeralCredentials(String username, String credential) {
     }
 
 }

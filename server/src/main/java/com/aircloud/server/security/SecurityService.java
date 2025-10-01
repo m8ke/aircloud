@@ -17,8 +17,8 @@ public class SecurityService {
     private static String SECRET_KEY;
 
     @Value("${aircloud.jwt.secret}")
-    public void setSecret(String secret) {
-        SECRET_KEY = secret;
+    public void setSecret(String jwtSecret) {
+        SECRET_KEY = jwtSecret;
     }
 
     private static Key getSigningKey() {

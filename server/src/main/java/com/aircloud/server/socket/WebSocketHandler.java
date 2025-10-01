@@ -246,15 +246,19 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private List<IceServer> generateIceServers(
             final WebSocketSession session
     ) throws Exception {
-        final TurnCredentialService.EphemeralCred cred = TurnCredentialService.generate(session.getId(), 3600);
+        final TurnCredentialService.EphemeralCredentials credentials = TurnCredentialService.generate(session.getId(), 900);
+
+        if (credentials == null) {
+            return null;
+        }
 
         final IceServer stun = new IceServer();
         stun.setUrls(STUN_IP);
 
         final IceServer turn = new IceServer();
         turn.setUrls(TURN_IP);
-        turn.setUsername(cred.username());
-        turn.setCredential(cred.credential());
+        turn.setUsername(credentials.username());
+        turn.setCredential(credentials.credential());
 
         return Arrays.asList(stun, turn);
     }
