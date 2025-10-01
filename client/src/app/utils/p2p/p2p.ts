@@ -487,8 +487,6 @@ export class P2P {
     private async handleAcceptedFileShare(dc: RTCDataChannel, data: any): Promise<void> {
         const file: SendingFile | undefined = this.sendingFiles().get(data.peerId);
 
-        console.log(data.peerId)
-
         if (file) {
             await this.sendFile(data.peerId, dc, file);
         }
