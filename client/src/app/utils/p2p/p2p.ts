@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { Router } from "@angular/router";
+import { Location } from "@angular/common";
 import { computed, inject, Injectable, Signal, signal } from "@angular/core";
 
 import { Env } from "@/utils/env/env";
@@ -10,7 +11,7 @@ import { ConnectionType } from "@/utils/p2p/connection-type";
 import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 import { ConnectRequest, SocketRequestType, SocketResponseType } from "@/utils/p2p/p2p-interface";
-import { Location } from "@angular/common";
+import { ModalService } from "@/utils/modal/modal";
 
 enum RTCType {
     EOF = "EOF",
@@ -27,6 +28,7 @@ export class P2P {
 
     private ws!: WebSocket;
     private readonly env: Env = inject<Env>(Env);
+    private readonly modal: ModalService = inject<ModalService>(ModalService);
     private readonly router: Router = inject<Router>(Router);
     private readonly session: Session = inject<Session>(Session);
     private readonly location: Location = inject<Location>(Location);
@@ -195,13 +197,14 @@ export class P2P {
 
     // TODO: Add an interface
     private async handlePeerConnectSucceed(data: any): Promise<void> {
-        // TODO: Close modal instead of notification!
-
         console.log("[WebSocket] Direct connection succeed");
+
         this.notification.show({
             message: "Connected with a peer",
             type: "success",
         });
+
+        this.modal.close("connectPeer");
     }
 
     // TODO: Add an interface

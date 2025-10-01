@@ -155,7 +155,7 @@ coturn:
 Although AirCloud prioritizes privacy when sharing files between peers, for additional security you should consider
 using a (self-hosted) VPN and user-agent spoofing at the operating system level. Since we haven't implemented [metadata
 removal](https://emmatrowbridge.github.io/Excuse-Me-Your-Data-Is-Leaking/2025/05/27/Exposed-by-Metadata.html), we
-recommend to sanitize files, images etc. before sending.
+recommend to sanitize files, images etc., before sending.
 
 ## Support
 
