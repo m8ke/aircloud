@@ -15,17 +15,17 @@ public class PeerConnectResponse {
 
     private ResponseType type = ResponseType.CONNECT;
 
-    private UUID publicId;
+    private UUID peerId;
 
-    private String privateId;
+    private String authToken;
 
     private String connectionId;
 
     private List<IceServer> iceServers;
 
-    public PeerConnectResponse(UUID publicId, String privateId, String connectionId, List<IceServer> iceServers) {
-        this.publicId = publicId;
-        this.privateId = privateId;
+    public PeerConnectResponse(UUID peerId, String authToken, String connectionId, List<IceServer> iceServers) {
+        this.peerId = peerId;
+        this.authToken = authToken;
         this.connectionId = connectionId;
         this.iceServers = iceServers;
     }

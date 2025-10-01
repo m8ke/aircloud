@@ -1,11 +1,13 @@
 package com.aircloud.server.socket;
 
 import com.aircloud.server.security.ConnectionIdGenerator;
-import com.aircloud.server.security.JwtService;
+import com.aircloud.server.security.SecurityService;
 import com.aircloud.server.security.TurnCredentialService;
 import com.aircloud.server.socket.dto.request.*;
 import com.aircloud.server.socket.dto.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.jwk.OctetKeyPair;
+import com.nimbusds.jwt.SignedJWT;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -37,10 +39,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private final Set<Peer> peers = ConcurrentHashMap.newKeySet();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-    private final JwtService jwtService;
-
     @Override
-    public void afterConnectionEstablished(final WebSocketSession session) {
+    public void afterConnectionEstablished(
+            final WebSocketSession session
+    ) {
         connectPeer(session);
     }
 
@@ -59,7 +61,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     ) {
         final Peer peer = findPeerBySession(session);
         peer.updatePeerSession(session);
-        log.info("Pong received from peer ID {}", peer.getPrivateId());
+        log.info("Pong received from peer ID {}", peer.getPeerId());
     }
 
     @PostConstruct
@@ -89,16 +91,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             final TextMessage message
     ) throws Exception {
         final BaseRequest payload = new ObjectMapper().readValue(message.getPayload(), BaseRequest.class);
-        final String token = payload.getToken();
-
-        if (token.isEmpty() && !jwtService.isTokenValid(token)) {
-            return;
-        }
-
-        // final Peer peer = findPeerBySession(session);
-        final Peer peer = findPeerById(UUID.fromString(jwtService.parseToken(token).getPayload().getSubject()));
-
-        System.out.println(peer);
+        final Peer peer = findPeerBySession(session);
 
         if (peer != null) {
             peer.updatePeerSession(session);
@@ -125,7 +118,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         final Peer peer = findPeerBySession(session);
         peers.remove(peer);
         unconnectPeerInNetwork(peer);
-        log.info("Peer ID {} disconnected", peer.getPrivateId());
+        log.info("Peer ID {} disconnected", peer.getPeerId());
     }
 
     private void handleChangeSettings(
@@ -149,7 +142,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         if (peerA != null) {
             final Peer peerB = findPeerBySession(session);
             establishConnectionBetweenPeers(peerA, peerB, ConnectionType.MANUAL);
-            sendMessage(session, new PeerManualConnectResponse(peerA.getPrivateId(), true));
+            sendMessage(session, new PeerManualConnectResponse(peerA.getPeerId(), true));
         } else {
             sendMessage(session, new PeerManualConnectResponse(null, false));
         }
@@ -171,7 +164,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         if (peerA != null) {
             final Peer peerB = findPeerBySession(session);
-            sendMessage(peerA.getSession(), new IceCandidateResponse(peerB.getPrivateId(), data.getCandidate()));
+            sendMessage(peerA.getSession(), new IceCandidateResponse(peerB.getPeerId(), data.getCandidate()));
         }
     }
 
@@ -181,7 +174,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         if (peerA != null) {
             final Peer peerB = findPeerBySession(session);
-            sendMessage(peerA.getSession(), new EndOfIceCandidatesResponse(peerB.getPrivateId()));
+            sendMessage(peerA.getSession(), new EndOfIceCandidatesResponse(peerB.getPeerId()));
         }
     }
 
@@ -194,7 +187,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         if (peerB != null) {
             sendMessage(peerB.getSession(), new RTCApproveAnswerResponse(
-                    peerA.getPrivateId(),
+                    peerA.getPeerId(),
                     data.getAnswer())
             );
         }
@@ -209,7 +202,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         if (peerB != null) {
             sendMessage(peerB.getSession(), new RTCAnswerResponse(
-                    peerA.getPrivateId(),
+                    peerA.getPeerId(),
                     data.getOffer(),
                     peerA.getName(),
                     peerA.getDevice(),
@@ -226,16 +219,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
         final String connectionId = ConnectionIdGenerator.generateConnectionId(6, peers);
         final PeerConnectRequest data = new ObjectMapper().convertValue(payload.getData(), PeerConnectRequest.class);
 
-        final String authToken = jwtService.generateToken(peer.getPrivateId());
-
         peer.setName(data.getName());
-        peer.setPublicId(data.getPublicId());
-        peer.setPrivateId(peer.getPrivateId());
+        peer.setPeerId(data.getPeerId());
         peer.setConnectionId(connectionId);
         peer.setDiscoverability(data.getDiscoverability());
 
-        sendMessage(session, new PeerConnectResponse(peer.getPublicId(), authToken, peer.getConnectionId(), generateIceServers(session)));
-        log.info("Peer ID {} connected", peer.getPrivateId());
+        sendMessage(session, new PeerConnectResponse(peer.getPeerId(), "authToken", peer.getConnectionId(), generateIceServers(session)));
+        log.info("Peer ID {} connected", peer.getPeerId());
 
         handlePeerConnection(peer);
     }
@@ -299,7 +289,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     private void unconnectPeerInNetwork(final Peer peer) {
         for (Peer p : findPeersInNetwork(peer)) {
-            sendMessage(p.getSession(), new PeerDisconnectResponse(peer.getPrivateId()));
+            sendMessage(p.getSession(), new PeerDisconnectResponse(peer.getPeerId()));
         }
     }
 
@@ -309,8 +299,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
             final ConnectionType connectionType
     ) {
         if (!peerA.equals(peerB)) {
-            log.info("Peer-A ID {} and peer-B ID {} connected through {} connection", peerA.getPrivateId(), peerB.getPrivateId(), connectionType);
-            sendMessage(peerA.getSession(), new RTCOfferResponse(peerB.getPrivateId(), peerB.getName(), peerB.getDevice(), connectionType));
+            log.info("Peer-A ID {} and peer-B ID {} connected through {} connection", peerA.getPeerId(), peerB.getPeerId(), connectionType);
+            sendMessage(peerA.getSession(), new RTCOfferResponse(peerB.getPeerId(), peerB.getName(), peerB.getDevice(), connectionType));
         }
     }
 
@@ -323,7 +313,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     private Peer findPeerById(final UUID peerId) {
         return peers.stream()
-                .filter(p -> p.getPrivateId() != null && p.getPrivateId().equals(peerId)).findFirst()
+                .filter(p -> p.getPeerId() != null && p.getPeerId().equals(peerId)).findFirst()
                 .orElse(null);
     }
 
