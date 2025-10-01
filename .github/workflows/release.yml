@@ -47,8 +47,6 @@ jobs:
   build-client-ghcr:
     name: Client
     runs-on: ubuntu-latest
-    needs:
-      - build-server-ghcr
     env:
       REGISTRY: ghcr.io
       REPOSITORY: ${{ github.repository }}
