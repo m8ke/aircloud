@@ -6,27 +6,20 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PeerConnectResponse {
+public class PingPongResponse {
 
-    private ResponseType type = ResponseType.CONNECT;
-
-    private UUID peerId;
+    private ResponseType type = ResponseType.PING_PONG;
 
     private String authToken;
 
-    private String connectionId;
-
     private List<IceServer> iceServers;
 
-    public PeerConnectResponse(String authToken, UUID peerId, String connectionId, List<IceServer> iceServers) {
+    public PingPongResponse(String authToken, List<IceServer> iceServers) {
         this.authToken = authToken;
-        this.peerId = peerId;
-        this.connectionId = connectionId;
         this.iceServers = iceServers;
     }
 

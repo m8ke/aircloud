@@ -1,8 +1,10 @@
 aircloud:
+  jwt:
+    secret: secret-only-for-development-secret-only-for-development-secret-only-for-development
   cors:
     origin: "*"
   turn:
-    secret: secret-only-for-development
+    secret:
     stun-ip: stun:127.0.0.1:3478
     turn-ip: turn:127.0.0.1:3478
 

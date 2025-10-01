@@ -7,6 +7,7 @@ import org.springframework.web.socket.WebSocketSession;
 import ua_parser.Client;
 import ua_parser.Parser;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -24,7 +25,9 @@ public class Peer {
     private Discoverability discoverability = Discoverability.NETWORK;
 
     @JsonIgnore
-    private int heartBeat;
+    private Instant lastSeen;
+
+    private UUID peerId;
 
     private String connectionId;
 
@@ -32,12 +35,11 @@ public class Peer {
 
     private String name;
 
-    private UUID peerId;
-
     public Peer(WebSocketSession session) {
         this.session = session;
         this.ipAddress = parseIpAddress();
         this.device = parseDeviceName();
+        this.lastSeen = Instant.now();
     }
 
     private String parseIpAddress() {
@@ -55,6 +57,7 @@ public class Peer {
 
     public void updatePeerSession(WebSocketSession session) {
         this.session = session;
+        this.lastSeen = Instant.now();
         this.ipAddress = parseIpAddress();
     }
 

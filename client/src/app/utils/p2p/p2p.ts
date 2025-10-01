@@ -7,11 +7,11 @@ import { Env } from "@/utils/env/env";
 import { Peer } from "@/utils/p2p/peer";
 import { Session } from "@/utils/session/session";
 import { SendingFile } from "@/utils/file-manager/sending-file";
+import { ModalService } from "@/utils/modal/modal";
 import { ConnectionType } from "@/utils/p2p/connection-type";
 import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 import { ConnectRequest, SocketRequestType, SocketResponseType } from "@/utils/p2p/p2p-interface";
-import { ModalService } from "@/utils/modal/modal";
 
 enum RTCType {
     EOF = "EOF",
@@ -47,6 +47,10 @@ export class P2P {
 
         this.ws.onopen = (): void => {
             console.log("[WebSocket] Connection opened");
+
+            this.dcs.clear();
+            this.pcs.set(new Map<string, Peer>());
+
             this.connectWebSocket();
             this.connectPersistedIds();
 
@@ -65,6 +69,8 @@ export class P2P {
                     return this.handleConnect(data);
                 case SocketResponseType.DISCONNECT:
                     return this.handleDisconnect(data);
+                case SocketResponseType.PING_PONG:
+                    return this.handlePingPong(data);
                 case SocketResponseType.OFFER:
                     return this.handleOffer(data);
                 case SocketResponseType.ANSWER:
@@ -100,16 +106,17 @@ export class P2P {
     private connectWebSocket(): void {
         const name: string | null = this.session.name;
         const peerId: string | null = this.session.peerId;
+        const authToken: string | null = this.session.authToken;
 
-        if (!name || !peerId) {
-            throw new Error("[WebSocket] Name or peer ID is not provided");
+        if (!name) {
+            throw new Error("[WebSocket] Name or auth token is not provided");
         }
 
         this.sendSignal<ConnectRequest>({
             type: SocketRequestType.CONNECT,
             data: {
                 name,
-                peerId,
+                authToken,
                 discoverability: this.session.discoverability,
             },
         });
@@ -151,6 +158,8 @@ export class P2P {
     private handleConnect(data: any): void {
         this.session.connectionId = data.connectionId;
         this.session.iceServers = data.iceServers;
+        this.session.authToken = data.authToken;
+        this.session.peerId = data.peerId;
         this.notification.show({message: "Connected to P2P network"});
     }
 
@@ -158,6 +167,13 @@ export class P2P {
     private handleDisconnect(data: any): void {
         console.log(`[Socket] Peer ID ${data.peerId} disconnected`);
         this.closeConnection(data.peerId);
+    }
+
+    // TODO: Add an interface
+    private handlePingPong(data: any): void {
+        console.log(`[Socket] Ping-pong`);
+        this.session.iceServers = data.iceServers;
+        this.session.authToken = data.authToken;
     }
 
     // TODO: Add an interface
@@ -590,8 +606,8 @@ export class P2P {
 
         // TODO: Add an interface
         dc.send(JSON.stringify({
-            type: RTCType.ACCEPTED_FILE_SHARE,
             peerId: this.session.peerId,
+            type: RTCType.ACCEPTED_FILE_SHARE,
         }));
     }
 
@@ -772,4 +788,5 @@ export class P2P {
     private get connectionId(): string | null {
         return this.router.routerState.snapshot.root.firstChild?.paramMap.get("connectionId") ?? null;
     }
+
 }

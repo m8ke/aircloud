@@ -33,8 +33,8 @@ way to transfer files across devices. We never upload, store, or track files.
 | **Cross-device**                     | Use any device with a [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) supported browser  |
 | **Peer-to-peer**                     | Direct connection and file transfer between peers without a central server or third-party storage              |
 | **Bypass NATs and strict firewalls** | Usable with devices that may be behind strict firewalls or NATs                                                |
-| **Auto-discover peers**              | Detect other peers in the same network (including VPN, LAN, public Wi-Fi)                                      |
-| **Manual connection**                | Connect using a 6-digit code or QR code for peers outside the network                                          |
+| **Auto-discover peers**              | Detect other peers on the same network (including VPN, LAN, public Wi-Fi)                                      |
+| **Manual connection**                | Connect using a 6-digit code or QR code for peers outside the same network                                     |
 | **No limitations**                   | Send as many or large files as you want, everything depends on WebRTC capabilities, and network speed of peers |
 | **No sign-up or ads**                | You don't see annoying ads, or need to sign-up after few transfers                                             |
 | **End-to-end encryption**            | File transfers are always encrypted                                                                            |
@@ -68,22 +68,22 @@ way to transfer files across devices. We never upload, store, or track files.
 
 <sup><a href="#top">back to top</a></sup>
 
-| Technology     | Scope  | Description                                                                   |
-|----------------|--------|-------------------------------------------------------------------------------|
-| Docker         | Core   | Containerization                                                              |
-| GitHub Actions | Core   | CI/CD pipelines                                                               |
-| Spring Boot    | Server | Server-side application built in Java                                         |
-| WebSocket      | Server | Signaling service to establish a WebRTC connection between peers              |
-| Angular        | Client | Client-side application built in TypeScript                                   |
-| WebRTC         | Client | Establish P2P connection between peers                                        |
-| Zip.js         | Client | Zip files on the client-side to send as a bundle                              |
-| Coturn         | Server | Facilitate communication between devices that may be behind firewalls or NATs |
+| Technology  | Scope  | Description                                                                              |
+|-------------|--------|------------------------------------------------------------------------------------------|
+| Spring Boot | Server | Server-side application built in Java                                                    |
+| WebSocket   | Server | Signaling service to establish a WebRTC connection between peers                         |
+| Coturn      | Server | Facilitate communication between devices that may be behind firewalls or NATs (optional) |
+| Angular     | Client | Client-side application built in TypeScript                                              |
+| WebRTC      | Client | Establish P2P connection between peers                                                   |
+| Zip.js      | Client | Zip files on the client-side to send as a bundle                                         |
 
-## Deployment
+## Getting started
 
-### Self-hosting
+<sup><a href="#top">back to top</a></sup>
 
-```bash
+### Docker Compose
+
+```yaml
 services:
   server:
     image: ghcr.io/m8ke/aircloud/server:${AIRCLOUD_VERSION:-latest}
@@ -91,10 +91,11 @@ services:
     container_name: aircloud-server
     environment:
       PORT: ${SERVER_PORT:-8000}
-      DOMAIN: ${DOMAIN:-aircloud.sh}
+      DOMAIN: ${DOMAIN}
+      JWT_SECRET: ${JWT_SECRET}
       TURN_SECRET: ${TURN_SECRET}
-      STUN_IP: stun:${DOMAIN:-turn.aircloud.sh}:3478  # optional
-      TURN_IP: turns:${DOMAIN:-turn.aircloud.sh}:5349 # optional
+      STUN_IP: stun:${DOMAIN}:3478  # optional
+      TURN_IP: turns:${DOMAIN}:5349 # optional
     ports:
       - "${SERVER_PORT:-8000}:${SERVER_PORT:-8000}"
 
@@ -115,7 +116,7 @@ services:
 In case you need to facilitate communication between devices that may be behind firewalls or NATs, you should consider
 using TURN server. Coturn server minimum requirements should be 2 CPU machine with 4 GB of RAM.
 
-```bash
+```yaml
 coturn:
   image: coturn/coturn:4.7.0-alpine
   container_name: coturn
@@ -151,7 +152,7 @@ coturn:
 Although AirCloud prioritizes privacy when sharing files between peers, for additional security you should consider
 using a (self-hosted) VPN and user-agent spoofing at the operating system level. Since we haven't implemented [metadata
 removal](https://emmatrowbridge.github.io/Excuse-Me-Your-Data-Is-Leaking/2025/05/27/Exposed-by-Metadata.html), we
-recommend to sanitize files, images etc. before sending.
+recommend to sanitize files, images etc., before sending.
 
 ## Support
 

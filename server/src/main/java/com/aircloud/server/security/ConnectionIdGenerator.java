@@ -1,4 +1,6 @@
-package com.aircloud.server.socket;
+package com.aircloud.server.security;
+
+import com.aircloud.server.socket.Peer;
 
 import java.security.SecureRandom;
 import java.util.Set;

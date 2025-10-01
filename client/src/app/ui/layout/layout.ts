@@ -31,24 +31,10 @@ export class Layout {
         event.preventDefault();
         event.stopPropagation();
         this.isFileDropping.set(false);
+        const files = event.dataTransfer?.files;
 
-        if (event.dataTransfer?.files.length) {
-            for (const file of event.dataTransfer.files) {
-                // TODO: Check replicates
-                if (this.fileManager.files().includes(file)) {
-                    this.notification.show<any>({
-                        message: `File ${file.name} already exist`,
-                        type: "error",
-                    }, NotificationType.INFO);
-                    continue;
-                }
-                this.fileManager.addFile(file);
-            }
-        } else {
-            this.notification.show<any>({
-                message: "Could not upload file",
-                type: "error",
-            }, NotificationType.INFO);
+        if (files != undefined) {
+            this.fileManager.addFiles(files);
         }
     }
 

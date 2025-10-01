@@ -1,9 +1,14 @@
 package com.aircloud.server.socket;
 
+import com.aircloud.server.security.Auth;
+import com.aircloud.server.security.ConnectionIdGenerator;
+import com.aircloud.server.security.SecurityService;
+import com.aircloud.server.security.TurnCredentialService;
 import com.aircloud.server.socket.dto.request.*;
 import com.aircloud.server.socket.dto.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,13 +17,11 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Log4j2
 @Component
+@RequiredArgsConstructor
 public class WebSocketHandler extends TextWebSocketHandler {
 
     @Value("${aircloud.turn.stun-ip}")
@@ -33,7 +36,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @Override
-    public void afterConnectionEstablished(final WebSocketSession session) {
+    public void afterConnectionEstablished(
+            final WebSocketSession session
+    ) {
         connectPeer(session);
     }
 
@@ -49,9 +54,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public void handlePongMessage(
             final WebSocketSession session,
             final PongMessage message
-    ) {
+    ) throws Exception {
         final Peer peer = findPeerBySession(session);
         peer.updatePeerSession(session);
+
+        final String token = SecurityService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
+        sendMessage(session, new PingPongResponse(token, generateIceServers(session)));
+
         log.info("Pong received from peer ID {}", peer.getPeerId());
     }
 
@@ -207,30 +216,51 @@ public class WebSocketHandler extends TextWebSocketHandler {
             final Peer peer,
             final BaseRequest payload
     ) throws Exception {
-        final String connectionId = ConnectionIdGenerator.generateConnectionId(6, peers);
         final PeerConnectRequest data = new ObjectMapper().convertValue(payload.getData(), PeerConnectRequest.class);
 
+        if (data.getAuthToken() != null && SecurityService.verifyAuthToken(data.getAuthToken())) {
+            final Auth authClaims = SecurityService.parseAuth(data.getAuthToken());
+            peer.setPeerId(authClaims.getPeerId());
+            peer.setConnectionId(authClaims.getConnectionId());
+        } else {
+            if (peer.getConnectionId() == null) {
+                peer.setConnectionId(ConnectionIdGenerator.generateConnectionId(6, peers));
+            }
+
+            if (peer.getPeerId() == null) {
+                peer.setPeerId(UUID.randomUUID());
+            }
+        }
+
         peer.setName(data.getName());
-        peer.setPeerId(data.getPeerId());
-        peer.setConnectionId(connectionId);
         peer.setDiscoverability(data.getDiscoverability());
 
-        final TurnServerCredential.EphemeralCred cred = TurnServerCredential.generate(session.getId(), 3600);
+        final String token = SecurityService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
+
+        sendMessage(session, new PeerConnectResponse(token, peer.getPeerId(), peer.getConnectionId(), generateIceServers(session)));
+        log.info("Peer ID {} connected", peer.getPeerId());
+
+        handlePeerConnection(peer);
+    }
+
+    private List<IceServer> generateIceServers(
+            final WebSocketSession session
+    ) throws Exception {
+        final TurnCredentialService.EphemeralCredentials credentials = TurnCredentialService.generate(session.getId(), 900);
+
+        if (credentials == null) {
+            return null;
+        }
 
         final IceServer stun = new IceServer();
         stun.setUrls(STUN_IP);
 
         final IceServer turn = new IceServer();
         turn.setUrls(TURN_IP);
-        turn.setUsername(cred.username());
-        turn.setCredential(cred.credential());
+        turn.setUsername(credentials.username());
+        turn.setCredential(credentials.credential());
 
-        final List<IceServer> iceServers = Arrays.asList(stun, turn);
-
-        sendMessage(session, new PeerConnectResponse(peer.getPeerId(), peer.getConnectionId(), iceServers));
-        log.info("Peer ID {} connected", peer.getPeerId());
-
-        handlePeerConnection(peer);
+        return Arrays.asList(stun, turn);
     }
 
     private Peer findPeerByConnectionId(

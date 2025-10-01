@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import { inject, Injectable } from "@angular/core";
 
 import animals from "@/utils/session/dict/animals";
@@ -8,6 +7,7 @@ import { Discoverability } from "@/utils/p2p/p2p-interface";
 enum SessionKey {
     NAME = "NAME",
     PEER_ID = "PEER_ID",
+    AUTH_TOKEN = "AUTH_TOKEN",
     CONNECTION_ID = "CONNECTION_ID",
     DISCOVERABILITY = "DISCOVERABILITY",
     CONNECTED_PEER_IDS = "CONNECTED_PEER_IDS",
@@ -27,10 +27,6 @@ export class Session {
     private readonly sessionStorage: SessionStorage = inject<SessionStorage>(SessionStorage);
 
     public init(): void {
-        if (!this.peerId) {
-            this.peerId = uuidv4();
-        }
-
         if (!this.name) {
             this.name = this.generateName();
         }
@@ -54,6 +50,14 @@ export class Session {
 
     public set peerId(peerId: string) {
         this.sessionStorage.setItem(SessionKey.PEER_ID, peerId);
+    }
+
+    public get authToken(): string | null {
+        return this.sessionStorage.getItem(SessionKey.AUTH_TOKEN);
+    }
+
+    public set authToken(authToken: string) {
+        this.sessionStorage.setItem(SessionKey.AUTH_TOKEN, authToken);
     }
 
     public get connectionId(): string | null {
@@ -104,7 +108,10 @@ export class Session {
 
     // TODO: Add an interface
     public set iceServers(iceServers: any) {
-        this.sessionStorage.setItem(SessionKey.ICE_SERVERS, iceServers);
+        if (iceServers) {
+            this.sessionStorage.setItem(SessionKey.ICE_SERVERS, iceServers);
+        }
+        this.sessionStorage.removeItem(SessionKey.ICE_SERVERS);
     }
 
     public get iceServers(): { iceServers: IceServer[] } {

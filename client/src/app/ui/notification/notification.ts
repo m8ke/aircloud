@@ -1,9 +1,10 @@
-import { Component, inject } from "@angular/core";
-import { Observable } from "rxjs";
-import { INotification, NotificationType , NotificationService } from "@/ui/notification/notification.service";
 import { AsyncPipe } from "@angular/common";
-import { NotificationFileRequest } from "@/ui/notification/notification-file-request/notification-file-request";
+import { Observable } from "rxjs";
+import { Component, inject } from "@angular/core";
+
 import { NotificationInfo } from "@/ui/notification/notification-info/notification-info";
+import { NotificationFileRequest } from "@/ui/notification/notification-file-request/notification-file-request";
+import { INotification, NotificationType , NotificationService } from "@/ui/notification/notification.service";
 
 @Component({
     selector: "app-notification",

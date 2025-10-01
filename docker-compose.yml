@@ -6,6 +6,7 @@ services:
     environment:
       PORT: ${SERVER_PORT:-8000}
       DOMAIN: ${DOMAIN:-aircloud.sh}
+      JWT_SECRET: ${JWT_SECRET}
       TURN_SECRET: ${TURN_SECRET}
       STUN_IP: stun:${DOMAIN:-turn.aircloud.sh}:3478  # optional
       TURN_IP: turns:${DOMAIN:-turn.aircloud.sh}:5349 # optional

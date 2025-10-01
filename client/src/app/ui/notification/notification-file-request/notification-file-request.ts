@@ -1,5 +1,5 @@
-import { Component, EventEmitter, input, Output } from "@angular/core";
 import { TitleCasePipe } from "@angular/common";
+import { Component, EventEmitter, input, Output } from "@angular/core";
 
 @Component({
     selector: "app-notification-file-request",

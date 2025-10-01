@@ -1,4 +1,6 @@
 aircloud:
+  jwt:
+    secret: ${JWT_SECRET}
   cors:
     origin: https://${DOMAIN}
   turn:
