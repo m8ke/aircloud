@@ -48,6 +48,7 @@ export class Dropzone {
 
     protected addFiles(event: any): void {
         this.fileManager.addFiles(event.currentTarget?.files);
+        event.currentTarget.value = "";
     }
 
     protected selectFile(): void {

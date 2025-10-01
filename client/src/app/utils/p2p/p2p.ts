@@ -48,7 +48,6 @@ export class P2P {
         this.ws.onopen = (): void => {
             console.log("[WebSocket] Connection opened");
 
-            // TODO: Fix because of bad UX when reconnecting
             this.dcs.clear();
             this.pcs.set(new Map<string, Peer>());
 

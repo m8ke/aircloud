@@ -1,7 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
-import { inject, Injectable, signal } from "@angular/core";
 import { BlobWriter, ZipWriter } from "@zip.js/zip.js";
+import { inject, Injectable, signal } from "@angular/core";
+
 import { Session } from "@/utils/session/session";
+import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 
 @Injectable({
     providedIn: "root",
@@ -9,13 +11,38 @@ import { Session } from "@/utils/session/session";
 export class FileManager {
     public readonly files = signal<File[]>([]);
     private readonly session: Session = inject<Session>(Session);
+    private readonly notification: NotificationService = inject(NotificationService);
 
     public addFile(file: File): void {
+        if (file.size == 0) {
+            this.notification.show<any>({
+                message: "Could not upload file",
+                type: "error",
+            }, NotificationType.INFO);
+            return;
+        }
+
+        const exists: boolean = this.files().some((f: File) =>
+            f.name === file.name &&
+            f.size === file.size &&
+            f.type === file.type &&
+            f.lastModified === file.lastModified,
+        );
+
+        if (exists) {
+            this.notification.show<any>({
+                message: `File ${file.name} already exist`,
+                type: "error",
+            }, NotificationType.INFO);
+
+            return;
+        }
+
         this.files().unshift(file);
         console.log("[FileManager] Added file to buffer:", file.name, file.size);
     }
 
-    public addFiles(files: File[]): void {
+    public addFiles(files: File[] | FileList): void {
         for (const file of files) {
             this.addFile(file);
         }
