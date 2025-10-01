@@ -33,12 +33,13 @@ way to transfer files across devices. We never upload, store, or track files.
 | **Cross-device**                     | Use any device with a [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) supported browser  |
 | **Peer-to-peer**                     | Direct connection and file transfer between peers without a central server or third-party storage              |
 | **Bypass NATs and strict firewalls** | Usable with devices that may be behind strict firewalls or NATs                                                |
-| **Auto-discover peers**              | Detect other peers in the same network (including VPN, LAN, public Wi-Fi)                                      |
-| **Manual connection**                | Connect using a 6-digit code or QR code for peers outside the network                                          |
+| **Auto-discover peers**              | Detect other peers on the same network (including VPN, LAN, public Wi-Fi)                                      |
+| **Manual connection**                | Connect using a 6-digit code or QR code for peers outside the same network                                     |
 | **No limitations**                   | Send as many or large files as you want, everything depends on WebRTC capabilities, and network speed of peers |
 | **No sign-up or ads**                | You don't see annoying ads, or need to sign-up after few transfers                                             |
 | **End-to-end encryption**            | File transfers are always encrypted                                                                            |
 | **Session-based**                    | All data will be deleted if you close the tab or browser                                                       |
+| **Self-hosted**                      | Host AirCloud on your own cloud server or homelab                                                              |
 | **Anonymity**                        | Never upload, store, or track files, IPs etc                                                                   |
 | **Open source**                      | Review the source code, contribute, or share ideas to improve the project                                      |
 
@@ -51,7 +52,6 @@ way to transfer files across devices. We never upload, store, or track files.
 | **PWA**              | Progressive web application                                                      |
 | **Metadata removal** | Read and/or remove metadata from images, videos, etc., to ensure maximum privacy |
 | **Localization**     | Translate into multiple languages (community contributions welcome)              |
-| **Self-hostable**    | Docker image to provide easy self-hosting                                        |
 | **Desktop app**      | Desktop application for MacOS, Windows, and Linux                                |
 | **Mobile app**       | Mobile application for iOS and Android                                           |
 | **TV app**           | TV application for tvOS and Android TV                                           |
@@ -79,12 +79,83 @@ way to transfer files across devices. We never upload, store, or track files.
 | Zip.js         | Client | Zip files on the client-side to send as a bundle                              |
 | Coturn         | Server | Facilitate communication between devices that may be behind firewalls or NATs |
 
+## Getting started
+
+<sup><a href="#top">back to top</a></sup>
+
+### Docker CLI
+
+### Docker Compose
+
+```bash
+services:
+  server:
+    image: ghcr.io/m8ke/aircloud/server:${AIRCLOUD_VERSION:-latest}
+    restart: unless-stopped
+    container_name: aircloud-server
+    environment:
+      PORT: ${SERVER_PORT:-8000}
+      DOMAIN: ${DOMAIN}
+      TURN_SECRET: ${TURN_SECRET}
+      STUN_IP: stun:${DOMAIN}:3478  # optional
+      TURN_IP: turns:${DOMAIN}:5349 # optional
+    ports:
+      - "${SERVER_PORT:-8000}:${SERVER_PORT:-8000}"
+
+  client:
+    image: ghcr.io/m8ke/aircloud/client:${AIRCLOUD_VERSION:-latest}
+    restart: unless-stopped
+    container_name: aircloud-client
+    environment:
+      PORT: ${CLIENT_PORT:-4000}
+    ports:
+      - "${CLIENT_PORT:-4000}:${CLIENT_PORT:-4000}"
+    depends_on:
+      - server
+```
+
+### TURN server
+
+In case you need to facilitate communication between devices that may be behind firewalls or NATs, you should consider
+using TURN server. Coturn server minimum requirements should be 2 CPU machine with 4 GB of RAM.
+
+```bash
+coturn:
+  image: coturn/coturn:4.7.0-alpine
+  container_name: coturn
+  network_mode: host
+  restart: unless-stopped
+  command:
+    - --realm=turn.${DOMAIN}
+    - --server-name=turn.${DOMAIN}
+    - --use-auth-secret
+    - --static-auth-secret=${TURN_SECRET}
+    - --listening-ip=0.0.0.0
+    - --listening-port=3478
+    - --tls-listening-port=5349
+    - --min-port=10000
+    - --max-port=20000
+    - --cert=/certs/fullchain.pem
+    - --pkey=/certs/privkey.pem
+    - --verbose
+    - --fingerprint
+    - --no-rfc5780
+    - --no-tlsv1_2
+    - --no-cli
+    - --no-multicast-peers
+    - --no-software-attribute
+    - --check-origin-consistency
+    - --log-file=-
+```
+
 ## Recommendations
 
 <sup><a href="#top">back to top</a></sup>
 
 Although AirCloud prioritizes privacy when sharing files between peers, for additional security you should consider
-using a (self-hosted) VPN and user-agent spoofing at the operating system level.
+using a (self-hosted) VPN and user-agent spoofing at the operating system level. Since we haven't implemented [metadata
+removal](https://emmatrowbridge.github.io/Excuse-Me-Your-Data-Is-Leaking/2025/05/27/Exposed-by-Metadata.html), we
+recommend to sanitize files, images etc. before sending.
 
 ## Support
 

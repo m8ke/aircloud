@@ -12,7 +12,9 @@ public class PeerConnectRequest {
 
     private String name;
 
-    private UUID peerId;
+    private UUID publicId;
+
+    private String authToken;
 
     private Discoverability discoverability;
 

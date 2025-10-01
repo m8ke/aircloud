@@ -13,36 +13,38 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(
-            ServerHttpRequest request,
-            ServerHttpResponse response,
-            WebSocketHandler wsHandler,
-            Map<String, Object> attributes
+            final ServerHttpRequest request,
+            final ServerHttpResponse response,
+            final WebSocketHandler wsHandler,
+            final Map<String, Object> attributes
     ) {
         if (request instanceof ServletServerHttpRequest servletRequest) {
             final HttpServletRequest httpRequest = servletRequest.getServletRequest();
 
-            final String userAgent = httpRequest.getHeader("User-Agent");
-            String ipAddress = httpRequest.getRemoteAddr();
+            final String userAgent = httpRequest.getHeader("user-agent");
+            String ipAddress;
 
-            if (ipAddress == null || ipAddress.startsWith("127.") || ipAddress.startsWith("0:0:0:0:0:0:0:1")) {
-                ipAddress = httpRequest.getHeader("X-Forwarded-For");
-                if (ipAddress == null) {
-                    ipAddress = httpRequest.getHeader("X-Real-IP");
-                }
+            if (httpRequest.getHeader("cf-connecting-ip") != null) {
+                ipAddress = httpRequest.getHeader("cf-connecting-ip");
+            } else if (httpRequest.getHeader("x-forwarded-for") != null) {
+                ipAddress = httpRequest.getHeader("x-forwarded-for");
+            } else {
+                ipAddress = httpRequest.getRemoteAddr();
             }
 
             attributes.put("userAgent", userAgent);
             attributes.put("ipAddress", ipAddress);
         }
+
         return true;
     }
 
     @Override
     public void afterHandshake(
-            ServerHttpRequest request,
-            ServerHttpResponse response,
-            WebSocketHandler wsHandler,
-            Exception exception
+            final ServerHttpRequest request,
+            final ServerHttpResponse response,
+            final WebSocketHandler wsHandler,
+            final Exception exception
     ) {
     }
 }

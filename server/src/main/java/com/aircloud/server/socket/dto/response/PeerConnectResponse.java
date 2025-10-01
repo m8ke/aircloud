@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,14 +15,17 @@ public class PeerConnectResponse {
 
     private ResponseType type = ResponseType.CONNECT;
 
-    private String token;
+    private UUID publicId;
+
+    private String privateId;
 
     private String connectionId;
 
     private List<IceServer> iceServers;
 
-    public PeerConnectResponse(String token, String connectionId, List<IceServer> iceServers) {
-        this.token = token;
+    public PeerConnectResponse(UUID publicId, String privateId, String connectionId, List<IceServer> iceServers) {
+        this.publicId = publicId;
+        this.privateId = privateId;
         this.connectionId = connectionId;
         this.iceServers = iceServers;
     }
