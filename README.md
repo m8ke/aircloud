@@ -83,11 +83,9 @@ way to transfer files across devices. We never upload, store, or track files.
 
 <sup><a href="#top">back to top</a></sup>
 
-### Docker CLI
-
 ### Docker Compose
 
-```bash
+```yaml
 services:
   server:
     image: ghcr.io/m8ke/aircloud/server:${AIRCLOUD_VERSION:-latest}
