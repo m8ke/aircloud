@@ -24,3 +24,11 @@ updates:
       prefix: "ci"
     schedule:
       interval: "weekly"
+  - package-ecosystem: "docker"
+    directory: /
+    schedule:
+      interval: "weekly"
+    labels:
+      - "build"
+    commit-message:
+      prefix: "build"
