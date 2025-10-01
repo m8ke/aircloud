@@ -237,7 +237,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         final String token = SecurityService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
 
-        sendMessage(session, new PeerConnectResponse(token, peer.getConnectionId(), generateIceServers(session)));
+        sendMessage(session, new PeerConnectResponse(token, peer.getPeerId(), peer.getConnectionId(), generateIceServers(session)));
         log.info("Peer ID {} connected", peer.getPeerId());
 
         handlePeerConnection(peer);

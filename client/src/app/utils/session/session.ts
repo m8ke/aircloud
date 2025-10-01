@@ -6,6 +6,7 @@ import { Discoverability } from "@/utils/p2p/p2p-interface";
 
 enum SessionKey {
     NAME = "NAME",
+    PEER_ID = "PEER_ID",
     AUTH_TOKEN = "AUTH_TOKEN",
     CONNECTION_ID = "CONNECTION_ID",
     DISCOVERABILITY = "DISCOVERABILITY",
@@ -41,6 +42,14 @@ export class Session {
 
     public set name(name: string) {
         this.sessionStorage.setItem(SessionKey.NAME, name);
+    }
+
+    public get peerId(): string | null {
+        return this.sessionStorage.getItem(SessionKey.PEER_ID);
+    }
+
+    public set peerId(peerId: string) {
+        this.sessionStorage.setItem(SessionKey.PEER_ID, peerId);
     }
 
     public get authToken(): string | null {

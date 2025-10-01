@@ -105,6 +105,7 @@ export class P2P {
 
     private connectWebSocket(): void {
         const name: string | null = this.session.name;
+        const peerId: string | null = this.session.peerId;
         const authToken: string | null = this.session.authToken;
 
         if (!name) {
@@ -158,6 +159,7 @@ export class P2P {
         this.session.connectionId = data.connectionId;
         this.session.iceServers = data.iceServers;
         this.session.authToken = data.authToken;
+        this.session.peerId = data.peerId;
         this.notification.show({message: "Connected to P2P network"});
     }
 
@@ -485,6 +487,8 @@ export class P2P {
     private async handleAcceptedFileShare(dc: RTCDataChannel, data: any): Promise<void> {
         const file: SendingFile | undefined = this.sendingFiles().get(data.peerId);
 
+        console.log(data.peerId)
+
         if (file) {
             await this.sendFile(data.peerId, dc, file);
         }
@@ -604,6 +608,7 @@ export class P2P {
 
         // TODO: Add an interface
         dc.send(JSON.stringify({
+            peerId: this.session.peerId,
             type: RTCType.ACCEPTED_FILE_SHARE,
         }));
     }
