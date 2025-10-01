@@ -116,7 +116,7 @@ services:
 In case you need to facilitate communication between devices that may be behind firewalls or NATs, you should consider
 using TURN server. Coturn server minimum requirements should be 2 CPU machine with 4 GB of RAM.
 
-```bash
+```yaml
 coturn:
   image: coturn/coturn:4.7.0-alpine
   container_name: coturn
