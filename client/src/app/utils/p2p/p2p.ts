@@ -106,7 +106,7 @@ export class P2P {
         const authToken: string | null = this.session.authToken;
 
         if (!name) {
-            throw new Error("[WebSocket] Name, peer ID, or auth token is not provided");
+            throw new Error("[WebSocket] Name or auth token is not provided");
         }
 
         this.sendSignal<ConnectRequest>({
