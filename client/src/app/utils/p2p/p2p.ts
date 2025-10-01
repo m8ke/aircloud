@@ -69,6 +69,8 @@ export class P2P {
                     return this.handleConnect(data);
                 case SocketResponseType.DISCONNECT:
                     return this.handleDisconnect(data);
+                case SocketResponseType.PING_PONG:
+                    return this.handlePingPong(data);
                 case SocketResponseType.OFFER:
                     return this.handleOffer(data);
                 case SocketResponseType.ANSWER:
@@ -163,6 +165,13 @@ export class P2P {
     private handleDisconnect(data: any): void {
         console.log(`[Socket] Peer ID ${data.peerId} disconnected`);
         this.closeConnection(data.peerId);
+    }
+
+    // TODO: Add an interface
+    private handlePingPong(data: any): void {
+        console.log(`[Socket] Ping-pong`);
+        this.session.iceServers = data.iceServers;
+        this.session.authToken = data.authToken;
     }
 
     // TODO: Add an interface
@@ -776,4 +785,5 @@ export class P2P {
     private get connectionId(): string | null {
         return this.router.routerState.snapshot.root.firstChild?.paramMap.get("connectionId") ?? null;
     }
+
 }

@@ -94,6 +94,7 @@ services:
     environment:
       PORT: ${SERVER_PORT:-8000}
       DOMAIN: ${DOMAIN}
+      JWT_SECRET: ${JWT_SECRET}
       TURN_SECRET: ${TURN_SECRET}
       STUN_IP: stun:${DOMAIN}:3478  # optional
       TURN_IP: turns:${DOMAIN}:5349 # optional

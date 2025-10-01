@@ -54,9 +54,13 @@ public class WebSocketHandler extends TextWebSocketHandler {
     public void handlePongMessage(
             final WebSocketSession session,
             final PongMessage message
-    ) {
+    ) throws Exception {
         final Peer peer = findPeerBySession(session);
         peer.updatePeerSession(session);
+
+        final String token = SecurityService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
+        sendMessage(session, new PingPongResponse(token, generateIceServers(session)));
+
         log.info("Pong received from peer ID {}", peer.getPeerId());
     }
 

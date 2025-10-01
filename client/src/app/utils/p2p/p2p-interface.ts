@@ -11,6 +11,7 @@ export enum SocketRequestType {
 export enum SocketResponseType {
     DISCONNECT = "DISCONNECT",
     CONNECT = "CONNECT",
+    PING_PONG = "PING_PONG",
     OFFER = "OFFER",
     ANSWER = "ANSWER",
     APPROVE_ANSWER = "APPROVE_ANSWER",

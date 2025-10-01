@@ -2,17 +2,29 @@ package com.aircloud.server.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Date;
 import java.util.UUID;
 
+@Component
 public class SecurityService {
 
-    private static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private static String SECRET_KEY;
+
+    @Value("${aircloud.jwt.secret}")
+    public void setSecret(String secret) {
+        SECRET_KEY = secret;
+    }
+
+    private static Key getSigningKey() {
+        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
+    }
 
     public static String issueAuthToken(
             final UUID peerId,
@@ -26,7 +38,7 @@ public class SecurityService {
                 .id(UUID.randomUUID().toString())
                 .issuedAt(new Date(now))
                 .expiration(new Date(exp))
-                .signWith(SECRET_KEY)
+                .signWith(getSigningKey())
                 .claim("connectionId", connectionId)
                 .compact();
     }
@@ -36,7 +48,7 @@ public class SecurityService {
     ) {
         try {
             Jwts.parser()
-                    .setSigningKey(SECRET_KEY)
+                    .setSigningKey(getSigningKey())
                     .build()
                     .parseSignedClaims(token);
             return true;
@@ -49,7 +61,7 @@ public class SecurityService {
             final String token
     ) {
         final Claims claims = Jwts.parser()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
