@@ -35,8 +35,6 @@ public class Peer {
 
     private String name;
 
-    private static final int DEFAULT_TTL_SECONDS = 30;
-
     public Peer(WebSocketSession session) {
         this.session = session;
         this.ipAddress = parseIpAddress();
@@ -63,23 +61,9 @@ public class Peer {
         this.ipAddress = parseIpAddress();
     }
 
-    public void visit() {
-        this.lastSeen = Instant.now();
-    }
-
     @JsonIgnore
     public boolean isActive() {
         return session.isOpen() && name != null && device != null;
-    }
-
-    @JsonIgnore
-    public boolean hasExpired() {
-        return lastSeen.plusSeconds(DEFAULT_TTL_SECONDS).isBefore(Instant.now());
-    }
-
-    @JsonIgnore
-    public long getSecondsUntilExpiry() {
-        return Math.max(0, DEFAULT_TTL_SECONDS - java.time.Duration.between(lastSeen, Instant.now()).getSeconds());
     }
 
 }
