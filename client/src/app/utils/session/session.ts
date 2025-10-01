@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import { inject, Injectable } from "@angular/core";
 
 import animals from "@/utils/session/dict/animals";
@@ -7,7 +6,7 @@ import { Discoverability } from "@/utils/p2p/p2p-interface";
 
 enum SessionKey {
     NAME = "NAME",
-    PEER_ID = "PEER_ID",
+    AUTH_TOKEN = "AUTH_TOKEN",
     CONNECTION_ID = "CONNECTION_ID",
     DISCOVERABILITY = "DISCOVERABILITY",
     CONNECTED_PEER_IDS = "CONNECTED_PEER_IDS",
@@ -27,10 +26,6 @@ export class Session {
     private readonly sessionStorage: SessionStorage = inject<SessionStorage>(SessionStorage);
 
     public init(): void {
-        if (!this.peerId) {
-            this.peerId = uuidv4();
-        }
-
         if (!this.name) {
             this.name = this.generateName();
         }
@@ -48,12 +43,12 @@ export class Session {
         this.sessionStorage.setItem(SessionKey.NAME, name);
     }
 
-    public get peerId(): string | null {
-        return this.sessionStorage.getItem(SessionKey.PEER_ID);
+    public get authToken(): string | null {
+        return this.sessionStorage.getItem(SessionKey.AUTH_TOKEN);
     }
 
-    public set peerId(peerId: string) {
-        this.sessionStorage.setItem(SessionKey.PEER_ID, peerId);
+    public set authToken(authToken: string) {
+        this.sessionStorage.setItem(SessionKey.AUTH_TOKEN, authToken);
     }
 
     public get connectionId(): string | null {

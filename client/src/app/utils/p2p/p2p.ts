@@ -47,6 +47,11 @@ export class P2P {
 
         this.ws.onopen = (): void => {
             console.log("[WebSocket] Connection opened");
+
+            // TODO: Fix because of bad UX when reconnecting
+            this.dcs.clear();
+            this.pcs.set(new Map<string, Peer>());
+
             this.connectWebSocket();
             this.connectPersistedIds();
 
@@ -99,17 +104,17 @@ export class P2P {
 
     private connectWebSocket(): void {
         const name: string | null = this.session.name;
-        const peerId: string | null = this.session.peerId;
+        const authToken: string | null = this.session.authToken;
 
-        if (!name || !peerId) {
-            throw new Error("[WebSocket] Name or peer ID is not provided");
+        if (!name) {
+            throw new Error("[WebSocket] Name, peer ID, or auth token is not provided");
         }
 
         this.sendSignal<ConnectRequest>({
             type: SocketRequestType.CONNECT,
             data: {
                 name,
-                peerId,
+                authToken,
                 discoverability: this.session.discoverability,
             },
         });
@@ -151,6 +156,7 @@ export class P2P {
     private handleConnect(data: any): void {
         this.session.connectionId = data.connectionId;
         this.session.iceServers = data.iceServers;
+        this.session.authToken = data.authToken;
         this.notification.show({message: "Connected to P2P network"});
     }
 
@@ -591,7 +597,6 @@ export class P2P {
         // TODO: Add an interface
         dc.send(JSON.stringify({
             type: RTCType.ACCEPTED_FILE_SHARE,
-            peerId: this.session.peerId,
         }));
     }
 

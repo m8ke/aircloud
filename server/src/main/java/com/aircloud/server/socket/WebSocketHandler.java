@@ -1,13 +1,12 @@
 package com.aircloud.server.socket;
 
+import com.aircloud.server.security.Auth;
 import com.aircloud.server.security.ConnectionIdGenerator;
 import com.aircloud.server.security.SecurityService;
 import com.aircloud.server.security.TurnCredentialService;
 import com.aircloud.server.socket.dto.request.*;
 import com.aircloud.server.socket.dto.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.jwk.OctetKeyPair;
-import com.nimbusds.jwt.SignedJWT;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -18,10 +17,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @Log4j2
 @Component
@@ -216,15 +212,28 @@ public class WebSocketHandler extends TextWebSocketHandler {
             final Peer peer,
             final BaseRequest payload
     ) throws Exception {
-        final String connectionId = ConnectionIdGenerator.generateConnectionId(6, peers);
         final PeerConnectRequest data = new ObjectMapper().convertValue(payload.getData(), PeerConnectRequest.class);
 
+        if (data.getAuthToken() != null && SecurityService.verifyAuthToken(data.getAuthToken())) {
+            final Auth authClaims = SecurityService.parseAuth(data.getAuthToken());
+            peer.setPeerId(authClaims.getPeerId());
+            peer.setConnectionId(authClaims.getConnectionId());
+        } else {
+            if (peer.getConnectionId() == null) {
+                peer.setConnectionId(ConnectionIdGenerator.generateConnectionId(6, peers));
+            }
+
+            if (peer.getPeerId() == null) {
+                peer.setPeerId(UUID.randomUUID());
+            }
+        }
+
         peer.setName(data.getName());
-        peer.setPeerId(data.getPeerId());
-        peer.setConnectionId(connectionId);
         peer.setDiscoverability(data.getDiscoverability());
 
-        sendMessage(session, new PeerConnectResponse(peer.getPeerId(), "authToken", peer.getConnectionId(), generateIceServers(session)));
+        final String token = SecurityService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
+
+        sendMessage(session, new PeerConnectResponse(token, peer.getConnectionId(), generateIceServers(session)));
         log.info("Peer ID {} connected", peer.getPeerId());
 
         handlePeerConnection(peer);

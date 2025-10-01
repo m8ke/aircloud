@@ -27,12 +27,9 @@ public class Peer {
     @JsonIgnore
     private Instant lastSeen;
 
-    @JsonIgnore
-    private Object privateKey;
+    private UUID peerId;
 
-    private UUID peerId; // Public ID to handle connections on the client-side (only informative meaning)
-
-    private String connectionId; // Short unique (usually 6-8 chars) for easier connection
+    private String connectionId;
 
     private String device;
 

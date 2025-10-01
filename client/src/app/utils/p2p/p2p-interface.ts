@@ -27,7 +27,7 @@ export interface ConnectRequest {
     type: SocketRequestType,
     data: {
         name: string;
-        peerId: string;
+        authToken: string | null;
         discoverability: Discoverability;
     }
 }
