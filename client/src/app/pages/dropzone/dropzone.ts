@@ -1,5 +1,5 @@
 import { ReactiveFormsModule } from "@angular/forms";
-import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from "@angular/core";
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, viewChild } from "@angular/core";
 
 import { P2P } from "@/utils/p2p/p2p";
 import { Peer } from "@/ui/peer/peer";
@@ -33,6 +33,14 @@ export class Dropzone {
     protected readonly fileManager: FileManager = inject<FileManager>(FileManager);
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
+
+    @HostListener("window: beforeunload", ["$event"])
+    protected onBeforeUnload(event: BeforeUnloadEvent): void {
+        if (this.fileManager.files().length > 0) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    }
 
     protected onRemoveFiles(): void {
         this.fileManager.removeFiles();
@@ -81,4 +89,6 @@ export class Dropzone {
         this.onRemoveFiles();
         this.modal.close("clearFiles");
     }
+
+
 }
