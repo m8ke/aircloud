@@ -34,7 +34,7 @@ export class Dropzone {
 
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
 
-    @HostListener("window: beforeunload", ["$event"])
+    @HostListener("window:beforeunload", ["$event"])
     protected onBeforeUnload(event: BeforeUnloadEvent): void {
         if (this.fileManager.files().length > 0) {
             event.preventDefault();
