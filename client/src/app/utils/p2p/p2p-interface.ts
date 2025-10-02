@@ -21,7 +21,8 @@ export enum SocketResponseType {
 }
 
 export enum Discoverability {
-    NETWORK = "NETWORK"
+    DIRECT = "DIRECT",
+    NETWORK = "NETWORK",
 }
 
 export interface ConnectRequest {

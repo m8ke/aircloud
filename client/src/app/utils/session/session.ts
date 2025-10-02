@@ -99,7 +99,14 @@ export class Session {
     }
 
     private generateName(): string {
-        return animals[this.randomInt(0, animals.length - 1)];
+        return this.titleCase(animals[this.randomInt(0, animals.length - 1)]);
+    }
+
+    private titleCase(value: string): string {
+        return value.toLowerCase()
+            .split(" ")
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
     }
 
     private randomInt(min: number, max: number): number {
