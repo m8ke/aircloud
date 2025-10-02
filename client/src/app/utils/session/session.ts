@@ -110,8 +110,9 @@ export class Session {
     public set iceServers(iceServers: any) {
         if (iceServers) {
             this.sessionStorage.setItem(SessionKey.ICE_SERVERS, iceServers);
+        } else {
+            this.sessionStorage.removeItem(SessionKey.ICE_SERVERS);
         }
-        this.sessionStorage.removeItem(SessionKey.ICE_SERVERS);
     }
 
     public get iceServers(): { iceServers: IceServer[] } {
