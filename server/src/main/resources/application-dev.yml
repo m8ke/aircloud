@@ -4,7 +4,7 @@ aircloud:
   cors:
     origin: "*"
   turn:
-    secret:
+    secret: secret-only-for-development
     stun-ip: stun:127.0.0.1:3478
     turn-ip: turn:127.0.0.1:3478
 
