@@ -38,6 +38,7 @@ export class P2P {
     public readonly pcs = signal<Map<string, Peer>>(new Map<string, Peer>());
     public readonly sendingFiles = signal<Map<string, SendingFile>>(new Map<string, SendingFile>());
     public readonly receivingFiles = signal<Map<string, ReceivingFile>>(new Map<string, ReceivingFile>());
+    public readonly isConnected = signal<boolean>(true);
 
     private static readonly CHUNK_SIZE: number = 64 * 1024;
 
@@ -47,6 +48,7 @@ export class P2P {
 
         this.ws.onopen = (): void => {
             console.log("[WebSocket] Connection opened");
+            this.isConnected.set(true);
 
             this.dcs.clear();
             this.pcs.set(new Map<string, Peer>());
@@ -93,19 +95,20 @@ export class P2P {
 
         this.ws.onclose = async (e: CloseEvent): Promise<void> => {
             console.warn(`[WebSocket] Connection closed, retrying in ${P2P.RECONNECT_DELAY} ms`);
+            this.isConnected.set(false);
             await this.delay(P2P.RECONNECT_DELAY);
             this.init();
         };
 
         this.ws.onerror = (e: Event): void => {
             console.log("[WebSocket] Connection error", e);
+            this.isConnected.set(false);
             this.ws.close();
         };
     }
 
     private connectWebSocket(): void {
         const name: string | null = this.session.name;
-        const peerId: string | null = this.session.peerId;
         const authToken: string | null = this.session.authToken;
 
         if (!name) {
