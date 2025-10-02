@@ -1,19 +1,22 @@
 <app-layout>
     <div slot="header" class="flex flex-row justify-between gap-2 items-center w-full">
         <div class="flex flex-row items-center gap-x-2">
-            <!--            <button-->
-            <!--                class="cursor-pointer flex flex-row gap-x-1 items-center rounded-xl px-2.5 py-1.5 text-xs text-white shadow-xs border border-zinc-700 hover:bg-zinc-800 transition duration-300">-->
-            <!--                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4">-->
-            <!--                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z" />-->
-            <!--                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />-->
-            <!--                </svg>-->
+            <button
+                (click)="modal.open('settings')"
+                class="cursor-pointer flex flex-row gap-x-1 items-center rounded-xl px-2.5 py-1.5 text-xs text-white shadow-xs border border-zinc-700 hover:bg-zinc-800 transition duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="size-4">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 0 1 1.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.559.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.894.149c-.424.07-.764.383-.929.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 0 1-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.398.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 0 1-.12-1.45l.527-.737c.25-.35.272-.806.108-1.204-.165-.397-.506-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.108-1.204l-.526-.738a1.125 1.125 0 0 1 .12-1.45l.773-.773a1.125 1.125 0 0 1 1.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894Z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                </svg>
 
-            <!--                <span>Settings</span>-->
-            <!--            </button>-->
+                <span>Settings</span>
+            </button>
 
             <div>
                 @if (p2p.isConnected()) {
-                    Known as <strong class="text-white">{{ session.name | titlecase }}</strong>
+                    Known as <strong class="text-white">{{ session.name }}</strong>
                 } @else {
                     <div class="flex items-center gap-x-2">
                         <svg aria-hidden="true"
@@ -112,7 +115,7 @@
         } @else {
             <div
                 class="flex justify-center items-center flex-col h-full text-center xl:w-[40%] lg:w-[60%] mx-auto inset-shadow-sm">
-                <div class="horizontal-scroll flex flex-row w-full items-center mb-4 gap-x-4 px-14">
+                <div class="horizontal-scroll flex flex-row w-full items-center mb-4 gap-x-4 px-14 h-[76px]">
                     @for (peer of p2p.pcs() | keyvalue; track peer.key) {
                         <app-peer
                             [key]="peer.key"
@@ -143,8 +146,7 @@
 
                 <p class="mt-2 text-white/50 text-xs w-[80%]">
                     Your files are transferred directly peer-to-peer — we <strong>never</strong> upload, store, or track
-                    your
-                    files. We respect your privacy and GDPR.
+                    your files. We respect your privacy and GDPR.
                 </p>
             </div>
         }
@@ -173,6 +175,58 @@
                 (click)="clearAll()"
                 class="inline-flex cursor-pointer w-full justify-center rounded-xl px-3 py-2 text-sm font-semibold text-white sm:ml-2 sm:w-auto bg-rose-600 hover:bg-rose-500 disabled:opacity-50">
                 Clear all
+            </button>
+        </footer>
+    </app-modal>
+
+    <app-modal modalId="settings">
+        <h3 class="text-xl font-semibold text-gray-900 font-serif" slot="header">
+            Change settings
+        </h3>
+
+        <form [formGroup]="formSettings" class="grid gap-3">
+            <div>
+                <label
+                    for="discoverable"
+                    class="block text-sm/6 font-medium text-black">
+                    Discovery mode
+                </label>
+
+                <app-dropdown
+                    formControlName="discoverability"
+                    placeholder="Expiration time">
+                    <app-dropdown-item [value]="Discoverability.NETWORK">
+                        Network
+                    </app-dropdown-item>
+                </app-dropdown>
+            </div>
+
+            <div>
+                <label
+                    for="name"
+                    class="block text-sm/6 font-medium text-black">
+                    Display name
+                </label>
+                <div class="mt-2">
+                    <input
+                        id="name"
+                        type="text"
+                        autocomplete="name"
+                        formControlName="name"
+                        [maxLength]="25"
+                        class="block w-full rounded-xl bg-white/5 px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-black/10 placeholder:text-zinc-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+                    />
+                </div>
+            </div>
+        </form>
+
+        <footer slot="footer">
+            <button
+                type="button"
+                (click)="saveSettings()"
+                [disabled]="formSettings.invalid"
+                class="inline-flex cursor-pointer w-full justify-center rounded-xl px-3 py-2 text-sm font-semibold text-white sm:ml-2 sm:w-auto bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50">
+                Save settings
             </button>
         </footer>
     </app-modal>

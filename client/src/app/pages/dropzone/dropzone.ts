@@ -1,15 +1,18 @@
-import { ReactiveFormsModule } from "@angular/forms";
-import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, viewChild } from "@angular/core";
+import { KeyValuePipe, NgStyle } from "@angular/common";
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, OnInit, viewChild } from "@angular/core";
 
 import { P2P } from "@/utils/p2p/p2p";
 import { Peer } from "@/ui/peer/peer";
 import { Modal } from "@/ui/modal/modal";
 import { Layout } from "@/ui/layout/layout";
 import { Session } from "@/utils/session/session";
+import { Dropdown } from "@/ui/dropdown/dropdown";
 import { FileManager } from "@/utils/file-manager/file-manager";
 import { SendingFile } from "@/utils/file-manager/sending-file";
 import { ModalService } from "@/utils/modal/modal";
-import { KeyValuePipe, NgStyle, TitleCasePipe } from "@angular/common";
+import { DropdownItem } from "@/ui/dropdown-item/dropdown-item";
+import { Discoverability } from "@/utils/p2p/p2p-interface";
 
 @Component({
     selector: "app-dropzone",
@@ -19,20 +22,39 @@ import { KeyValuePipe, NgStyle, TitleCasePipe } from "@angular/common";
         Modal,
         Peer,
         KeyValuePipe,
-        TitleCasePipe,
         NgStyle,
+        DropdownItem,
+        Dropdown,
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: "./dropzone.html",
     styleUrl: "./dropzone.scss",
 })
-export class Dropzone {
+export class Dropzone implements OnInit {
     protected readonly p2p: P2P = inject<P2P>(P2P);
     protected readonly modal: ModalService = inject<ModalService>(ModalService);
     protected readonly session: Session = inject<Session>(Session);
     protected readonly fileManager: FileManager = inject<FileManager>(FileManager);
+    private readonly formBuilder: FormBuilder = inject<FormBuilder>(FormBuilder);
 
+    protected formSettings!: FormGroup;
     protected readonly addFileElement = viewChild<ElementRef>("addFileRef");
+
+    public ngOnInit(): void {
+        this.formSettings = this.formBuilder.group({
+            name: [this.session.name, [
+                Validators.required,
+                Validators.minLength(1),
+                Validators.maxLength(25),
+            ]],
+            discoverability: [this.session.discoverability, [
+                Validators.required,
+            ]],
+            saveToBrowser: [false, [
+                Validators.required,
+            ]],
+        });
+    }
 
     @HostListener("window:beforeunload", ["$event"])
     protected onBeforeUnload(event: BeforeUnloadEvent): void {
@@ -90,5 +112,13 @@ export class Dropzone {
         this.modal.close("clearFiles");
     }
 
+    protected saveSettings(): void {
+        this.session.name = this.formSettings.get("name")?.value;
+        this.session.discoverability = this.formSettings.get("discoverability")?.value as Discoverability;
+        this.modal.close("settings");
+    }
 
+    protected get Discoverability(): typeof Discoverability {
+        return Discoverability;
+    }
 }

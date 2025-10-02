@@ -1,10 +1,13 @@
 import { Component, ContentChildren, forwardRef, HostListener, input, QueryList } from "@angular/core";
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
 import { DropdownItem } from "@/ui/dropdown-item/dropdown-item";
+import { TitleCasePipe } from "@angular/common";
 
 @Component({
     selector: "app-dropdown",
-    imports: [],
+    imports: [
+        TitleCasePipe,
+    ],
     templateUrl: "./dropdown.html",
     styleUrl: "./dropdown.scss",
     providers: [{
