@@ -8,12 +8,12 @@ import { Peer } from "@/utils/p2p/peer";
 import { Session } from "@/utils/session/session";
 import { SendingFile } from "@/utils/file-manager/sending-file";
 import { ModalService } from "@/utils/modal/modal";
-import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
-import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
+import { DiscoveryMode } from "@/utils/websocket/discovery-mode";
+import { ConnectRequest } from "@/utils/websocket/connect-request";
 import { SocketRequestType } from "@/utils/websocket/socket-request-type";
 import { SocketResponseType } from "@/utils/websocket/socket-response-type";
-import { ConnectRequest } from "@/utils/p2p/p2p-interface";
-import { DiscoveryMode } from "@/utils/websocket/discovery-mode";
+import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
+import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 
 enum RTCType {
     EOF = "EOF",
