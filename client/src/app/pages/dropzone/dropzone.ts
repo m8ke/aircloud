@@ -12,7 +12,7 @@ import { FileManager } from "@/utils/file-manager/file-manager";
 import { SendingFile } from "@/utils/file-manager/sending-file";
 import { ModalService } from "@/utils/modal/modal";
 import { DropdownItem } from "@/ui/dropdown-item/dropdown-item";
-import { DiscoveryMode } from "@/utils/websocket/discovery-mode";
+import { DiscoveryMode } from "@/utils/p2p/discovery-mode";
 
 @Component({
     selector: "app-dropzone",

@@ -15,10 +15,7 @@ export class FileManager {
 
     public addFile(file: File): void {
         if (file.size == 0) {
-            this.notification.show<any>({
-                message: "Could not upload file",
-                type: "error",
-            }, NotificationType.INFO);
+            this.notification.show({message: "Could not upload file"});
             return;
         }
 
@@ -30,11 +27,7 @@ export class FileManager {
         );
 
         if (exists) {
-            this.notification.show<any>({
-                message: `File ${file.name} already exist`,
-                type: "error",
-            }, NotificationType.INFO);
-
+            this.notification.show({message: `File ${file.name} already exist`});
             return;
         }
 

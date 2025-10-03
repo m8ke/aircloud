@@ -1,8 +1,8 @@
 import { inject, Injectable } from "@angular/core";
 
 import animals from "@/utils/session/dict/animals";
+import { DiscoveryMode } from "@/utils/p2p/discovery-mode";
 import { SessionStorage } from "@/utils/storage/session-storage";
-import { DiscoveryMode } from "@/utils/websocket/discovery-mode";
 
 enum SessionKey {
     NAME = "NAME",
@@ -77,7 +77,7 @@ export class Session {
     }
 
     public get connectedPeerIds(): string[] {
-        const ids = sessionStorage.getItem(SessionKey.CONNECTED_PEER_IDS);
+        const ids: string | null = sessionStorage.getItem(SessionKey.CONNECTED_PEER_IDS);
         return ids ? JSON.parse(ids) : [];
     }
 
@@ -113,8 +113,7 @@ export class Session {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    // TODO: Add an interface
-    public set iceServers(iceServers: any) {
+    public set iceServers(iceServers: IceServer[]) {
         if (iceServers) {
             this.sessionStorage.setItem(SessionKey.ICE_SERVERS, iceServers);
         } else {
@@ -123,7 +122,7 @@ export class Session {
     }
 
     public get iceServers(): { iceServers: IceServer[] } {
-        const iceServers = this.sessionStorage.getItem(SessionKey.ICE_SERVERS) as IceServer[] | null;
+        const iceServers: IceServer[] | null = this.sessionStorage.getItem(SessionKey.ICE_SERVERS);
 
         if (iceServers == null) {
             console.warn("[Session] ICE servers not found, fallback to public STUN server");

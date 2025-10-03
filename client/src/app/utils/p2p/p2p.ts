@@ -6,26 +6,38 @@ import { computed, inject, Injectable, Signal, signal } from "@angular/core";
 import { Env } from "@/utils/env/env";
 import { Peer } from "@/utils/p2p/peer";
 import { Session } from "@/utils/session/session";
+import { RTCType } from "@/utils/p2p/rtc-type";
 import { SendingFile } from "@/utils/file-manager/sending-file";
 import { ModalService } from "@/utils/modal/modal";
-import { DiscoveryMode } from "@/utils/websocket/discovery-mode";
-import { ConnectRequest } from "@/utils/websocket/connect-request";
-import { SocketRequestType } from "@/utils/websocket/socket-request-type";
-import { SocketResponseType } from "@/utils/websocket/socket-response-type";
+import { DiscoveryMode } from "@/utils/p2p/discovery-mode";
 import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 
-enum RTCType {
-    EOF = "EOF",
-    REQUESTED_FILE_SHARE = "REQUESTED_FILE_SHARE",
-    ACCEPTED_FILE_SHARE = "ACCEPTED_FILE_SHARE",
-    DENIED_FILE_SHARE = "DENIED_FILE_SHARE",
-}
+import {
+    SocketConnectRequest,
+    SocketPeerConnectRequest,
+    SocketPeerReconnectRequest,
+    SocketRequestType,
+} from "@/utils/p2p/socket-request";
+
+import {
+    SocketAnswer,
+    SocketApproveAnswer,
+    SocketConnect,
+    SocketDisconnect,
+    SocketEndOfIceCandidates,
+    SocketIceCandidate,
+    SocketOffer,
+    SocketPeerDirectConnect,
+    SocketPingPong,
+    SocketResponseType,
+} from "@/utils/p2p/socket-response";
 
 @Injectable({
     providedIn: "root",
 })
 export class P2P {
+    private static readonly CHUNK_SIZE: number = 64 * 1024;
     private static readonly RECONNECT_DELAY: number = 3000;
 
     private ws!: WebSocket;
@@ -38,11 +50,9 @@ export class P2P {
 
     private readonly dcs: Map<string, RTCDataChannel> = new Map<string, RTCDataChannel>();
     public readonly pcs = signal<Map<string, Peer>>(new Map<string, Peer>());
+    public readonly isConnected = signal<boolean>(true);
     public readonly sendingFiles = signal<Map<string, SendingFile>>(new Map<string, SendingFile>());
     public readonly receivingFiles = signal<Map<string, ReceivingFile>>(new Map<string, ReceivingFile>());
-    public readonly isConnected = signal<boolean>(true);
-
-    private static readonly CHUNK_SIZE: number = 64 * 1024;
 
     public init(): void {
         console.log("[WebSocket] Initialize connection");
@@ -70,40 +80,40 @@ export class P2P {
 
             switch (data.type as SocketResponseType) {
                 case SocketResponseType.CONNECT:
-                    return this.handleConnect(data);
+                    return this.handleConnect(data as SocketConnect);
                 case SocketResponseType.DISCONNECT:
-                    return this.handleDisconnect(data);
+                    return this.handleDisconnect(data as SocketDisconnect);
                 case SocketResponseType.PING_PONG:
-                    return this.handlePingPong(data);
+                    return this.handlePingPong(data as SocketPingPong);
                 case SocketResponseType.OFFER:
-                    return this.handleOffer(data);
+                    return this.handleOffer(data as SocketOffer);
                 case SocketResponseType.ANSWER:
-                    return await this.handleAnswer(data);
+                    return await this.handleAnswer(data as SocketAnswer);
                 case SocketResponseType.APPROVE_ANSWER:
-                    return this.handleApproveAnswer(data);
+                    return this.handleApproveAnswer(data as SocketApproveAnswer);
                 case SocketResponseType.PEER_CONNECT:
-                    return data.isConnected
-                        ? this.handlePeerConnectSucceed(data)
-                        : this.handlePeerConnectFailed(data);
+                    return (data as SocketPeerDirectConnect).isConnected
+                        ? this.handlePeerConnectSucceed()
+                        : this.handlePeerConnectFailed();
                 case SocketResponseType.ICE_CANDIDATE:
-                    return this.handleIceCandidate(data);
+                    return this.handleIceCandidate(data as SocketIceCandidate);
                 case SocketResponseType.END_OF_ICE_CANDIDATES:
-                    return this.handleEndOfIceCandidates(data);
+                    return this.handleEndOfIceCandidates(data as SocketEndOfIceCandidates);
                 default:
                     console.log("[WebSocket] Unhandled message received", data);
                     break;
             }
         };
 
-        this.ws.onclose = async (e: CloseEvent): Promise<void> => {
+        this.ws.onclose = async (event: CloseEvent): Promise<void> => {
             console.warn(`[WebSocket] Connection closed, retrying in ${P2P.RECONNECT_DELAY} ms`);
             this.isConnected.set(false);
             await this.delay(P2P.RECONNECT_DELAY);
             this.init();
         };
 
-        this.ws.onerror = (e: Event): void => {
-            console.log("[WebSocket] Connection error", e);
+        this.ws.onerror = (event: Event): void => {
+            console.log("[WebSocket] Connection error", event);
             this.isConnected.set(false);
             this.ws.close();
         };
@@ -117,7 +127,7 @@ export class P2P {
             throw new Error("[WebSocket] Name or auth token is not provided");
         }
 
-        this.sendSignal<ConnectRequest>({
+        this.sendSignal<SocketConnectRequest>({
             type: SocketRequestType.CONNECT,
             data: {
                 name,
@@ -128,8 +138,7 @@ export class P2P {
     }
 
     public connectPeer(connectionId: string): void {
-        // TODO: Add an interface
-        this.sendSignal<any>({
+        this.sendSignal<SocketPeerConnectRequest>({
             type: SocketRequestType.PEER_CONNECT,
             data: {
                 connectionId,
@@ -138,8 +147,7 @@ export class P2P {
     }
 
     public reestablishConnection(peerId: string): void {
-        // TODO: Add an interface
-        this.sendSignal<any>({
+        this.sendSignal<SocketPeerReconnectRequest>({
             type: SocketRequestType.PEER_RECONNECT,
             data: {
                 peerId,
@@ -159,30 +167,26 @@ export class P2P {
         });
     }
 
-    // TODO: Add an interface
-    private handleConnect(data: any): void {
-        this.session.connectionId = data.connectionId;
-        this.session.iceServers = data.iceServers;
-        this.session.authToken = data.authToken;
+    private handleConnect(data: SocketConnect): void {
         this.session.peerId = data.peerId;
+        this.session.authToken = data.authToken;
+        this.session.iceServers = data.iceServers;
+        this.session.connectionId = data.connectionId;
         this.notification.show({message: "Connected to P2P network"});
     }
 
-    // TODO: Add an interface
-    private handleDisconnect(data: any): void {
+    private handleDisconnect(data: SocketDisconnect): void {
         console.log(`[Socket] Peer ID ${data.peerId} disconnected`);
         this.closeConnection(data.peerId);
     }
 
-    // TODO: Add an interface
-    private handlePingPong(data: any): void {
+    private handlePingPong(data: SocketPingPong): void {
         console.log(`[Socket] Ping-pong`);
         this.session.iceServers = data.iceServers;
         this.session.authToken = data.authToken;
     }
 
-    // TODO: Add an interface
-    private async handleOffer(data: any): Promise<void> {
+    private async handleOffer(data: SocketOffer): Promise<void> {
         console.log(`[WebSocket] Received an offer request from peer ID ${data.peerId}`);
         const offer: RTCSessionDescription | null = await this.createOffer(data.peerId, data.name, data.device, data.discoveryMode);
 
@@ -196,10 +200,9 @@ export class P2P {
         });
     }
 
-    // TODO: Add an interface
-    private async handleAnswer(data: any): Promise<void> {
+    private async handleAnswer(data: SocketAnswer): Promise<void> {
         console.log("[WebSocket] Received offer from peer and creating an answer");
-        const answer = await this.createAnswer(data.peerId, data.offer, data.name, data.device, data.discoveryMode);
+        const answer: RTCSessionDescription | null = await this.createAnswer(data.peerId, data.offer, data.name, data.device, data.discoveryMode);
 
         this.sendSignal({
             type: SocketRequestType.ANSWER,
@@ -210,31 +213,20 @@ export class P2P {
         });
     }
 
-    // TODO: Add an interface
-    private async handleApproveAnswer(data: any): Promise<void> {
+    private async handleApproveAnswer(data: SocketApproveAnswer): Promise<void> {
         console.log(`[WebSocket] Received an answer from the peer ID ${data.peerId}`);
         await this.approveAnswer(data.peerId, data.answer);
     }
 
-    // TODO: Add an interface
-    private async handlePeerConnectSucceed(data: any): Promise<void> {
+    private async handlePeerConnectSucceed(): Promise<void> {
         console.log("[WebSocket] Direct connection succeed");
-
-        this.notification.show({
-            message: "Connected with a peer",
-            type: "success",
-        });
-
+        this.notification.show({message: "Connected with a peer"});
         this.modal.close("connectPeer");
     }
 
-    // TODO: Add an interface
-    private handlePeerConnectFailed(data: any): void {
+    private handlePeerConnectFailed(): void {
         console.log("[WebSocket] Direct connection failed");
-        this.notification.show({
-            message: "Wrong ID or peer is not online",
-            type: "error",
-        });
+        this.notification.show({message: "Wrong ID or peer is not online"});
     }
 
     private connectPersistedIds(): void {
@@ -460,7 +452,6 @@ export class P2P {
     }
 
     // TODO: Add an interface
-    //       Add docs
     private handleRequestedFileShare(dc: RTCDataChannel, data: any): void {
         const name: string = data.name;
         const metadata: PeerFileMetadata = data.metadata;
@@ -488,7 +479,6 @@ export class P2P {
     }
 
     // TODO: Add an interface
-    //       Add docs
     private async handleAcceptedFileShare(dc: RTCDataChannel, data: any): Promise<void> {
         const file: SendingFile | undefined = this.sendingFiles().get(data.peerId);
 
@@ -498,7 +488,6 @@ export class P2P {
     }
 
     // TODO: Add an interface
-    //       Add docs
     private handleDeniedFileShare(dc: RTCDataChannel, data: any): void {
         // TODO: Show notification about denied request (maybe not)
         //       Remove pending files when peerId is disconnected as well (in another method)
@@ -506,7 +495,6 @@ export class P2P {
         this.removePendingFilesByPeerId(data.peerId);
     }
 
-    // TODO: Add docs
     private handleEndOfFile(dc: RTCDataChannel): void {
         const file: ReceivingFile | undefined = this.receivingFiles().get(dc.label);
 
@@ -766,7 +754,7 @@ export class P2P {
         return this.receivingFiles().size > 0;
     }
 
-    private async handleIceCandidate(data: any): Promise<void> {
+    private async handleIceCandidate(data: SocketIceCandidate): Promise<void> {
         const pc: RTCPeerConnection | undefined = this.pcs().get(data.peerId)?.pc;
         const peer: Peer | undefined = this.pcs().get(data.peerId);
 
@@ -782,7 +770,7 @@ export class P2P {
         }
     }
 
-    private async handleEndOfIceCandidates(data: any): Promise<void> {
+    private async handleEndOfIceCandidates(data: SocketEndOfIceCandidates): Promise<void> {
         const pc: RTCPeerConnection | undefined = this.pcs().get(data.peerId)?.pc;
 
         if (pc) {
@@ -793,5 +781,4 @@ export class P2P {
     private get connectionId(): string | null {
         return this.router.routerState.snapshot.root.firstChild?.paramMap.get("connectionId") ?? null;
     }
-
 }
