@@ -11,7 +11,8 @@ import { SendingFile } from "@/utils/file-manager/sending-file";
 import { ModalService } from "@/utils/modal/modal";
 import { DiscoveryMode } from "@/utils/p2p/discovery-mode";
 import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
-import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
+import { RtcPayload, RtcPeerDataChanges, RtcRequestedFileShare } from "@/utils/p2p/rtc-payload";
+import { NotificationResult, NotificationService, NotificationType } from "@/ui/notification/notification.service";
 
 import {
     SocketChangeSettingsRequest,
@@ -61,22 +62,22 @@ export class P2P {
 
         this.ws.onopen = (): void => {
             console.log("[WebSocket] Connection opened");
-            this.isConnected.set(true);
 
             this.dcs.clear();
             this.pcs.set(new Map<string, Peer>());
+            this.isConnected.set(true);
 
             this.connectWebSocket();
             this.connectPersistedIds();
 
-            if (this.connectionId) {
+            if (this.routerConnectionId) {
                 // TODO: It causes "InvalidStateError: Failed to execute 'setLocalDescription' on 'RTCPeerConnection': Failed to set local answer sdp: Called in wrong state: stable"
-                this.connectPeer(this.connectionId);
+                this.connectPeer(this.routerConnectionId);
                 this.location.replaceState("/");
             }
         };
 
-        this.ws.onmessage = async (event): Promise<void> => {
+        this.ws.onmessage = async (event: MessageEvent<any>): Promise<void> => {
             const data = JSON.parse(event.data);
 
             switch (data.type as SocketResponseType) {
@@ -106,7 +107,7 @@ export class P2P {
             }
         };
 
-        this.ws.onclose = async (event: CloseEvent): Promise<void> => {
+        this.ws.onclose = async (): Promise<void> => {
             console.warn(`[WebSocket] Connection closed, retrying in ${P2P.RECONNECT_DELAY} ms`);
             this.isConnected.set(false);
             await this.delay(P2P.RECONNECT_DELAY);
@@ -128,7 +129,7 @@ export class P2P {
             throw new Error("[WebSocket] Name is required");
         }
 
-        this.sendSignal<SocketConnectRequest>({
+        this.sendSocketSignal<SocketConnectRequest>({
             type: SocketRequestType.CONNECT,
             data: {
                 name,
@@ -140,14 +141,13 @@ export class P2P {
 
     public changeSettings(): void {
         const name: string | null = this.session.name;
-        const peerId: string | null = this.session.peerId;
         const authToken: string | null = this.session.authToken;
 
-        if (!name || !authToken || !peerId) {
-            throw new Error("[WebSocket] Name, peer ID and auth token is required");
+        if (!name || !authToken) {
+            throw new Error("[WebSocket] Name and auth token is required");
         }
 
-        this.sendSignal<SocketChangeSettingsRequest>({
+        this.sendSocketSignal<SocketChangeSettingsRequest>({
             type: SocketRequestType.CHANGE_SETTINGS,
             data: {
                 name,
@@ -156,11 +156,11 @@ export class P2P {
             },
         });
 
-        this.populateChangesToConnectedPeers(peerId, name);
+        this.populateChangesToConnectedPeers(name);
     }
 
     public connectPeer(connectionId: string): void {
-        this.sendSignal<SocketPeerConnectRequest>({
+        this.sendSocketSignal<SocketPeerConnectRequest>({
             type: SocketRequestType.PEER_CONNECT,
             data: {
                 connectionId,
@@ -169,7 +169,7 @@ export class P2P {
     }
 
     public reestablishConnection(peerId: string): void {
-        this.sendSignal<SocketPeerReconnectRequest>({
+        this.sendSocketSignal<SocketPeerReconnectRequest>({
             type: SocketRequestType.PEER_RECONNECT,
             data: {
                 peerId,
@@ -177,7 +177,7 @@ export class P2P {
         });
     }
 
-    private sendSignal<T>(message: T): void {
+    private sendSocketSignal<T>(message: T): void {
         if (this.ws?.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify(message));
         }
@@ -203,7 +203,7 @@ export class P2P {
     }
 
     private handlePingPong(data: SocketPingPong): void {
-        console.log(`[Socket] Ping-pong`);
+        console.log("[Socket] Received ping");
         this.session.iceServers = data.iceServers;
         this.session.authToken = data.authToken;
     }
@@ -212,7 +212,7 @@ export class P2P {
         console.log(`[WebSocket] Received an offer request from peer ID ${data.peerId}`);
         const offer: RTCSessionDescription | null = await this.createOffer(data.peerId, data.name, data.device, data.discoveryMode);
 
-        this.sendSignal({
+        this.sendSocketSignal({
             type: SocketRequestType.OFFER,
             data: {
                 offer: offer,
@@ -226,7 +226,7 @@ export class P2P {
         console.log("[WebSocket] Received offer from peer and creating an answer");
         const answer: RTCSessionDescription | null = await this.createAnswer(data.peerId, data.offer, data.name, data.device, data.discoveryMode);
 
-        this.sendSignal({
+        this.sendSocketSignal({
             type: SocketRequestType.ANSWER,
             data: {
                 answer: answer,
@@ -259,15 +259,6 @@ export class P2P {
         }
     }
 
-    /**
-     * Establish a peer connection.
-     *
-     * @param peerId peer ID with which the connection will be established
-     * @param name peer's name
-     * @param device peer's device OS family
-     * @param discoveryMode
-     * @private
-     */
     private establishPeerConnection(peerId: string, name: string, device: string, discoveryMode: DiscoveryMode): RTCPeerConnection {
         if (this.pcs().has(peerId)) {
             return this.pcs().get(peerId)?.pc!;
@@ -284,17 +275,17 @@ export class P2P {
             }
         };
 
-        pc.oniceconnectionstatechange = () => {
+        pc.oniceconnectionstatechange = (): void => {
             console.log(`[WebRTC] ICE state for peer ID ${peerId}: ${pc.iceConnectionState}`);
         };
 
-        pc.onsignalingstatechange = () => {
+        pc.onsignalingstatechange = (): void => {
             console.log(`[WebRTC] Signaling state for peer ID ${peerId}: ${pc.signalingState}`);
         };
 
         pc.onicecandidate = (event: RTCPeerConnectionIceEvent): void => {
             if (event.candidate) {
-                this.sendSignal({
+                this.sendSocketSignal({
                     type: SocketRequestType.ICE_CANDIDATE,
                     data: {
                         peerId,
@@ -302,7 +293,7 @@ export class P2P {
                     },
                 });
             } else {
-                this.sendSignal({
+                this.sendSocketSignal({
                     type: SocketRequestType.END_OF_ICE_CANDIDATES,
                     data: {
                         peerId,
@@ -325,16 +316,6 @@ export class P2P {
         return pc;
     }
 
-    private filterHostCandidates(sdp: string): string {
-        return sdp
-            .split("\n")
-            .filter(line => {
-                if (!line.startsWith("a=candidate:")) return true;
-                return line.includes(" typ host");
-            })
-            .join("\n");
-    }
-
     public async createOffer(peerId: string, name: string, device: string, discoveryMode: DiscoveryMode): Promise<RTCSessionDescription | null> {
         const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, discoveryMode);
         const dc: RTCDataChannel = pc.createDataChannel(uuidv4());
@@ -355,15 +336,6 @@ export class P2P {
         return null;
     }
 
-    /**
-     * Create an answer according to the offer.
-     *
-     * @param peerId peer ID with which the connection will be established
-     * @param offer offer from another peer
-     * @param name peer's name
-     * @param device peer's device OS family
-     * @param discoveryMode
-     */
     public async createAnswer(peerId: string, offer: RTCSessionDescription, name: string, device: string, discoveryMode: DiscoveryMode): Promise<RTCSessionDescription | null> {
         const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, discoveryMode);
 
@@ -385,21 +357,17 @@ export class P2P {
         await pc.setLocalDescription(answer);
 
         console.log(`[WebRTC] Created an answer for peer ID ${peerId}`);
+
         if (pc.localDescription) {
             return {
                 type: pc.localDescription.type,
                 sdp: this.filterHostCandidates(pc.localDescription.sdp!),
             } as RTCSessionDescription;
         }
+
         return null;
     }
 
-    /**
-     * Approve the answer that was received from the other peer.
-     *
-     * @param peerId peer ID with which the connection will be established
-     * @param answer answer from another peer
-     */
     public async approveAnswer(peerId: string, answer: RTCSessionDescription): Promise<void> {
         const peer: Peer | undefined = this.pcs().get(peerId);
         const pc: RTCPeerConnection | undefined = peer?.pc;
@@ -425,27 +393,17 @@ export class P2P {
         }
     }
 
-    /**
-     * Setup data channels to listen to events (open, close, message).
-     *
-     * @param peerId peer ID with which the connection has been established
-     * @param dc data channel
-     * @private
-     */
     private setupDataChannel(peerId: string, dc: RTCDataChannel): void {
         this.dcs.set(peerId, dc);
-        dc.onopen = (event) => this.handleDataChannelOpen(peerId);
-        dc.onclose = (event) => this.handleDataChannelClose(peerId);
+        dc.onopen = () => this.handleDataChannelOpen(peerId);
+        dc.onclose = () => this.handleDataChannelClose(peerId);
         dc.onmessage = async (event: MessageEvent<any>): Promise<void> => await this.handleDataChannelMessage(event, dc);
     }
 
-    /**
-     * Handle data channel message.
-     *
-     * @param event message event
-     * @param dc data channel
-     * @private
-     */
+    private sendDataChannelSignal<T>(dc: RTCDataChannel, data: T): void {
+        dc.send(JSON.stringify(data));
+    }
+
     private async handleDataChannelMessage(event: MessageEvent<any>, dc: RTCDataChannel): Promise<void> {
         if (event.data instanceof ArrayBuffer || event.data instanceof Blob) {
             await this.receiveFiles(dc.label, event.data);
@@ -463,28 +421,28 @@ export class P2P {
 
         switch (type) {
             case RTCType.REQUESTED_FILE_SHARE:
-                return this.handleRequestedFileShare(dc, data);
+                return this.handleRequestedFileShare(dc, data as RtcRequestedFileShare);
             case RTCType.ACCEPTED_FILE_SHARE:
-                return this.handleAcceptedFileShare(dc, data);
+                return this.handleAcceptedFileShare(dc);
             case RTCType.DENIED_FILE_SHARE:
-                return this.handleDeniedFileShare(dc, data);
+                return this.handleDeniedFileShare(dc);
             case RTCType.EOF:
                 return this.handleEndOfFile(dc);
             case RTCType.PEER_DATA_CHANGES:
-                return this.handlePeerDataChanges(data);
+                return this.handlePeerDataChanges(dc, data as RtcPeerDataChanges);
         }
     }
 
-    // TODO: Add an interface
-    private handleRequestedFileShare(dc: RTCDataChannel, data: any): void {
+    private handleRequestedFileShare(dc: RTCDataChannel, data: RtcRequestedFileShare): void {
+        const peerId: string = this.getPeerIdByDataChannel(dc);
         const name: string = data.name;
         const metadata: PeerFileMetadata = data.metadata;
 
-        console.log(`[WebRTC] Peer ID ${data.peerId} requested to send file ${metadata.name}`);
+        console.log(`[WebRTC] Peer ID ${peerId} requested to send file ${metadata.name}`);
 
         this.notification.show({name, metadata}, NotificationType.FILE_REQUEST).subscribe({
-            next: (result): void => {
-                if (result == "accept") {
+            next: (result: NotificationResult): void => {
+                if (result == NotificationResult.ACCEPT) {
                     this.receivingFiles.update(prev => {
                         const next = new Map(prev);
                         next.set(dc.label, new ReceivingFile(metadata));
@@ -493,30 +451,28 @@ export class P2P {
 
                     this.acceptedFileSharing(dc, new ReceivingFile(metadata));
                 } else {
-                    dc.send(JSON.stringify({
+                    this.sendDataChannelSignal<RtcPayload>(dc, {
                         type: RTCType.DENIED_FILE_SHARE,
-                        peerId: data.peerId,
-                    }));
+                    });
                 }
             },
         });
     }
 
-    // TODO: Add an interface
-    private async handleAcceptedFileShare(dc: RTCDataChannel, data: any): Promise<void> {
-        const file: SendingFile | undefined = this.sendingFiles().get(data.peerId);
+    private async handleAcceptedFileShare(dc: RTCDataChannel): Promise<void> {
+        const peerId: string = this.getPeerIdByDataChannel(dc);
+        const file: SendingFile | undefined = this.sendingFiles().get(peerId);
 
         if (file) {
-            await this.sendFile(data.peerId, dc, file);
+            await this.sendFile(peerId, dc, file);
         }
     }
 
-    // TODO: Add an interface
-    private handleDeniedFileShare(dc: RTCDataChannel, data: any): void {
+    private handleDeniedFileShare(dc: RTCDataChannel): void {
         // TODO: Show notification about denied request (maybe not)
         //       Remove pending files when peerId is disconnected as well (in another method)
         console.log("[WebRTC] Denied file share");
-        this.removePendingFilesByPeerId(data.peerId);
+        this.removePendingFilesByPeerId(this.getPeerIdByDataChannel(dc));
     }
 
     private handleEndOfFile(dc: RTCDataChannel): void {
@@ -536,11 +492,6 @@ export class P2P {
         }
     }
 
-    /**
-     * Clear connection.
-     *
-     * @param peerId peer ID with which the connection has been established
-     */
     public closeConnection(peerId: string): void {
         if (peerId == null) {
             return;
@@ -577,12 +528,6 @@ export class P2P {
         }
     }
 
-    /**
-     * Request approval or rejection from the other peer to send files.
-     *
-     * @param peerId peer ID with which the connection has been established
-     * @param file file that will be sent
-     */
     public requestFileSending(peerId: string, file: File): void {
         const dc: RTCDataChannel | undefined = this.dcs.get(peerId);
 
@@ -597,17 +542,15 @@ export class P2P {
             return next;
         });
 
-        // TODO: Add an interface
-        dc.send(JSON.stringify({
+        this.sendDataChannelSignal<RtcRequestedFileShare>(dc, {
             type: RTCType.REQUESTED_FILE_SHARE,
             name: this.session.name,
-            peerId: peerId,
             metadata: {
                 name: file.name,
                 size: file.size,
                 type: file.type,
             },
-        }));
+        });
     }
 
     private acceptedFileSharing(dc: RTCDataChannel, file: ReceivingFile): void {
@@ -621,20 +564,11 @@ export class P2P {
             return next;
         });
 
-        // TODO: Add an interface
-        dc.send(JSON.stringify({
-            peerId: this.session.peerId,
+        this.sendDataChannelSignal<RtcPayload>(dc, {
             type: RTCType.ACCEPTED_FILE_SHARE,
-        }));
+        });
     }
 
-    /**
-     * Send file to the peer through unique data channel.
-     *
-     * @param peerId peer ID with which the connection has been established
-     * @param dc RTC data channel used for P2P connection
-     * @param file file blobs that will be sent
-     */
     private async sendFile(peerId: string, dc: RTCDataChannel, file: SendingFile): Promise<void> {
         if (!dc || dc.readyState !== "open") {
             throw new Error(`[WebRTC] DataChannel ${dc?.label ?? "unknown"} is not open`);
@@ -671,21 +605,14 @@ export class P2P {
 
         file.complete = true;
 
-        // TODO: Add an interface
-        dc.send(JSON.stringify({
+        this.sendDataChannelSignal<RtcPayload>(dc, {
             type: RTCType.EOF,
-        }));
+        });
 
         console.log(`[WebRTC] File "${file.file.name}" sent to peer ID ${peerId}`);
         this.removePendingFilesByPeerId(peerId);
     }
 
-    /**
-     * Wait for buffer.
-     *
-     * @param dc data channel
-     * @private
-     */
     private async waitForBuffer(dc: RTCDataChannel): Promise<void> {
         if (dc.bufferedAmount <= P2P.CHUNK_SIZE) {
             return Promise.resolve();
@@ -701,13 +628,6 @@ export class P2P {
         });
     }
 
-    /**
-     * Download received files.
-     *
-     * @param blob file blob
-     * @param filename file name
-     * @private
-     */
     private downloadReceivedFile(blob: Blob, filename: string): void {
         const url: string = URL.createObjectURL(blob);
         const a: HTMLAnchorElement = document.createElement("a");
@@ -726,13 +646,6 @@ export class P2P {
         this.closeConnection(peerId);
     }
 
-    /**
-     * Receive files from the peer.
-     *
-     * @param dcLabel data channel name
-     * @param data array buffer or blob
-     * @private
-     */
     private async receiveFiles(dcLabel: string, data: any): Promise<void> {
         const file: ReceivingFile | undefined = this.receivingFiles().get(dcLabel);
 
@@ -750,32 +663,6 @@ export class P2P {
                 return next;
             });
         }
-    }
-
-    public removePendingFilesByPeerId(peerId: string): void {
-        this.sendingFiles.update(prev => {
-            const next = new Map(prev);
-            next.delete(peerId);
-            return next;
-        });
-    }
-
-    public readonly progress: Signal<number> = computed((): number => {
-        let totalSize: number = 0;
-        let receivedSize: number = 0;
-
-        for (const file of this.receivingFiles().values()) {
-            totalSize += file.metadata.size;
-            receivedSize += file.receivedSize;
-        }
-
-        return totalSize > 0
-            ? Math.round((receivedSize / totalSize) * 100)
-            : 0;
-    });
-
-    public get isReceiving(): boolean {
-        return this.receivingFiles().size > 0;
     }
 
     private async handleIceCandidate(data: SocketIceCandidate): Promise<void> {
@@ -802,31 +689,82 @@ export class P2P {
         }
     }
 
-    private get connectionId(): string | null {
-        return this.router.routerState.snapshot.root.firstChild?.paramMap.get("connectionId") ?? null;
-    }
-
-    private populateChangesToConnectedPeers(peerId: string, name: string) {
-        this.dcs.forEach((dc) => {
-            dc.send(JSON.stringify({
+    private populateChangesToConnectedPeers(name: string): void {
+        this.dcs.forEach((dc: RTCDataChannel): void => {
+            this.sendDataChannelSignal<RtcPeerDataChanges>(dc, {
                 type: RTCType.PEER_DATA_CHANGES,
                 name,
-                peerId,
-            }));
+            });
         });
     }
 
-    private handlePeerDataChanges(data: any) {
+    private handlePeerDataChanges(dc: RTCDataChannel, data: RtcPeerDataChanges): void {
+        const peerId: string = this.getPeerIdByDataChannel(dc);
+
         this.pcs.update(prev => {
             const next = new Map(prev);
-            const peer = next.get(data.peerId);
+            const peer = next.get(peerId);
 
             if (peer) {
                 peer.name = data.name;
-                next.set(data.peerId, peer);
+                next.set(peerId, peer);
             }
 
             return next;
         });
+    }
+
+    //
+    // Helpers
+    //
+
+    public readonly progress: Signal<number> = computed((): number => {
+        let totalSize: number = 0;
+        let receivedSize: number = 0;
+
+        for (const file of this.receivingFiles().values()) {
+            totalSize += file.metadata.size;
+            receivedSize += file.receivedSize;
+        }
+
+        return totalSize > 0
+            ? Math.round((receivedSize / totalSize) * 100)
+            : 0;
+    });
+
+    public removePendingFilesByPeerId(peerId: string): void {
+        this.sendingFiles.update(prev => {
+            const next = new Map(prev);
+            next.delete(peerId);
+            return next;
+        });
+    }
+
+    private getPeerIdByDataChannel(dc: RTCDataChannel): string {
+        const entry = [...this.dcs.entries()].find(([_, channel]) => channel === dc);
+
+        if (!entry) {
+            throw new Error("DataChannel not found in the map");
+        }
+
+        return entry[0];
+    }
+
+    private filterHostCandidates(sdp: string): string {
+        return sdp
+            .split("\n")
+            .filter(line => {
+                if (!line.startsWith("a=candidate:")) return true;
+                return line.includes(" typ host");
+            })
+            .join("\n");
+    }
+
+    public get isReceiving(): boolean {
+        return this.receivingFiles().size > 0;
+    }
+
+    private get routerConnectionId(): string | null {
+        return this.router.routerState.snapshot.root.firstChild?.paramMap.get("connectionId") ?? null;
     }
 }

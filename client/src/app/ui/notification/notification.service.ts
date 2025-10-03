@@ -12,7 +12,12 @@ export interface INotification<T = any> {
     type: NotificationType;
     data: T;
     duration: number;
-    subject: Subject<"accept" | "reject">;
+    subject: Subject<NotificationResult>;
+}
+
+export enum NotificationResult {
+    ACCEPT,
+    REJECT
 }
 
 @Injectable({
@@ -21,9 +26,9 @@ export interface INotification<T = any> {
 export class NotificationService {
     public notifications$ = new BehaviorSubject<INotification[]>([]);
 
-    public show<T>(data: T, type: NotificationType = NotificationType.INFO, duration: number = 6000): Observable<"accept" | "reject"> {
+    public show<T>(data: T, type: NotificationType = NotificationType.INFO, duration: number = 6000): Observable<NotificationResult> {
         const id: string = uuidv4();
-        const subject: Subject<"accept" | "reject"> = new Subject<"accept" | "reject">();
+        const subject: Subject<NotificationResult> = new Subject<NotificationResult>();
         const notification: INotification = {id, data, subject, type, duration};
         this.notifications$.next([...this.notifications$.value, notification]);
 
@@ -34,7 +39,7 @@ export class NotificationService {
         return subject.asObservable();
     }
 
-    private resolve(id: string, result: "accept" | "reject"): void {
+    private resolve(id: string, result: NotificationResult): void {
         const current = this.notifications$.value;
         const index = current.findIndex(n => n.id === id);
 
@@ -47,10 +52,10 @@ export class NotificationService {
     }
 
     public accept(id: string): void {
-        this.resolve(id, "accept");
+        this.resolve(id, NotificationResult.ACCEPT);
     }
 
     public reject(id: string): void {
-        this.resolve(id, "reject");
+        this.resolve(id, NotificationResult.REJECT);
     }
 }
