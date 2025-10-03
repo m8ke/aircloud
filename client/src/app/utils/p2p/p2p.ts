@@ -5,6 +5,7 @@ import { computed, inject, Injectable, Signal, signal } from "@angular/core";
 
 import { Env } from "@/utils/env/env";
 import { Peer } from "@/utils/p2p/peer";
+import { Alert } from "@/utils/alert/alert";
 import { Session } from "@/utils/session/session";
 import { RTCType } from "@/utils/p2p/rtc-type";
 import { SendingFile } from "@/utils/file-manager/sending-file";
@@ -45,6 +46,7 @@ export class P2P {
     private ws!: WebSocket;
     private readonly env: Env = inject<Env>(Env);
     private readonly modal: ModalService = inject<ModalService>(ModalService);
+    private readonly alert: Alert = inject<Alert>(Alert);
     private readonly router: Router = inject<Router>(Router);
     private readonly session: Session = inject<Session>(Session);
     private readonly location: Location = inject<Location>(Location);
@@ -433,12 +435,13 @@ export class P2P {
         }
     }
 
-    private handleRequestedFileShare(dc: RTCDataChannel, data: RtcRequestedFileShare): void {
+    private async handleRequestedFileShare(dc: RTCDataChannel, data: RtcRequestedFileShare): Promise<void> {
         const peerId: string = this.getPeerIdByDataChannel(dc);
         const name: string = data.name;
         const metadata: PeerFileMetadata = data.metadata;
 
         console.log(`[WebRTC] Peer ID ${peerId} requested to send file ${metadata.name}`);
+        await this.alert.play();
 
         this.notification.show({name, metadata}, NotificationType.FILE_REQUEST).subscribe({
             next: (result: NotificationResult): void => {
@@ -469,7 +472,7 @@ export class P2P {
     }
 
     private handleDeniedFileShare(dc: RTCDataChannel): void {
-        // TODO: Show notification about denied request (maybe not)
+        // TODO: Show alert about denied request (maybe not)
         //       Remove pending files when peerId is disconnected as well (in another method)
         console.log("[WebRTC] Denied file share");
         this.removePendingFilesByPeerId(this.getPeerIdByDataChannel(dc));
