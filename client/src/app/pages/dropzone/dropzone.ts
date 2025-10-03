@@ -115,6 +115,7 @@ export class Dropzone implements OnInit {
     protected saveSettings(): void {
         this.session.name = this.formSettings.get("name")?.value;
         this.session.discoveryMode = this.formSettings.get("discoveryMode")?.value as DiscoveryMode;
+        this.p2p.changeSettings();
         this.modal.close("settings");
     }
 

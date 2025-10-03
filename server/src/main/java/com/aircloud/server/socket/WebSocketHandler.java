@@ -127,7 +127,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
     ) {
         final PeerChangeSettingsRequest data = new ObjectMapper().convertValue(payload.getData(), PeerChangeSettingsRequest.class);
         peer.setName(data.getName());
-        peer.setConnectionId(data.getConnectionId());
         peer.setDiscoveryMode(data.getDiscoveryMode());
     }
 
