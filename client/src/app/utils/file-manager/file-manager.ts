@@ -3,7 +3,7 @@ import { BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import { inject, Injectable, signal } from "@angular/core";
 
 import { Session } from "@/utils/session/session";
-import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
+import { NotificationService } from "@/ui/notification/notification.service";
 
 @Injectable({
     providedIn: "root",
@@ -72,5 +72,4 @@ export class FileManager {
     private get zipName(): string {
         return `${this.session.name}-${uuidv4()}`;
     }
-
 }

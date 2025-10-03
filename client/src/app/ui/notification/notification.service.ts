@@ -1,6 +1,6 @@
+import { v4 as uuidv4 } from "uuid";
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, Subject } from "rxjs";
-import { v4 as uuidv4 } from "uuid";
 
 export enum NotificationType {
     INFO = "INFO",
@@ -41,8 +41,6 @@ export class NotificationService {
         if (index > -1) {
             const [notification] = current.splice(index, 1);
             this.notifications$.next([...current]);
-
-            // Emit and complete
             notification.subject.next(result);
             notification.subject.complete();
         }
