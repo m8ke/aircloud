@@ -161,7 +161,7 @@
     </section>
 
     <app-modal modalId="clearFiles">
-        <h3 class="text-xl font-semibold text-gray-900 font-serif" slot="header">
+        <h3 class="text-xl font-semibold text-black font-serif" slot="header">
             Are you sure about this?
         </h3>
 
@@ -180,22 +180,22 @@
     </app-modal>
 
     <app-modal modalId="settings">
-        <h3 class="text-xl font-semibold text-gray-900 font-serif" slot="header">
+        <h3 class="text-xl font-semibold text-black font-serif" slot="header">
             Change settings
         </h3>
 
         <form [formGroup]="formSettings" class="grid gap-3">
             <div>
                 <label
-                    for="discoverable"
+                    for="discoveryMode"
                     class="block text-sm/6 font-medium text-black">
                     Discovery mode
                 </label>
 
                 <app-dropdown
-                    formControlName="discoverability"
+                    formControlName="discoveryMode"
                     placeholder="Expiration time">
-                    <app-dropdown-item [value]="Discoverability.NETWORK">
+                    <app-dropdown-item [value]="DiscoveryMode.NETWORK">
                         Network
                     </app-dropdown-item>
                 </app-dropdown>
@@ -214,7 +214,7 @@
                         autocomplete="name"
                         formControlName="name"
                         [maxLength]="25"
-                        class="block w-full rounded-xl bg-white/5 px-3 py-1.5 text-base text-black outline-1 -outline-offset-1 outline-black/10 placeholder:text-zinc-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-500"
+                        class="grid w-full h-10 shadow-xs rounded-xl bg-white py-2 px-4 text-black outline-1 -outline-offset-1 outline-gray-200 placeholder:text-zinc-500 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                     />
                 </div>
             </div>
@@ -225,7 +225,7 @@
                 type="button"
                 (click)="saveSettings()"
                 [disabled]="formSettings.invalid"
-                class="inline-flex cursor-pointer w-full justify-center rounded-xl px-3 py-2 text-sm font-semibold text-white sm:ml-2 sm:w-auto bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50">
+                class="cursor-pointer rounded-xl bg-indigo-500 px-2.5 py-2.5 w-full text-sm text-white hover:bg-indigo-600 transition duration-300 disabled:opacity-50">
                 Save settings
             </button>
         </footer>

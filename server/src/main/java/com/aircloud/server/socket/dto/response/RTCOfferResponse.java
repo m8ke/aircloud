@@ -1,6 +1,6 @@
 package com.aircloud.server.socket.dto.response;
 
-import com.aircloud.server.socket.ConnectionType;
+import com.aircloud.server.socket.DiscoveryMode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,18 +18,18 @@ public class RTCOfferResponse {
 
     private String device;
 
-    private ConnectionType connectionType;
+    private DiscoveryMode discoveryMode;
 
     public RTCOfferResponse(
             UUID peerId,
             String name,
             String device,
-            ConnectionType connectionType
+            DiscoveryMode discoveryMode
     ) {
         this.peerId = peerId;
         this.name = name;
         this.device = device;
-        this.connectionType = connectionType;
+        this.discoveryMode = discoveryMode;
     }
 
 }

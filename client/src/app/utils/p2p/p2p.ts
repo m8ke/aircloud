@@ -8,10 +8,12 @@ import { Peer } from "@/utils/p2p/peer";
 import { Session } from "@/utils/session/session";
 import { SendingFile } from "@/utils/file-manager/sending-file";
 import { ModalService } from "@/utils/modal/modal";
-import { ConnectionType } from "@/utils/p2p/connection-type";
 import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
-import { ConnectRequest, SocketRequestType, SocketResponseType } from "@/utils/p2p/p2p-interface";
+import { SocketRequestType } from "@/utils/websocket/socket-request-type";
+import { SocketResponseType } from "@/utils/websocket/socket-response-type";
+import { ConnectRequest } from "@/utils/p2p/p2p-interface";
+import { DiscoveryMode } from "@/utils/websocket/discovery-mode";
 
 enum RTCType {
     EOF = "EOF",
@@ -120,7 +122,7 @@ export class P2P {
             data: {
                 name,
                 authToken,
-                discoverability: this.session.discoverability,
+                discoveryMode: this.session.discoveryMode,
             },
         });
     }
@@ -182,14 +184,14 @@ export class P2P {
     // TODO: Add an interface
     private async handleOffer(data: any): Promise<void> {
         console.log(`[WebSocket] Received an offer request from peer ID ${data.peerId}`);
-        const offer: RTCSessionDescription | null = await this.createOffer(data.peerId, data.name, data.device, data.connectionType);
+        const offer: RTCSessionDescription | null = await this.createOffer(data.peerId, data.name, data.device, data.discoveryMode);
 
         this.sendSignal({
             type: SocketRequestType.OFFER,
             data: {
                 offer: offer,
                 peerId: data.peerId,
-                connectionType: data.connectionType,
+                discoveryMode: data.discoveryMode,
             },
         });
     }
@@ -197,7 +199,7 @@ export class P2P {
     // TODO: Add an interface
     private async handleAnswer(data: any): Promise<void> {
         console.log("[WebSocket] Received offer from peer and creating an answer");
-        const answer = await this.createAnswer(data.peerId, data.offer, data.name, data.device, data.connectionType);
+        const answer = await this.createAnswer(data.peerId, data.offer, data.name, data.device, data.discoveryMode);
 
         this.sendSignal({
             type: SocketRequestType.ANSWER,
@@ -249,10 +251,10 @@ export class P2P {
      * @param peerId peer ID with which the connection will be established
      * @param name peer's name
      * @param device peer's device OS family
-     * @param connectionType
+     * @param discoveryMode
      * @private
      */
-    private establishPeerConnection(peerId: string, name: string, device: string, connectionType: ConnectionType): RTCPeerConnection {
+    private establishPeerConnection(peerId: string, name: string, device: string, discoveryMode: DiscoveryMode): RTCPeerConnection {
         if (this.pcs().has(peerId)) {
             return this.pcs().get(peerId)?.pc!;
         }
@@ -302,7 +304,7 @@ export class P2P {
             return next;
         });
 
-        if (connectionType == ConnectionType.MANUAL) {
+        if (discoveryMode == DiscoveryMode.DIRECT) {
             this.session.addConnectedPeerId(peerId);
         }
 
@@ -319,8 +321,8 @@ export class P2P {
             .join("\n");
     }
 
-    public async createOffer(peerId: string, name: string, device: string, connectionType: ConnectionType): Promise<RTCSessionDescription | null> {
-        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, connectionType);
+    public async createOffer(peerId: string, name: string, device: string, discoveryMode: DiscoveryMode): Promise<RTCSessionDescription | null> {
+        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, discoveryMode);
         const dc: RTCDataChannel = pc.createDataChannel(uuidv4());
 
         dc.bufferedAmountLowThreshold = P2P.CHUNK_SIZE;
@@ -346,10 +348,10 @@ export class P2P {
      * @param offer offer from another peer
      * @param name peer's name
      * @param device peer's device OS family
-     * @param connectionType
+     * @param discoveryMode
      */
-    public async createAnswer(peerId: string, offer: RTCSessionDescription, name: string, device: string, connectionType: ConnectionType): Promise<RTCSessionDescription | null> {
-        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, connectionType);
+    public async createAnswer(peerId: string, offer: RTCSessionDescription, name: string, device: string, discoveryMode: DiscoveryMode): Promise<RTCSessionDescription | null> {
+        const pc: RTCPeerConnection = this.establishPeerConnection(peerId, name, device, discoveryMode);
 
         pc.ondatachannel = (event: RTCDataChannelEvent): void => {
             this.setupDataChannel(peerId, event.channel);
