@@ -4,7 +4,7 @@ import { inject, Injectable } from "@angular/core";
 @Injectable({
     providedIn: "root",
 })
-export class Notification {
+export class Alert {
     private loaded: boolean = false;
     private readonly title: Title = inject<Title>(Title);
     private readonly audio = new Audio("alert.wav");

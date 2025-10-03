@@ -5,6 +5,7 @@ import { computed, inject, Injectable, Signal, signal } from "@angular/core";
 
 import { Env } from "@/utils/env/env";
 import { Peer } from "@/utils/p2p/peer";
+import { Alert } from "@/utils/alert/alert";
 import { Session } from "@/utils/session/session";
 import { RTCType } from "@/utils/p2p/rtc-type";
 import { SendingFile } from "@/utils/file-manager/sending-file";
@@ -34,7 +35,6 @@ import {
     SocketPingPong,
     SocketResponseType,
 } from "@/utils/p2p/socket-response";
-import { Notification } from "@/utils/alert/alert";
 
 @Injectable({
     providedIn: "root",
@@ -46,7 +46,7 @@ export class P2P {
     private ws!: WebSocket;
     private readonly env: Env = inject<Env>(Env);
     private readonly modal: ModalService = inject<ModalService>(ModalService);
-    private readonly sound: Notification = inject<Notification>(Notification);
+    private readonly alert: Alert = inject<Alert>(Alert);
     private readonly router: Router = inject<Router>(Router);
     private readonly session: Session = inject<Session>(Session);
     private readonly location: Location = inject<Location>(Location);
@@ -441,7 +441,7 @@ export class P2P {
         const metadata: PeerFileMetadata = data.metadata;
 
         console.log(`[WebRTC] Peer ID ${peerId} requested to send file ${metadata.name}`);
-        await this.sound.play();
+        await this.alert.play();
 
         this.notification.show({name, metadata}, NotificationType.FILE_REQUEST).subscribe({
             next: (result: NotificationResult): void => {
