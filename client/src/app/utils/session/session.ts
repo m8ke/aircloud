@@ -36,8 +36,8 @@ export class Session {
         }
     }
 
-    public get name(): string | null {
-        return this.sessionStorage.getItem(SessionKey.NAME);
+    public get name(): string {
+        return this.sessionStorage.getItem(SessionKey.NAME) || this.generateName();
     }
 
     public set name(name: string) {

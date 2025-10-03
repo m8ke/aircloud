@@ -2,7 +2,7 @@ package com.aircloud.server.socket;
 
 import com.aircloud.server.security.Auth;
 import com.aircloud.server.security.ConnectionIdGenerator;
-import com.aircloud.server.security.SecurityService;
+import com.aircloud.server.security.JwtService;
 import com.aircloud.server.security.TurnCredentialService;
 import com.aircloud.server.socket.dto.request.*;
 import com.aircloud.server.socket.dto.response.*;
@@ -58,7 +58,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         final Peer peer = findPeerBySession(session);
         peer.updatePeerSession(session);
 
-        final String token = SecurityService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
+        final String token = JwtService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
         sendMessage(session, new PingPongResponse(token, generateIceServers(session)));
 
         log.info("Pong received from peer ID {}", peer.getPeerId());
@@ -217,8 +217,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
     ) throws Exception {
         final PeerConnectRequest data = new ObjectMapper().convertValue(payload.getData(), PeerConnectRequest.class);
 
-        if (data.getAuthToken() != null && SecurityService.verifyAuthToken(data.getAuthToken())) {
-            final Auth authClaims = SecurityService.parseAuth(data.getAuthToken());
+        if (data.getAuthToken() != null && JwtService.verifyAuthToken(data.getAuthToken())) {
+            final Auth authClaims = JwtService.parseAuth(data.getAuthToken());
             peer.setPeerId(authClaims.getPeerId());
             peer.setConnectionId(authClaims.getConnectionId());
         } else {
@@ -234,7 +234,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         peer.setName(data.getName());
         peer.setDiscoveryMode(data.getDiscoveryMode());
 
-        final String token = SecurityService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
+        final String token = JwtService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
 
         sendMessage(session, new PeerConnectResponse(token, peer.getPeerId(), peer.getConnectionId(), generateIceServers(session)));
         log.info("Peer ID {} connected", peer.getPeerId());
@@ -245,7 +245,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private List<IceServer> generateIceServers(
             final WebSocketSession session
     ) throws Exception {
-        final TurnCredentialService.EphemeralCredentials credentials = TurnCredentialService.generate(session.getId(), 900);
+        final TurnCredentialService.EphemeralCredentials credentials = TurnCredentialService.generate(session.getId(), 3600);
 
         if (credentials == null) {
             return null;
