@@ -28,7 +28,7 @@ export class Session {
 
     public init(): void {
         if (!this.name) {
-            this.name = this.generateName();
+            this.generateName();
         }
 
         if (!this.discoveryMode) {
@@ -99,7 +99,9 @@ export class Session {
     }
 
     private generateName(): string {
-        return this.titleCase(animals[this.randomInt(0, animals.length - 1)]);
+        const name: string = this.titleCase(animals[this.randomInt(0, animals.length - 1)]);
+        this.name = name;
+        return name;
     }
 
     private titleCase(value: string): string {
