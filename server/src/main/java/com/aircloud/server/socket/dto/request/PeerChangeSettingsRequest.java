@@ -10,7 +10,7 @@ public class PeerChangeSettingsRequest {
 
     private String name;
 
-    private String connectionId;
+    private String authToken;
 
     private DiscoveryMode discoveryMode;
 

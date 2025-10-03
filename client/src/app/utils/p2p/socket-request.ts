@@ -7,7 +7,8 @@ export enum SocketRequestType {
     PEER_CONNECT = "PEER_CONNECT",
     PEER_RECONNECT = "PEER_RECONNECT",
     ICE_CANDIDATE = "ICE_CANDIDATE",
-    END_OF_ICE_CANDIDATES = "END_OF_ICE_CANDIDATES"
+    END_OF_ICE_CANDIDATES = "END_OF_ICE_CANDIDATES",
+    CHANGE_SETTINGS = "CHANGE_SETTINGS",
 }
 
 interface SocketRequest {
@@ -18,6 +19,14 @@ export interface SocketConnectRequest extends SocketRequest {
     data: {
         name: string;
         authToken: string | null;
+        discoveryMode: DiscoveryMode;
+    };
+}
+
+export interface SocketChangeSettingsRequest extends SocketRequest {
+    data: {
+        name: string;
+        authToken: string;
         discoveryMode: DiscoveryMode;
     };
 }

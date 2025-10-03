@@ -14,6 +14,7 @@ import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-
 import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
 
 import {
+    SocketChangeSettingsRequest,
     SocketConnectRequest,
     SocketPeerConnectRequest,
     SocketPeerReconnectRequest,
@@ -124,7 +125,7 @@ export class P2P {
         const authToken: string | null = this.session.authToken;
 
         if (!name) {
-            throw new Error("[WebSocket] Name or auth token is not provided");
+            throw new Error("[WebSocket] Name is required");
         }
 
         this.sendSignal<SocketConnectRequest>({
@@ -135,6 +136,27 @@ export class P2P {
                 discoveryMode: this.session.discoveryMode,
             },
         });
+    }
+
+    public changeSettings(): void {
+        const name: string | null = this.session.name;
+        const peerId: string | null = this.session.peerId;
+        const authToken: string | null = this.session.authToken;
+
+        if (!name || !authToken || !peerId) {
+            throw new Error("[WebSocket] Name, peer ID and auth token is required");
+        }
+
+        this.sendSignal<SocketChangeSettingsRequest>({
+            type: SocketRequestType.CHANGE_SETTINGS,
+            data: {
+                name,
+                authToken,
+                discoveryMode: this.session.discoveryMode,
+            },
+        });
+
+        this.populateChangesToConnectedPeers(peerId, name);
     }
 
     public connectPeer(connectionId: string): void {
@@ -448,6 +470,8 @@ export class P2P {
                 return this.handleDeniedFileShare(dc, data);
             case RTCType.EOF:
                 return this.handleEndOfFile(dc);
+            case RTCType.PEER_DATA_CHANGES:
+                return this.handlePeerDataChanges(data);
         }
     }
 
@@ -780,5 +804,29 @@ export class P2P {
 
     private get connectionId(): string | null {
         return this.router.routerState.snapshot.root.firstChild?.paramMap.get("connectionId") ?? null;
+    }
+
+    private populateChangesToConnectedPeers(peerId: string, name: string) {
+        this.dcs.forEach((dc) => {
+            dc.send(JSON.stringify({
+                type: RTCType.PEER_DATA_CHANGES,
+                name,
+                peerId,
+            }));
+        });
+    }
+
+    private handlePeerDataChanges(data: any) {
+        this.pcs.update(prev => {
+            const next = new Map(prev);
+            const peer = next.get(data.peerId);
+
+            if (peer) {
+                peer.name = data.name;
+                next.set(data.peerId, peer);
+            }
+
+            return next;
+        });
     }
 }
