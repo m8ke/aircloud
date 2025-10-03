@@ -1,6 +1,6 @@
 package com.aircloud.server.socket;
 
-public enum Discoverability {
+public enum DiscoveryMode {
 
     NETWORK,
     DIRECT,

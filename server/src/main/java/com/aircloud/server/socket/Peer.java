@@ -22,7 +22,7 @@ public class Peer {
     private String ipAddress;
 
     @JsonIgnore
-    private Discoverability discoverability = Discoverability.NETWORK;
+    private DiscoveryMode discoveryMode = DiscoveryMode.NETWORK;
 
     @JsonIgnore
     private Instant lastSeen;

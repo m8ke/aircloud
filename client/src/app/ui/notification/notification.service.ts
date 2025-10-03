@@ -1,6 +1,6 @@
+import { v4 as uuidv4 } from "uuid";
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, Subject } from "rxjs";
-import { v4 as uuidv4 } from "uuid";
 
 export enum NotificationType {
     INFO = "INFO",
@@ -21,7 +21,7 @@ export interface INotification<T = any> {
 export class NotificationService {
     public notifications$ = new BehaviorSubject<INotification[]>([]);
 
-    public show<T>(data: T, type: NotificationType = NotificationType.INFO, duration: number = 6000): Observable<any> {
+    public show<T>(data: T, type: NotificationType = NotificationType.INFO, duration: number = 6000): Observable<"accept" | "reject"> {
         const id: string = uuidv4();
         const subject: Subject<"accept" | "reject"> = new Subject<"accept" | "reject">();
         const notification: INotification = {id, data, subject, type, duration};
@@ -41,8 +41,6 @@ export class NotificationService {
         if (index > -1) {
             const [notification] = current.splice(index, 1);
             this.notifications$.next([...current]);
-
-            // Emit and complete
             notification.subject.next(result);
             notification.subject.complete();
         }

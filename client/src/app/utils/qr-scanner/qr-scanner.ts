@@ -53,7 +53,7 @@ export class QrScanner {
         }
     }
 
-    public async scanFrame(video: HTMLVideoElement, canvas: HTMLCanvasElement): Promise<void> {
+    private async scanFrame(video: HTMLVideoElement, canvas: HTMLCanvasElement): Promise<void> {
         this.animationFrameId = requestAnimationFrame(() => this.scanFrame(video, canvas));
 
         if (video.readyState !== video.HAVE_ENOUGH_DATA) {

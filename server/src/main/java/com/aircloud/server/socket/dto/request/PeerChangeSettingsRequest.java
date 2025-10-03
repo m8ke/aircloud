@@ -1,6 +1,6 @@
 package com.aircloud.server.socket.dto.request;
 
-import com.aircloud.server.socket.Discoverability;
+import com.aircloud.server.socket.DiscoveryMode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +12,6 @@ public class PeerChangeSettingsRequest {
 
     private String connectionId;
 
-    private Discoverability discoverability;
+    private DiscoveryMode discoveryMode;
 
 }

@@ -12,7 +12,7 @@ import { FileManager } from "@/utils/file-manager/file-manager";
 import { SendingFile } from "@/utils/file-manager/sending-file";
 import { ModalService } from "@/utils/modal/modal";
 import { DropdownItem } from "@/ui/dropdown-item/dropdown-item";
-import { Discoverability } from "@/utils/p2p/p2p-interface";
+import { DiscoveryMode } from "@/utils/p2p/discovery-mode";
 
 @Component({
     selector: "app-dropzone",
@@ -47,7 +47,7 @@ export class Dropzone implements OnInit {
                 Validators.minLength(1),
                 Validators.maxLength(25),
             ]],
-            discoverability: [this.session.discoverability, [
+            discoveryMode: [this.session.discoveryMode, [
                 Validators.required,
             ]],
             saveToBrowser: [false, [
@@ -114,11 +114,11 @@ export class Dropzone implements OnInit {
 
     protected saveSettings(): void {
         this.session.name = this.formSettings.get("name")?.value;
-        this.session.discoverability = this.formSettings.get("discoverability")?.value as Discoverability;
+        this.session.discoveryMode = this.formSettings.get("discoveryMode")?.value as DiscoveryMode;
         this.modal.close("settings");
     }
 
-    protected get Discoverability(): typeof Discoverability {
-        return Discoverability;
+    protected get DiscoveryMode(): typeof DiscoveryMode {
+        return DiscoveryMode;
     }
 }

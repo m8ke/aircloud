@@ -3,7 +3,7 @@ import { BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import { inject, Injectable, signal } from "@angular/core";
 
 import { Session } from "@/utils/session/session";
-import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
+import { NotificationService } from "@/ui/notification/notification.service";
 
 @Injectable({
     providedIn: "root",
@@ -15,10 +15,7 @@ export class FileManager {
 
     public addFile(file: File): void {
         if (file.size == 0) {
-            this.notification.show<any>({
-                message: "Could not upload file",
-                type: "error",
-            }, NotificationType.INFO);
+            this.notification.show({message: "Could not upload file"});
             return;
         }
 
@@ -30,11 +27,7 @@ export class FileManager {
         );
 
         if (exists) {
-            this.notification.show<any>({
-                message: `File ${file.name} already exist`,
-                type: "error",
-            }, NotificationType.INFO);
-
+            this.notification.show({message: `File ${file.name} already exist`});
             return;
         }
 
@@ -79,5 +72,4 @@ export class FileManager {
     private get zipName(): string {
         return `${this.session.name}-${uuidv4()}`;
     }
-
 }

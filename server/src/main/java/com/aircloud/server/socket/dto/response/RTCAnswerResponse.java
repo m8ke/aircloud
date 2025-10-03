@@ -1,6 +1,6 @@
 package com.aircloud.server.socket.dto.response;
 
-import com.aircloud.server.socket.ConnectionType;
+import com.aircloud.server.socket.DiscoveryMode;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,20 +21,20 @@ public class RTCAnswerResponse {
 
     private String device;
 
-    private ConnectionType connectionType;
+    private DiscoveryMode discoveryMode;
 
     public RTCAnswerResponse(
             UUID peerId,
             JsonNode offer,
             String name,
             String device,
-            ConnectionType connectionType
+            DiscoveryMode discoveryMode
     ) {
         this.peerId = peerId;
         this.offer = offer;
         this.name = name;
         this.device = device;
-        this.connectionType = connectionType;
+        this.discoveryMode = discoveryMode;
     }
 
 }

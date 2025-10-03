@@ -128,7 +128,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         final PeerChangeSettingsRequest data = new ObjectMapper().convertValue(payload.getData(), PeerChangeSettingsRequest.class);
         peer.setName(data.getName());
         peer.setConnectionId(data.getConnectionId());
-        peer.setDiscoverability(data.getDiscoverability());
+        peer.setDiscoveryMode(data.getDiscoveryMode());
     }
 
     private void handlePeerConnect(
@@ -141,7 +141,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         if (peerA != null) {
             final Peer peerB = findPeerBySession(session);
-            establishConnectionBetweenPeers(peerA, peerB, ConnectionType.MANUAL);
+            establishConnectionBetweenPeers(peerA, peerB, DiscoveryMode.DIRECT);
             sendMessage(session, new PeerManualConnectResponse(peerA.getPeerId(), true));
         } else {
             sendMessage(session, new PeerManualConnectResponse(null, false));
@@ -154,7 +154,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         if (peerA != null) {
             final Peer peerB = findPeerBySession(session);
-            establishConnectionBetweenPeers(peerA, peerB, ConnectionType.MANUAL); // TODO: Is it manual?
+            establishConnectionBetweenPeers(peerA, peerB, DiscoveryMode.DIRECT); // TODO: Is it manual?
         }
     }
 
@@ -206,7 +206,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     data.getOffer(),
                     peerA.getName(),
                     peerA.getDevice(),
-                    data.getConnectionType()
+                    data.getDiscoveryMode()
             ));
         }
     }
@@ -233,7 +233,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
 
         peer.setName(data.getName());
-        peer.setDiscoverability(data.getDiscoverability());
+        peer.setDiscoveryMode(data.getDiscoveryMode());
 
         final String token = SecurityService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
 
@@ -288,16 +288,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
     private void handlePeerConnection(final Peer peerA) {
-        if (peerA.getDiscoverability().equals(Discoverability.NETWORK)) {
+        if (peerA.getDiscoveryMode().equals(DiscoveryMode.NETWORK)) {
             for (Peer peerB : findPeersInNetwork(peerA)) {
-                establishConnectionBetweenPeers(peerB, peerA, ConnectionType.NETWORK);
+                establishConnectionBetweenPeers(peerB, peerA, DiscoveryMode.NETWORK);
             }
         }
     }
 
     private List<Peer> findPeersInNetwork(final Peer peer) {
         return peers.stream()
-                .filter(p -> p.getDiscoverability().equals(Discoverability.NETWORK))
+                .filter(p -> p.getDiscoveryMode().equals(DiscoveryMode.NETWORK))
                 .filter(p -> Objects.equals(p.getIpAddress(), peer.getIpAddress()))
                 .filter(p -> !p.equals(peer))
                 .filter(Peer::isActive)
@@ -313,11 +313,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
     private void establishConnectionBetweenPeers(
             final Peer peerA,
             final Peer peerB,
-            final ConnectionType connectionType
+            final DiscoveryMode discoveryMode
     ) {
         if (!peerA.equals(peerB)) {
-            log.info("Peer-A ID {} and peer-B ID {} connected through {} connection", peerA.getPeerId(), peerB.getPeerId(), connectionType);
-            sendMessage(peerA.getSession(), new RTCOfferResponse(peerB.getPeerId(), peerB.getName(), peerB.getDevice(), connectionType));
+            log.info("Peer-A ID {} and peer-B ID {} connected through {} connection", peerA.getPeerId(), peerB.getPeerId(), discoveryMode);
+            sendMessage(peerA.getSession(), new RTCOfferResponse(peerB.getPeerId(), peerB.getName(), peerB.getDevice(), discoveryMode));
         }
     }
 

@@ -1,15 +1,15 @@
 import { inject, Injectable } from "@angular/core";
 
 import animals from "@/utils/session/dict/animals";
+import { DiscoveryMode } from "@/utils/p2p/discovery-mode";
 import { SessionStorage } from "@/utils/storage/session-storage";
-import { Discoverability } from "@/utils/p2p/p2p-interface";
 
 enum SessionKey {
     NAME = "NAME",
     PEER_ID = "PEER_ID",
     AUTH_TOKEN = "AUTH_TOKEN",
     CONNECTION_ID = "CONNECTION_ID",
-    DISCOVERABILITY = "DISCOVERABILITY",
+    CONNECTION_TYPE = "CONNECTION_TYPE",
     CONNECTED_PEER_IDS = "CONNECTED_PEER_IDS",
     ICE_SERVERS = "ICE_SERVERS",
 }
@@ -31,8 +31,8 @@ export class Session {
             this.name = this.generateName();
         }
 
-        if (!this.discoverability) {
-            this.discoverability = Discoverability.NETWORK;
+        if (!this.discoveryMode) {
+            this.discoveryMode = DiscoveryMode.NETWORK;
         }
     }
 
@@ -68,16 +68,16 @@ export class Session {
         this.sessionStorage.setItem(SessionKey.CONNECTION_ID, connectionId);
     }
 
-    public get discoverability(): Discoverability {
-        return this.sessionStorage.getItem(SessionKey.DISCOVERABILITY) as Discoverability || Discoverability.NETWORK;
+    public get discoveryMode(): DiscoveryMode {
+        return this.sessionStorage.getItem(SessionKey.CONNECTION_TYPE) as DiscoveryMode || DiscoveryMode.NETWORK;
     }
 
-    public set discoverability(discoverability: Discoverability) {
-        this.sessionStorage.setItem(SessionKey.DISCOVERABILITY, discoverability);
+    public set discoveryMode(discoveryMode: DiscoveryMode) {
+        this.sessionStorage.setItem(SessionKey.CONNECTION_TYPE, discoveryMode);
     }
 
     public get connectedPeerIds(): string[] {
-        const ids = sessionStorage.getItem(SessionKey.CONNECTED_PEER_IDS);
+        const ids: string | null = sessionStorage.getItem(SessionKey.CONNECTED_PEER_IDS);
         return ids ? JSON.parse(ids) : [];
     }
 
@@ -113,8 +113,7 @@ export class Session {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    // TODO: Add an interface
-    public set iceServers(iceServers: any) {
+    public set iceServers(iceServers: IceServer[]) {
         if (iceServers) {
             this.sessionStorage.setItem(SessionKey.ICE_SERVERS, iceServers);
         } else {
@@ -123,7 +122,7 @@ export class Session {
     }
 
     public get iceServers(): { iceServers: IceServer[] } {
-        const iceServers = this.sessionStorage.getItem(SessionKey.ICE_SERVERS) as IceServer[] | null;
+        const iceServers: IceServer[] | null = this.sessionStorage.getItem(SessionKey.ICE_SERVERS);
 
         if (iceServers == null) {
             console.warn("[Session] ICE servers not found, fallback to public STUN server");
