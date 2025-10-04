@@ -32,7 +32,7 @@ way to transfer files across devices. We never upload, store, or track files.
 |--------------------------------------|----------------------------------------------------------------------------------------------------------------|
 | **Cross-device**                     | Use any device with a [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) supported browser  |
 | **Peer-to-peer**                     | Direct connection and file transfer between peers without a central server or third-party storage              |
-| **Bypass NATs and strict firewalls** | Usable with devices that may be behind strict firewalls or NATs                                                |
+| **Bypass NATs and strict firewalls** | Works behind strict firewalls or NATs                                                                          |
 | **Auto-discover peers**              | Detect other peers on the same network (including VPN, LAN, public Wi-Fi)                                      |
 | **Manual connection**                | Connect using a 6-digit code or QR code for peers outside the same network                                     |
 | **No limitations**                   | Send as many or large files as you want, everything depends on WebRTC capabilities, and network speed of peers |
@@ -47,14 +47,18 @@ way to transfer files across devices. We never upload, store, or track files.
 
 <sup><a href="#top">back to top</a></sup>
 
-| Feature              | Description                                                                      |
-|----------------------|----------------------------------------------------------------------------------|
-| **PWA**              | Progressive web application                                                      |
-| **Metadata removal** | Read and/or remove metadata from images, videos, etc., to ensure maximum privacy |
-| **Localization**     | Translate into multiple languages (community contributions welcome)              |
-| **Desktop app**      | Desktop application for MacOS, Windows, and Linux                                |
-| **Mobile app**       | Mobile application for iOS and Android                                           |
-| **TV app**           | TV application for tvOS and Android TV                                           |
+| Feature                   | Milestone | Description                                                        |
+|---------------------------|-----------|--------------------------------------------------------------------|
+| **PWA**                   | v1        | Progressive web application                                        |
+| **Local storage**         | v1        | Receive and store files decentralized on local machine             |
+| **Synchronization**       | v1        | Sync locally stored files across authorized devices (peer-to-peer) |
+| **Resume transfers**      | v1        | Transfers will continue after reconnection                         |
+| **Metadata sanitization** | v1        | Sanitize metadata from images, videos, etc.                        |
+| **Custom STUN/TURN**      | v1        | Use your preferred STUN/TURN servers                               |
+| **Localization**          | v1        | Translate into multiple languages                                  |
+| **Desktop app**           | v2        | Desktop application for MacOS, Windows, and Linux                  |
+| **Mobile app**            | -         | Mobile application for iOS and Android                             |
+| **TV app**                | -         | TV application for tvOS and Android TV                             |
 
 ## Platforms
 
@@ -158,7 +162,8 @@ recommend to sanitize files, images etc., before sending.
 
 <sup><a href="#top">back to top</a></sup>
 
-Feel free to open an issue, submit a pull request, or simply give the project a star to show your support.
+Feel free to open an issue, submit a pull request, or simply give the project a star to show your support. You are
+welcome to the [Discord](https://discord.gg/WChhuk96) server.
 
 ___
 
