@@ -57,7 +57,7 @@ export class Layout {
                 console.warn(error);
             }
         } else {
-            console.warn("Sharing not supported on this browser.");
+            console.warn("Sharing not supported on this browser");
         }
     }
 
