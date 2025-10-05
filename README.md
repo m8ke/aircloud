@@ -39,6 +39,7 @@ way to transfer files across devices. We never upload, store, or track files.
 | **No sign-up or ads**                | You don't see annoying ads, or need to sign-up after few transfers                                             |
 | **End-to-end encryption**            | File transfers are always encrypted                                                                            |
 | **Session-based**                    | All data will be deleted if you close the tab or browser                                                       |
+| **PWA**                              | Progressive web application                                                                                    |
 | **Self-hosted**                      | Host AirCloud on your own cloud server or homelab                                                              |
 | **Anonymity**                        | Never upload, store, or track files, IPs etc                                                                   |
 | **Open source**                      | Review the source code, contribute, or share ideas to improve the project                                      |
@@ -49,7 +50,6 @@ way to transfer files across devices. We never upload, store, or track files.
 
 | Feature                   | Milestone | Description                                                        |
 |---------------------------|-----------|--------------------------------------------------------------------|
-| **PWA**                   | v1        | Progressive web application                                        |
 | **Local storage**         | v1        | Receive and store files decentralized on local machine             |
 | **Synchronization**       | v1        | Sync locally stored files across authorized devices (peer-to-peer) |
 | **Resume transfers**      | v1        | Transfers will continue after reconnection                         |
