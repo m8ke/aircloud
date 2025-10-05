@@ -46,7 +46,7 @@ export class Layout {
     }
 
     protected async nativeShare(): Promise<void> {
-        if (navigator.share && window) {
+        if (navigator.share) {
             try {
                 await navigator.share({
                     title: "AirCloud",
