@@ -16,7 +16,15 @@
 
             <div>
                 @if (p2p.isConnected()) {
-                    Known as <strong class="text-white">{{ session.name }}</strong>
+                    <div class="flex items-center gap-x-1">
+                        <div class="flex-none rounded-full bg-emerald-500/30 p-1">
+                            <div class="size-1.5 rounded-full bg-emerald-500"></div>
+                        </div>
+
+                        <div>
+                            Known as <strong class="text-white">{{ session.name }}</strong>
+                        </div>
+                    </div>
                 } @else {
                     <div class="flex items-center gap-x-2">
                         <svg aria-hidden="true"

@@ -29,6 +29,7 @@
     "@angular/platform-browser": "^20.3.3",
     "@angular/platform-server": "^20.3.3",
     "@angular/router": "^20.3.3",
+    "@angular/service-worker": "^20.3.3",
     "@angular/ssr": "^20.3.3",
     "@tailwindcss/postcss": "^4.1.14",
     "@typescript/native-preview": "^7.0.0-dev.20251003.1",

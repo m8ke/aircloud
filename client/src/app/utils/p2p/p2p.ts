@@ -196,7 +196,6 @@ export class P2P {
         this.session.authToken = data.authToken;
         this.session.iceServers = data.iceServers;
         this.session.connectionId = data.connectionId;
-        this.notification.show({message: "Connected to P2P network"});
     }
 
     private handleDisconnect(data: SocketDisconnect): void {
