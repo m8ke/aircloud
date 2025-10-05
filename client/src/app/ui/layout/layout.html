@@ -35,6 +35,14 @@
                         class="cursor-pointer flex flex-row gap-x-1 items-center rounded-xl px-2.5 py-1.5 text-xs text-white shadow-xs border border-zinc-700 hover:bg-zinc-800 transition duration-300">
                         Github
                     </a>
+
+                    @if (isNativeShareEnabled) {
+                        <a
+                            (click)="nativeShare()"
+                            class="cursor-pointer flex flex-row gap-x-1 items-center rounded-xl px-2.5 py-1.5 text-xs text-white shadow-xs border border-zinc-700 hover:bg-zinc-800 transition duration-300">
+                            Share
+                        </a>
+                    }
                 </footer>
             </div>
 
