@@ -1,11 +1,10 @@
 import { Component, inject, signal } from "@angular/core";
 
+import { Env } from "@/utils/env/env";
 import { Navbar } from "@/ui/navbar/navbar";
 import { CdkDropList } from "@angular/cdk/drag-drop";
 import { FileManager } from "@/utils/file-manager/file-manager";
 import { Notification } from "@/ui/notification/notification";
-import { NotificationService, NotificationType } from "@/ui/notification/notification.service";
-import { Env } from "@/utils/env/env";
 
 @Component({
     selector: "app-layout",
