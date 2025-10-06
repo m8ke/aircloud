@@ -96,8 +96,7 @@ services:
     environment:
       PORT: ${SERVER_PORT:-8000}
       DOMAIN: ${DOMAIN}
-      JWT_SECRET: ${JWT_SECRET}
-      TURN_SECRET: ${TURN_SECRET}
+      TURN_SECRET: ${TURN_SECRET}   # optional
       STUN_IP: stun:${DOMAIN}:3478  # optional
       TURN_IP: turns:${DOMAIN}:5349 # optional
     ports:
@@ -153,10 +152,9 @@ coturn:
 
 <sup><a href="#top">back to top</a></sup>
 
-Although AirCloud prioritizes privacy when sharing files between peers, for additional security you should consider
-using a (self-hosted) VPN and user-agent spoofing at the operating system level. Since we haven't implemented [metadata
-removal](https://emmatrowbridge.github.io/Excuse-Me-Your-Data-Is-Leaking/2025/05/27/Exposed-by-Metadata.html), we
-recommend to sanitize files, images etc., before sending.
+Although AirCloud prioritizes privacy when sharing files between peers, for additional security you should consider using a (self-hosted) VPN. Since we haven't
+implemented [metadata removal](https://emmatrowbridge.github.io/Excuse-Me-Your-Data-Is-Leaking/2025/05/27/Exposed-by-Metadata.html), we recommend to sanitize
+files, images etc., before sending.
 
 ## Support
 

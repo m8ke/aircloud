@@ -29,6 +29,8 @@ public class Peer {
 
     private UUID peerId;
 
+    private UUID privateKey;
+
     private String connectionId;
 
     private String device;
@@ -40,6 +42,7 @@ public class Peer {
         this.ipAddress = parseIpAddress();
         this.device = parseDeviceName();
         this.lastSeen = Instant.now();
+        this.privateKey = UUID.randomUUID();
     }
 
     private String parseIpAddress() {
@@ -59,6 +62,10 @@ public class Peer {
         this.session = session;
         this.lastSeen = Instant.now();
         this.ipAddress = parseIpAddress();
+    }
+
+    public void renewPrivateKey() {
+        this.privateKey = UUID.randomUUID();
     }
 
     @JsonIgnore
