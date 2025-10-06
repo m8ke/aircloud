@@ -56,9 +56,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
             final PongMessage message
     ) throws Exception {
         final Peer peer = findPeerBySession(session);
-        peer.updatePeerSession(session);
 
-        final String token = JwtService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
+        peer.updatePeerSession(session);
+        peer.renewPrivateKey();
+
+        final String token = JwtService.issueAuthToken(peer.getPeerId(), peer.getConnectionId(), peer.getPrivateKey());
         sendMessage(session, new PingPongResponse(token, generateIceServers(session)));
 
         log.info("Pong received from peer ID {}", peer.getPeerId());
@@ -153,7 +155,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         if (peerA != null) {
             final Peer peerB = findPeerBySession(session);
-            establishConnectionBetweenPeers(peerA, peerB, DiscoveryMode.DIRECT); // TODO: Is it manual?
+            establishConnectionBetweenPeers(peerA, peerB, DiscoveryMode.DIRECT);
         }
     }
 
@@ -217,8 +219,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
     ) throws Exception {
         final PeerConnectRequest data = new ObjectMapper().convertValue(payload.getData(), PeerConnectRequest.class);
 
-        if (data.getAuthToken() != null && JwtService.verifyAuthToken(data.getAuthToken())) {
-            final Auth authClaims = JwtService.parseAuth(data.getAuthToken());
+        if (data.getAuthToken() != null && JwtService.verifyAuthToken(data.getAuthToken(), peer.getPrivateKey())) {
+            final Auth authClaims = JwtService.parseAuth(data.getAuthToken(), peer.getPrivateKey());
             peer.setPeerId(authClaims.getPeerId());
             peer.setConnectionId(authClaims.getConnectionId());
         } else {
@@ -233,8 +235,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
         peer.setName(data.getName());
         peer.setDiscoveryMode(data.getDiscoveryMode());
+        peer.renewPrivateKey();
 
-        final String token = JwtService.issueAuthToken(peer.getPeerId(), peer.getConnectionId());
+        final String token = JwtService.issueAuthToken(peer.getPeerId(), peer.getConnectionId(), peer.getPrivateKey());
 
         sendMessage(session, new PeerConnectResponse(token, peer.getPeerId(), peer.getConnectionId(), generateIceServers(session)));
         log.info("Peer ID {} connected", peer.getPeerId());

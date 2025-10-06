@@ -1,6 +1,4 @@
 aircloud:
-  jwt:
-    secret: secret-only-for-development-secret-only-for-development-secret-only-for-development
   cors:
     origin: "*"
   turn:
