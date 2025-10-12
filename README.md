@@ -161,7 +161,7 @@ files, images etc., before sending.
 <sup><a href="#top">back to top</a></sup>
 
 Feel free to open an issue, submit a pull request, or simply give the project a star to show your support. You are
-welcome to the [Discord](https://discord.gg/WChhuk96) server.
+welcome to the [Discord](https://discord.com/invite/d6eZf2af9Q) server.
 
 ___
 
