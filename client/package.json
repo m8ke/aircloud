@@ -44,7 +44,7 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@angular/build": "^20.3.3",
+    "@angular/build": "^20.3.6",
     "@angular/cli": "^20.3.3",
     "@angular/compiler-cli": "^20.3.3",
     "@types/express": "^5.0.1",
