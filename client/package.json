@@ -32,7 +32,7 @@
     "@angular/service-worker": "^20.3.7",
     "@angular/ssr": "^20.3.7",
     "@tailwindcss/postcss": "^4.1.14",
-    "@typescript/native-preview": "^7.0.0-dev.20251003.1",
+    "@typescript/native-preview": "^7.0.0-dev.20251102.1",
     "@zip.js/zip.js": "^2.8.8",
     "angularx-qrcode": "^20.0.0",
     "express": "^5.1.0",
