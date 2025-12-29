@@ -34,7 +34,7 @@
     "@tailwindcss/postcss": "^4.1.14",
     "@typescript/native-preview": "^7.0.0-dev.20251109.1",
     "@zip.js/zip.js": "^2.8.8",
-    "angularx-qrcode": "^20.0.0",
+    "angularx-qrcode": "^21.0.4",
     "express": "^5.1.0",
     "jsqr": "^1.4.0",
     "postcss": "^8.5.6",
