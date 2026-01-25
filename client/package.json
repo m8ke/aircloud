@@ -33,7 +33,7 @@
     "@angular/ssr": "^21.0.4",
     "@tailwindcss/postcss": "^4.1.14",
     "@typescript/native-preview": "^7.0.0-dev.20251109.1",
-    "@zip.js/zip.js": "^2.8.8",
+    "@zip.js/zip.js": "^2.8.11",
     "angularx-qrcode": "^21.0.4",
     "express": "^5.2.1",
     "jsqr": "^1.4.0",
