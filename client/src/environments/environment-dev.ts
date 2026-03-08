@@ -1,6 +1,6 @@
 export const environment = {
     version: "1",
     production: false,
-    wsUrl: "ws://localhost:8080/ws",
-    clientUrl: "http://localhost:4200",
+    wsUrl: "ws://0.0.0.0:8080/ws",
+    clientUrl: "http://0.0.0.0:4200",
 };
