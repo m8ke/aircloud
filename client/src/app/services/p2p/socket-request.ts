@@ -1,4 +1,4 @@
-import { DiscoveryMode } from "@/utils/p2p/discovery-mode";
+import { DiscoveryMode } from "@/services/p2p/discovery-mode";
 
 export enum SocketRequestType {
     CONNECT = "CONNECT",

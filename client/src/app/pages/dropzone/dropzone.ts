@@ -2,17 +2,17 @@ import { KeyValuePipe, NgStyle } from "@angular/common";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, OnInit, viewChild } from "@angular/core";
 
-import { P2P } from "@/utils/p2p/p2p";
+import { P2P } from "@/services/p2p/p2p";
 import { Peer } from "@/ui/peer/peer";
 import { Modal } from "@/ui/modal/modal";
 import { Layout } from "@/ui/layout/layout";
-import { Session } from "@/utils/session/session";
+import { Session } from "@/services/session/session";
 import { Dropdown } from "@/ui/dropdown/dropdown";
-import { FileManager } from "@/utils/file-manager/file-manager";
-import { SendingFile } from "@/utils/file-manager/sending-file";
-import { ModalService } from "@/utils/modal/modal";
+import { FileManager } from "@/services/file-manager/file-manager";
+import { SendingFile } from "@/services/file-manager/sending-file";
+import { ModalService } from "@/services/modal/modal";
 import { DropdownItem } from "@/ui/dropdown-item/dropdown-item";
-import { DiscoveryMode } from "@/utils/p2p/discovery-mode";
+import { DiscoveryMode } from "@/services/p2p/discovery-mode";
 
 @Component({
     selector: "app-dropzone",

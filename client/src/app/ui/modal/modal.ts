@@ -1,5 +1,5 @@
 import { Component, inject, input, output } from "@angular/core";
-import { ModalService } from "@/utils/modal/modal";
+import { ModalService } from "@/services/modal/modal";
 
 @Component({
     selector: "app-modal",

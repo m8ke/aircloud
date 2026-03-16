@@ -1,5 +1,5 @@
-import { IceServer } from "@/utils/session/session";
-import { DiscoveryMode } from "@/utils/p2p/discovery-mode";
+import { IceServer } from "@/services/session/session";
+import { DiscoveryMode } from "@/services/p2p/discovery-mode";
 
 export enum SocketResponseType {
     CONNECT = "CONNECT",

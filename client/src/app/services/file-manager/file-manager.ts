@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 import { BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import { inject, Injectable, signal } from "@angular/core";
 
-import { Session } from "@/utils/session/session";
+import { Session } from "@/services/session/session";
 import { NotificationService } from "@/ui/notification/notification.service";
 
 @Injectable({
