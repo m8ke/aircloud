@@ -1,9 +1,9 @@
 import jsQR, { QRCode } from "jsqr";
 import { inject, Injectable } from "@angular/core";
 
-import { Env } from "@/utils/env/env";
-import { P2P } from "@/utils/p2p/p2p";
-import { ModalService } from "@/utils/modal/modal";
+import { Env } from "@/services/env/env";
+import { P2P } from "@/services/p2p/p2p";
+import { ModalService } from "@/services/modal/modal";
 
 @Injectable({
     providedIn: "root",

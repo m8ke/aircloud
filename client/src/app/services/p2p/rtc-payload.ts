@@ -1,4 +1,4 @@
-import { RTCType } from "@/utils/p2p/rtc-type";
+import { RTCType } from "@/services/p2p/rtc-type";
 
 export interface RtcPayload {
     type: RTCType;

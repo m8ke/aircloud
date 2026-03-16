@@ -3,16 +3,16 @@ import { Router } from "@angular/router";
 import { Location } from "@angular/common";
 import { computed, inject, Injectable, Signal, signal } from "@angular/core";
 
-import { Env } from "@/utils/env/env";
-import { Peer } from "@/utils/p2p/peer";
-import { Alert } from "@/utils/alert/alert";
-import { Session } from "@/utils/session/session";
-import { RTCType } from "@/utils/p2p/rtc-type";
-import { SendingFile } from "@/utils/file-manager/sending-file";
-import { ModalService } from "@/utils/modal/modal";
-import { DiscoveryMode } from "@/utils/p2p/discovery-mode";
-import { PeerFileMetadata, ReceivingFile } from "@/utils/file-manager/receiving-file";
-import { RtcPayload, RtcPeerDataChanges, RtcRequestedFileShare } from "@/utils/p2p/rtc-payload";
+import { Env } from "@/services/env/env";
+import { Peer } from "@/services/p2p/peer";
+import { Alert } from "@/services/alert/alert";
+import { Session } from "@/services/session/session";
+import { RTCType } from "@/services/p2p/rtc-type";
+import { SendingFile } from "@/services/file-manager/sending-file";
+import { ModalService } from "@/services/modal/modal";
+import { DiscoveryMode } from "@/services/p2p/discovery-mode";
+import { PeerFileMetadata, ReceivingFile } from "@/services/file-manager/receiving-file";
+import { RtcPayload, RtcPeerDataChanges, RtcRequestedFileShare } from "@/services/p2p/rtc-payload";
 import { NotificationResult, NotificationService, NotificationType } from "@/ui/notification/notification.service";
 
 import {
@@ -21,7 +21,7 @@ import {
     SocketPeerConnectRequest,
     SocketPeerReconnectRequest,
     SocketRequestType,
-} from "@/utils/p2p/socket-request";
+} from "@/services/p2p/socket-request";
 
 import {
     SocketAnswer,
@@ -34,7 +34,7 @@ import {
     SocketPeerDirectConnect,
     SocketPingPong,
     SocketResponseType,
-} from "@/utils/p2p/socket-response";
+} from "@/services/p2p/socket-response";
 
 @Injectable({
     providedIn: "root",

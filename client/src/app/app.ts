@@ -1,9 +1,9 @@
 import { RouterOutlet } from "@angular/router";
 import { Component, HostListener, inject } from "@angular/core";
 
-import { P2P } from "@/utils/p2p/p2p";
-import { Session } from "@/utils/session/session";
-import { Alert } from "@/utils/alert/alert";
+import { P2P } from "@/services/p2p/p2p";
+import { Session } from "@/services/session/session";
+import { Alert } from "@/services/alert/alert";
 
 @Component({
     selector: "app-root",

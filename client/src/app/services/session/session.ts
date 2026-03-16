@@ -1,8 +1,8 @@
 import { inject, Injectable } from "@angular/core";
 
-import animals from "@/utils/session/dict/animals";
-import { DiscoveryMode } from "@/utils/p2p/discovery-mode";
-import { SessionStorage } from "@/utils/storage/session-storage";
+import animals from "@/services/session/dict/animals";
+import { DiscoveryMode } from "@/services/p2p/discovery-mode";
+import { SessionStorage } from "@/services/storage/session-storage";
 
 enum SessionKey {
     NAME = "NAME",

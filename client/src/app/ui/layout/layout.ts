@@ -1,9 +1,9 @@
 import { Component, inject, signal } from "@angular/core";
 
-import { Env } from "@/utils/env/env";
+import { Env } from "@/services/env/env";
 import { Navbar } from "@/ui/navbar/navbar";
 import { CdkDropList } from "@angular/cdk/drag-drop";
-import { FileManager } from "@/utils/file-manager/file-manager";
+import { FileManager } from "@/services/file-manager/file-manager";
 import { Notification } from "@/ui/notification/notification";
 
 @Component({

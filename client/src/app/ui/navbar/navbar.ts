@@ -7,13 +7,13 @@ import { QRCodeComponent } from "angularx-qrcode";
 import { NgOptimizedImage } from "@angular/common";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 
-import { Env } from "@/utils/env/env";
-import { P2P } from "@/utils/p2p/p2p";
+import { Env } from "@/services/env/env";
+import { P2P } from "@/services/p2p/p2p";
 import { Modal } from "@/ui/modal/modal";
-import { Session } from "@/utils/session/session";
-import { QrScanner } from "@/utils/qr-scanner/qr-scanner";
-import { ModalService } from "@/utils/modal/modal";
-import { CopyClipboard } from "@/utils/copy-clipboard/copy-clipboard";
+import { Session } from "@/services/session/session";
+import { QrScanner } from "@/services/qr-scanner/qr-scanner";
+import { ModalService } from "@/services/modal/modal";
+import { CopyClipboard } from "@/services/copy-clipboard/copy-clipboard";
 
 @Component({
     selector: "app-navbar",
