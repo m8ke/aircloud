@@ -32,7 +32,6 @@
     "@angular/service-worker": "^21.2.4",
     "@angular/ssr": "^21.2.3",
     "@tailwindcss/postcss": "^4.2.1",
-    "@typescript/native-preview": "^7.0.0-dev.20260308.1",
     "@zip.js/zip.js": "^2.8.23",
     "angularx-qrcode": "^21.0.4",
     "express": "^5.2.1",
