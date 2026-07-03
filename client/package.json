@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:aircloud": "node dist/aircloud/server/server.mjs"
+    "serve:ssr": "node dist/aircloud/server/server.mjs"
   },
   "prettier": {
     "overrides": [
@@ -42,7 +42,7 @@
     "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "@angular/build": "^21.2.18",
+    "@angular/build": "^22.0.5",
     "@angular/cli": "^22.0.5",
     "@angular/compiler-cli": "^22.0.5",
     "@types/express": "^5.0.6",
