@@ -1,10 +1,11 @@
-import { AfterViewInit, Component, ElementRef, input, Optional } from "@angular/core";
+import { AfterViewInit, Component, ElementRef, input, Optional, ChangeDetectionStrategy } from "@angular/core";
 import { Dropdown } from "@/ui/dropdown/dropdown";
 
 @Component({
     selector: "app-dropdown-item",
     imports: [],
     templateUrl: "./dropdown-item.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: "./dropdown-item.scss",
 })
 export class DropdownItem implements AfterViewInit {

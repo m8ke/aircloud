@@ -1,4 +1,4 @@
-import { Component, inject, signal } from "@angular/core";
+import { Component, inject, signal, ChangeDetectionStrategy } from "@angular/core";
 
 import { Env } from "@/services/env/env";
 import { Navbar } from "@/ui/navbar/navbar";
@@ -14,6 +14,7 @@ import { Notification } from "@/ui/notification/notification";
         Notification,
     ],
     templateUrl: "./layout.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: "./layout.scss",
 })
 export class Layout {

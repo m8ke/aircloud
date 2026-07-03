@@ -1,9 +1,10 @@
-import { Component, input, output } from "@angular/core";
+import { Component, input, output, ChangeDetectionStrategy } from "@angular/core";
 
 @Component({
     selector: "app-notification-info",
     imports: [],
     templateUrl: "./notification-info.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: "./notification-info.scss",
 })
 export class NotificationInfo {

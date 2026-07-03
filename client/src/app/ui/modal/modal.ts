@@ -1,10 +1,11 @@
-import { Component, inject, input, output } from "@angular/core";
+import { Component, inject, input, output, ChangeDetectionStrategy } from "@angular/core";
 import { ModalService } from "@/services/modal/modal";
 
 @Component({
     selector: "app-modal",
     imports: [],
     templateUrl: "./modal.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: "./modal.scss",
 })
 export class Modal {
