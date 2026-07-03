@@ -1,5 +1,5 @@
 import { TitleCasePipe } from "@angular/common";
-import { Component, input, output } from "@angular/core";
+import { Component, input, output, ChangeDetectionStrategy } from "@angular/core";
 
 @Component({
     selector: "app-notification-file-request",
@@ -7,6 +7,7 @@ import { Component, input, output } from "@angular/core";
         TitleCasePipe,
     ],
     templateUrl: "./notification-file-request.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: "./notification-file-request.scss",
 })
 export class NotificationFileRequest {

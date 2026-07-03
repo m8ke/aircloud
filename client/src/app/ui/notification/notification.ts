@@ -1,6 +1,6 @@
 import { AsyncPipe } from "@angular/common";
 import { Observable } from "rxjs";
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectionStrategy } from "@angular/core";
 
 import { NotificationInfo } from "@/ui/notification/notification-info/notification-info";
 import { NotificationFileRequest } from "@/ui/notification/notification-file-request/notification-file-request";
@@ -14,6 +14,7 @@ import { INotification, NotificationType , NotificationService } from "@/ui/noti
         NotificationInfo,
     ],
     templateUrl: "./notification.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: "./notification.scss",
 })
 export class Notification {

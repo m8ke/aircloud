@@ -1,4 +1,4 @@
-import { Component, input } from "@angular/core";
+import { Component, input, ChangeDetectionStrategy } from "@angular/core";
 import { NgStyle, TitleCasePipe } from "@angular/common";
 
 @Component({
@@ -8,6 +8,7 @@ import { NgStyle, TitleCasePipe } from "@angular/common";
         TitleCasePipe,
     ],
     templateUrl: "./peer.html",
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: "./peer.scss",
 })
 export class Peer {

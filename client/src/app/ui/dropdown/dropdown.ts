@@ -1,4 +1,4 @@
-import { Component, ContentChildren, forwardRef, HostListener, input, QueryList } from "@angular/core";
+import { Component, ContentChildren, forwardRef, HostListener, input, QueryList, ChangeDetectionStrategy } from "@angular/core";
 import { NG_VALUE_ACCESSOR } from "@angular/forms";
 import { DropdownItem } from "@/ui/dropdown-item/dropdown-item";
 import { TitleCasePipe } from "@angular/common";
@@ -10,6 +10,7 @@ import { TitleCasePipe } from "@angular/common";
     ],
     templateUrl: "./dropdown.html",
     styleUrl: "./dropdown.scss",
+    changeDetection: ChangeDetectionStrategy.Eager,
     providers: [{
         provide: NG_VALUE_ACCESSOR,
         useExisting: forwardRef(() => Dropdown),

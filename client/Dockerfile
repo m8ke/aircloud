@@ -5,7 +5,7 @@ WORKDIR /client
 
 COPY package*.json /client/
 
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 COPY . ./
 
@@ -20,4 +20,4 @@ COPY --from=build /client/package.json ./
 COPY --from=build /client/node_modules ./node_modules
 COPY --from=build /client/dist ./dist
 
-CMD ["sh", "-c", "npm run serve:ssr:aircloud"]
+CMD ["sh", "-c", "npm run serve:ssr"]
