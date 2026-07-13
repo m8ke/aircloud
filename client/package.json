@@ -46,7 +46,7 @@
     "@angular/cli": "^22.0.5",
     "@angular/compiler-cli": "^22.0.5",
     "@types/express": "^5.0.6",
-    "@types/node": "^24.6.2",
+    "@types/node": "^26.1.1",
     "@types/uuid": "^11.0.0",
     "istanbul-lib-instrument": "^6.0.3",
     "jsdom": "^27.4.0",
