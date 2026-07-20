@@ -50,7 +50,7 @@
     "@types/uuid": "^11.0.0",
     "istanbul-lib-instrument": "^6.0.3",
     "jsdom": "^27.4.0",
-    "postcss": "^8.5.3",
+    "postcss": "^8.5.20",
     "typescript": "~6.0.3",
     "vitest": "^4.1.9"
   }
