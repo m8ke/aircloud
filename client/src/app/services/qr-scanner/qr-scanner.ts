@@ -1,7 +1,7 @@
 import jsQR, { QRCode } from "jsqr";
+import { DOCUMENT } from "@angular/common";
 import { inject, Injectable } from "@angular/core";
 
-import { Env } from "@/services/env/env";
 import { P2P } from "@/services/p2p/p2p";
 import { ModalService } from "@/services/modal/modal";
 
@@ -9,7 +9,7 @@ import { ModalService } from "@/services/modal/modal";
     providedIn: "root",
 })
 export class QrScanner {
-    private readonly env: Env = inject<Env>(Env);
+    private readonly document: Document = inject<Document>(DOCUMENT);
     private readonly p2p: P2P = inject<P2P>(P2P);
     private readonly modal: ModalService = inject<ModalService>(ModalService);
 
@@ -84,8 +84,9 @@ export class QrScanner {
 
     private isValidRoute(url: URL): boolean {
         try {
-            const isValid: boolean = url.protocol + "//" + url.host === this.env.clientUrl;
-            console.log(`[QrScanner] Scanned URL ${url} is valid: ${isValid}. Looking for ${this.env.clientUrl}`);
+            const clientUrl: string | undefined = this.document.location?.origin;
+            const isValid: boolean = clientUrl !== undefined && url.origin === clientUrl;
+            console.log(`[QrScanner] Scanned URL ${url} is valid: ${isValid}. Looking for ${clientUrl}`);
             return isValid;
         } catch {
             console.log(`[QrScanner] Scanned invalid URL ${url}`);

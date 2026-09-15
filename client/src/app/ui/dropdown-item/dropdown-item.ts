@@ -20,7 +20,8 @@ export class DropdownItem implements AfterViewInit {
     }
 
     public ngAfterViewInit(): void {
-        this.label = this.elementRef.nativeElement.innerText.trim();
+        const text = this.elementRef.nativeElement.innerText ?? this.elementRef.nativeElement.textContent ?? "";
+        this.label = text.trim();
 
         if (this.isSelected()) {
             this.parentComponent.selectValue(this.value());
