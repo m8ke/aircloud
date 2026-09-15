@@ -114,6 +114,16 @@ services:
       - server
 ```
 
+### Development
+
+```bash
+PORT=8001 ./gradlew bootRun --args='--spring.profiles.active=dev'
+```
+
+```bash
+SERVER_PORT=8001 npm start
+```
+
 ### TURN server
 
 In case you need to facilitate communication between devices that may be behind firewalls or NATs, you should consider

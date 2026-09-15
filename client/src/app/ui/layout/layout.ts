@@ -1,6 +1,6 @@
+import { DOCUMENT } from "@angular/common";
 import { Component, inject, signal, ChangeDetectionStrategy } from "@angular/core";
 
-import { Env } from "@/services/env/env";
 import { Navbar } from "@/ui/navbar/navbar";
 import { CdkDropList } from "@angular/cdk/drag-drop";
 import { FileManager } from "@/services/file-manager/file-manager";
@@ -18,7 +18,7 @@ import { Notification } from "@/ui/notification/notification";
     styleUrl: "./layout.scss",
 })
 export class Layout {
-    private readonly env: Env = inject<Env>(Env);
+    private readonly document: Document = inject<Document>(DOCUMENT);
     private readonly fileManager: FileManager = inject(FileManager);
     protected readonly isFileDropping = signal<boolean>(false);
 
@@ -49,9 +49,9 @@ export class Layout {
         if (navigator.share) {
             try {
                 await navigator.share({
-                    title: "AirCloud",
-                    text: "Share files securely and free!",
-                    url: this.env.clientUrl,
+                title: "AirCloud",
+                text: "Share files securely and free!",
+                url: this.document.location?.origin ?? "",
                 });
             } catch (error) {
                 console.warn(error);

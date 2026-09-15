@@ -2,12 +2,12 @@ import {
     ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, OnInit, viewChild,
 } from "@angular/core";
 
+import { DOCUMENT } from "@angular/common";
 import { RouterLink } from "@angular/router";
 import { QRCodeComponent } from "angularx-qrcode";
 import { NgOptimizedImage } from "@angular/common";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 
-import { Env } from "@/services/env/env";
 import { P2P } from "@/services/p2p/p2p";
 import { Modal } from "@/ui/modal/modal";
 import { Session } from "@/services/session/session";
@@ -33,7 +33,7 @@ export class Navbar implements OnInit, OnDestroy {
     private _state: string = "qr";
     protected formJoinPeer!: FormGroup;
 
-    private readonly env: Env = inject<Env>(Env);
+    private readonly document: Document = inject<Document>(DOCUMENT);
     private readonly qrScanner: QrScanner = inject<QrScanner>(QrScanner);
     private readonly formBuilder: FormBuilder = inject<FormBuilder>(FormBuilder);
 
@@ -91,7 +91,7 @@ export class Navbar implements OnInit, OnDestroy {
     }
 
     protected get directConnectionUrl(): string {
-        return `${this.env.clientUrl}/pair/${this.session.connectionId}`;
+        return `${this.document.location?.origin ?? ""}/pair/${this.session.connectionId}`;
     }
 
     protected get state(): string {

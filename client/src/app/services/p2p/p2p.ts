@@ -1,9 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import { Router } from "@angular/router";
-import { Location } from "@angular/common";
-import { computed, inject, Injectable, Signal, signal } from "@angular/core";
+import { DOCUMENT, isPlatformBrowser, Location } from "@angular/common";
+import { computed, inject, Injectable, PLATFORM_ID, Signal, signal } from "@angular/core";
 
-import { Env } from "@/services/env/env";
 import { Peer } from "@/services/p2p/peer";
 import { Alert } from "@/services/alert/alert";
 import { Session } from "@/services/session/session";
@@ -44,7 +43,8 @@ export class P2P {
     private static readonly RECONNECT_DELAY: number = 3000;
 
     private ws!: WebSocket;
-    private readonly env: Env = inject<Env>(Env);
+    private readonly platformId = inject(PLATFORM_ID);
+    private readonly document: Document = inject<Document>(DOCUMENT);
     private readonly modal: ModalService = inject<ModalService>(ModalService);
     private readonly alert: Alert = inject<Alert>(Alert);
     private readonly router: Router = inject<Router>(Router);
@@ -59,8 +59,12 @@ export class P2P {
     public readonly receivingFiles = signal<Map<string, ReceivingFile>>(new Map<string, ReceivingFile>());
 
     public init(): void {
+        if (!isPlatformBrowser(this.platformId)) {
+            return;
+        }
+
         console.log("[WebSocket] Initialize connection");
-        this.ws = new WebSocket(this.env.wsUrl);
+        this.ws = new WebSocket(this.websocketUrl);
 
         this.ws.onopen = (): void => {
             console.log("[WebSocket] Connection opened");
@@ -139,6 +143,17 @@ export class P2P {
                 discoveryMode: this.session.discoveryMode,
             },
         });
+    }
+
+    private get websocketUrl(): string {
+        const location = this.document.location;
+
+        if (!location) {
+            return "";
+        }
+
+        const protocol: string = location.protocol === "https:" ? "wss:" : "ws:";
+        return `${protocol}//${location.host}/ws`;
     }
 
     public changeSettings(): void {
